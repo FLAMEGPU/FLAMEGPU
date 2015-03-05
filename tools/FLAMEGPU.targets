@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <PropertyPageSchema
+      Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml" />
+    <AvailableItemName
+      Include="FLAMEGPU_Template_Build_Rule">
+	  <Targets>_FLAMEGPU_Template_Build_Rule</Targets>
+    </AvailableItemName>
+	
+	
+  </ItemGroup>
+  <UsingTask
+    TaskName="FLAMEGPU_Template_Build_Rule"
+    TaskFactory="XamlTaskFactory"
+    AssemblyName="Microsoft.Build.Tasks.v4.0">
+    <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
+  </UsingTask>
+  
+ 
+ 
+  
+  <Target
+    Name="_FLAMEGPU_Template_Build_Rule"
+	BeforeTargets="$(FLAMEGPU_Template_Build_RuleBeforeTargets)"
+    AfterTargets="$(FLAMEGPU_Template_Build_RuleAfterTargets)"
+    Condition="'@(FLAMEGPU_Template_Build_Rule)' != ''"
+    DependsOnTargets="$(FLAMEGPU_Template_Build_RuleDependsOn);ComputeFLAMEGPU_Template_Build_RuleOutput"
+    Outputs="$(AllBuildOutputs)"
+    Inputs="@(FLAMEGPU_Template_Build_Rule);%(FLAMEGPU_Template_Build_Rule.AdditionalDependencies);$(MSBuildProjectFile)"
+    >
+	
+	<ItemGroup
+      Condition="'@(SelectedFiles)' != ''">
+      <FLAMEGPU_Template_Build_Rule
+        Remove="@(FLAMEGPU_Template_Build_Rule)"
+        Condition="'%(Identity)' != '@(SelectedFiles)'" />
+    </ItemGroup>
+	
+	<ItemGroup>
+      <FLAMEGPU_Template_Build_Rule_tlog
+        Include="$(AllBuildOutputs)"
+        Condition="'$(AllBuildOutputs)' != '' and '%(FLAMEGPU_Template_Build_Rule.ExcludedFromBuild)' != 'true'">
+        <Source>@(FLAMEGPU_Template_Build_Rule, '|')</Source>
+      </FLAMEGPU_Template_Build_Rule_tlog>
+    </ItemGroup>
+    <Message
+      Importance="High"
+      Text="%(FLAMEGPU_Template_Build_Rule.ExecutionDescription)" />
+    <WriteLinesToFile
+      Condition="'@(FLAMEGPU_Template_Build_Rule_tlog)' != '' and '%(FLAMEGPU_Template_Build_Rule_tlog.ExcludedFromBuild)' != 'true'"
+      File="$(TLogLocation)$(ProjectName).write.1.tlog"
+      Lines="^%(FLAMEGPU_Template_Build_Rule_tlog.Source);@(FLAMEGPU_Template_Build_Rule_tlog-&gt;'%(Fullpath)')" />
+    <FLAMEGPU_Template_Build_Rule
+		
+      Condition="'@(FLAMEGPU_Template_Build_Rule)' != '' and '%(FLAMEGPU_Template_Build_Rule.ExcludedFromBuild)' != 'true'"
+      CommandLineTemplate="$(HeadTransformOut)  $(FLAMEGPUKernalsTransformOut)  $(IOTransformOut)  $(SimulationTransformOut)  $(MainTransformOut)  $(VisualisationTransformOut)"
+	  
+	  Outputs = "$(AllBuildOutputs)"
+	  
+      HeaderTransform="%(FLAMEGPU_Template_Build_Rule.HeaderTransform)"
+      FLAMEGPUKernalsTransform="%(FLAMEGPU_Template_Build_Rule.FLAMEGPUKernalsTransform)"
+      IOTransform="%(FLAMEGPU_Template_Build_Rule.IOTransform)"
+      SimulationTransform="%(FLAMEGPU_Template_Build_Rule.SimulationTransform)"
+      MainTransform="%(FLAMEGPU_Template_Build_Rule.MainTransform)"
+      VisualisationTransform="%(FLAMEGPU_Template_Build_Rule.VisualisationTransform)"
+      AdditionalOptions="%(FLAMEGPU_Template_Build_Rule.AdditionalOptions)"
+      Inputs="@(FLAMEGPU_Template_Build_Rule)" 
+	  StandardOutputImportance="High"
+	  StandardErrorImportance="High"
+      EchoOff="false"/>
+  </Target>
+  <PropertyGroup>
+    <ComputeLinkInputsTargets>
+            $(ComputeLinkInputsTargets);
+            ComputeFLAMEGPU_Template_Build_RuleOutput;
+          </ComputeLinkInputsTargets>
+    <ComputeLibInputsTargets>
+            $(ComputeLibInputsTargets);
+            ComputeFLAMEGPU_Template_Build_RuleOutput;
+          </ComputeLibInputsTargets>
+  </PropertyGroup>
+  <Target
+    Name="ComputeFLAMEGPU_Template_Build_RuleOutput"
+    Condition="'@(FLAMEGPU_Template_Build_Rule)' != ''">
+	
+	<PropertyGroup >
+  		<HeadTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.HeaderTransform)' == 'true' ">"%(FLAMEGPU_Template_Build_Rule.XSLTProcessorLocation)" "%(FullPath)" "%(FLAMEGPU_Template_Build_Rule.TemplateDir)\header.xslt" "%(FLAMEGPU_Template_Build_Rule.OutputDir)\header.h" &#xA;</HeadTransformOut>
+		<HeadTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.HeaderTransform)' != 'true' "></HeadTransformOut>
+		<HeadTransformOutFile Condition=" '%(FLAMEGPU_Template_Build_Rule.HeaderTransform)' == 'true' ">%(FLAMEGPU_Template_Build_Rule.OutputDir)\header.h ;</HeadTransformOutFile>
+		
+		<FLAMEGPUKernalsTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.FLAMEGPUKernalsTransform)' == 'true' ">"%(FLAMEGPU_Template_Build_Rule.XSLTProcessorLocation)" "%(FullPath)" "%(FLAMEGPU_Template_Build_Rule.TemplateDir)\FLAMEGPU_kernals.xslt" "%(FLAMEGPU_Template_Build_Rule.OutputDir)\FLAMEGPU_kernals.cu" &#xA;</FLAMEGPUKernalsTransformOut>
+		<FLAMEGPUKernalsTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.FLAMEGPUKernalsTransform)' != 'true' "></FLAMEGPUKernalsTransformOut>
+		<FLAMEGPUKernalsTransformOutFile Condition=" '%(FLAMEGPU_Template_Build_Rule.FLAMEGPUKernalsTransform)' == 'true' ">%(FLAMEGPU_Template_Build_Rule.OutputDir)\FLAMEGPU_kernals.cu ;</FLAMEGPUKernalsTransformOutFile>
+		
+		<IOTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.IOTransform)' == 'true' ">"%(FLAMEGPU_Template_Build_Rule.XSLTProcessorLocation)" "%(FullPath)" "%(FLAMEGPU_Template_Build_Rule.TemplateDir)\io.xslt" "%(FLAMEGPU_Template_Build_Rule.OutputDir)\io.cu" &#xA;</IOTransformOut>
+		<IOTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.IOTransform)' != 'true' "></IOTransformOut>
+		<IOTransformOutFile Condition=" '%(FLAMEGPU_Template_Build_Rule.IOTransform)' == 'true' ">%(FLAMEGPU_Template_Build_Rule.OutputDir)\io.cu ;</IOTransformOutFile>
+		
+		<SimulationTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.SimulationTransform)' == 'true' ">"%(FLAMEGPU_Template_Build_Rule.XSLTProcessorLocation)" "%(FullPath)" "%(FLAMEGPU_Template_Build_Rule.TemplateDir)\simulation.xslt" "%(FLAMEGPU_Template_Build_Rule.OutputDir)\simulation.cu" &#xA;</SimulationTransformOut>
+		<SimulationTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.SimulationTransform)' != 'true' "></SimulationTransformOut>
+		<SimulationTransformOutFile Condition=" '%(FLAMEGPU_Template_Build_Rule.SimulationTransform)' == 'true' "> %(FLAMEGPU_Template_Build_Rule.OutputDir)\simulation.cu ;</SimulationTransformOutFile>
+		
+		<MainTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.MainTransform)' == 'true' ">"%(FLAMEGPU_Template_Build_Rule.XSLTProcessorLocation)" "%(FullPath)" "%(FLAMEGPU_Template_Build_Rule.TemplateDir)\main.xslt" "%(FLAMEGPU_Template_Build_Rule.OutputDir)\main.cu" &#xA;</MainTransformOut>
+		<MainTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.MainTransform)' != 'true' "></MainTransformOut>
+		<MainTransformOutFile Condition=" '%(FLAMEGPU_Template_Build_Rule.MainTransform)' == 'true' ">%(FLAMEGPU_Template_Build_Rule.OutputDir)\main.cu ;</MainTransformOutFile>
+		
+		<VisualisationTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.VisualisationTransform)' == 'true' ">"%(FLAMEGPU_Template_Build_Rule.XSLTProcessorLocation)" "%(FullPath)" "%(FLAMEGPU_Template_Build_Rule.TemplateDir)\visualisation.xslt" "%(FLAMEGPU_Template_Build_Rule.OutputDir)\visualisation.cu" &#xA;</VisualisationTransformOut>
+		<VisualisationTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.VisualisationTransform)' != 'true' "></VisualisationTransformOut>
+		<VisualisationTransformOutFile Condition=" '%(FLAMEGPU_Template_Build_Rule.VisualisationTransform)' == 'true' ">%(FLAMEGPU_Template_Build_Rule.OutputDir)\visualisation.cu ;</VisualisationTransformOutFile>
+		
+		<AllBuildOutputs>$(HeadTransformOutFile) $(FLAMEGPUKernalsTransformOutFile) $(IOTransformOutFile) $(SimulationTransformOutFile) $(MainTransformOutFile) $(VisualisationTransformOutFile)</AllBuildOutputs>
+	</PropertyGroup>
+	
+    <ItemGroup>
+      <FLAMEGPU_Template_Build_RuleDirsToMake
+        Condition="'@(FLAMEGPU_Template_Build_Rule)' != '' and '%(FLAMEGPU_Template_Build_Rule.ExcludedFromBuild)' != 'true'"
+        Include="$(AllBuildOutputs)" />
+      <Link
+        Include="%(FLAMEGPU_Template_Build_RuleDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+      <Lib
+        Include="%(FLAMEGPU_Template_Build_RuleDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+      <ImpLib
+        Include="%(FLAMEGPU_Template_Build_RuleDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+    </ItemGroup>
+	
+    <MakeDir
+      Directories="@(FLAMEGPU_Template_Build_RuleDirsToMake-&gt;'%(RootDir)%(Directory)')" />
+	  
+	  <Message Text="Outputting files: $(AllBuildOutputs)" />
+  </Target>
+</Project>

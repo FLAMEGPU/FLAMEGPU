@@ -1,0 +1,1 @@
+Release_Console\PedestrianNavigation.exe "..\..\examples\PedestrianNavigation\iterations\map.xml" 1

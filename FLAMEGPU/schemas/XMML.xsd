@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2011 University of Sheffield.
+ * Author: Dr Paul Richmond 
+ * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+ *
+ * University of Sheffield retain all intellectual property and 
+ * proprietary rights in and to this software and related documentation. 
+ * Any use, reproduction, disclosure, or distribution of this software 
+ * and related documentation without an express license agreement from
+ * University of Sheffield is strictly prohibited.
+ *
+ * For terms of licence agreement please attached licence or view licence 
+ * on www.flamegpu.com website.
+ * 
+ * -->
+
+<xs:schema id="XMML" targetNamespace="http://www.dcs.shef.ac.uk/~paul/XMML" elementFormDefault="qualified" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML" xmlns:mstns="http://www.dcs.shef.ac.uk/~paul/XMML" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:complexType name="xmodel_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1" nillable="false" />
+			<xs:element name="version" type="xs:string" maxOccurs="unbounded" minOccurs="0" />
+			<xs:element name="description" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element minOccurs="1" maxOccurs="1" ref="environment">
+			</xs:element>
+			<xs:element minOccurs="1" maxOccurs="1" ref="xagents">
+			</xs:element>
+			<xs:element minOccurs="1" maxOccurs="1" ref="messages">
+			</xs:element>
+			<xs:element minOccurs="1" maxOccurs="1" ref="layers">
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="type_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="int" />
+			<xs:enumeration value="float" />
+			<xs:enumeration value="double" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="variable_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="type" type="xs:string" maxOccurs="1" minOccurs="1" nillable="false" />
+			<xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1" nillable="false" />
+			<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="arrayLength" type="xs:int" minOccurs="0" maxOccurs="1" />
+			<xs:element name="defaultValue" type="xs:double" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="environment_type" abstract="true">
+		<xs:sequence>
+			<xs:element ref="constants" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="functionFiles" minOccurs="1" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="constants_type" abstract="true">
+		<xs:sequence>
+			<xs:element ref="variable" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="functionFiles_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="file" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="xagents" abstract="false">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="xagent" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="messages" abstract="false">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="message" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="layers" abstract="false">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="layer" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="xagent_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element minOccurs="1" maxOccurs="1" ref="memory">
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" ref="functions">
+			</xs:element>
+			<xs:element minOccurs="1" maxOccurs="1" ref="states">
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="function_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="currentState" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element name="nextState" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element minOccurs="0" maxOccurs="1" ref="inputs">
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" ref="outputs">
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" ref="xagentOutputs">
+			</xs:element>
+			<xs:element ref="condition" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="functions">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="function" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="states">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="state" minOccurs="0" maxOccurs="unbounded" />
+				<xs:element name="initialState" type="xs:string" maxOccurs="1" minOccurs="1" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="outputs">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="output" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="inputs">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="input" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="xagentOutputs">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="xagentOutput" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="input_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="messageName" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="output_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="messageName" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="xagentOutput_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="xagentName" type="xs:string" />
+			<xs:element name="state" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="message_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element minOccurs="1" maxOccurs="1" ref="variables">
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="variables">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="variable" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="layer">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="layerFunction" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="message" type="message_type" abstract="true">
+	</xs:element>
+	<xs:element name="xagentOutput" type="xagentOutput_type" abstract="true">
+	</xs:element>
+	<xs:element name="output" type="output_type" abstract="true">
+	</xs:element>
+	<xs:element name="input" type="input_type" abstract="true">
+	</xs:element>
+	<xs:complexType name="state_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="state" type="state_type" abstract="true">
+	</xs:element>
+	<xs:element name="function" type="function_type" abstract="true">
+	</xs:element>
+	<xs:element name="xagent" type="xagent_type" abstract="true">
+	</xs:element>
+	<xs:element name="variable" type="variable_type" abstract="true">
+	</xs:element>
+	<xs:element name="environment" type="environment_type" abstract="true">
+	</xs:element>
+	<xs:element name="constants" type="constants_type" abstract="true">
+	</xs:element>
+	<xs:element name="functionFiles" type="functionFiles_type" abstract="true">
+	</xs:element>
+	<xs:element name="memory">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="variable" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="xmodel" type="xmodel_type" abstract="true">
+	</xs:element>
+	<xs:complexType name="layer_function_type" abstract="true">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="layerFunction" type="layer_function_type" abstract="true" />
+	<xs:complexType name="condition_type">
+		<xs:sequence>
+			<xs:element name="lhs">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:choice>
+							<xs:element ref="condition" />
+							<xs:element name="value" type="xs:string">
+							</xs:element>
+							<xs:element name="agentVariable" type="xs:string" />
+						</xs:choice>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="operator" type="xs:string" />
+			<xs:element name="rhs">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:choice>
+							<xs:element ref="condition" />
+							<xs:element name="value" type="xs:string" />
+							<xs:element name="agentVariable" type="xs:string" />
+						</xs:choice>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="condition" type="condition_type">
+	</xs:element>
+</xs:schema>

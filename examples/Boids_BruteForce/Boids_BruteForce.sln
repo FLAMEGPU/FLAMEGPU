@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Boids_BruteForce", "Boids_BruteForce.vcxproj", "{E6EA73EB-F133-4103-B375-768E6086339A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_Console|x64 = Debug_Console|x64
+		Debug_Visualisation|x64 = Debug_Visualisation|x64
+		Release_Console|x64 = Release_Console|x64
+		Release_Visualisation|x64 = Release_Visualisation|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
+		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Console|x64.Build.0 = Debug_Console|x64
+		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
+		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Visualisation|x64.Build.0 = Debug_Visualisation|x64
+		{E6EA73EB-F133-4103-B375-768E6086339A}.Release_Console|x64.ActiveCfg = Release_Console|x64
+		{E6EA73EB-F133-4103-B375-768E6086339A}.Release_Console|x64.Build.0 = Release_Console|x64
+		{E6EA73EB-F133-4103-B375-768E6086339A}.Release_Visualisation|x64.ActiveCfg = Release_Visualisation|x64
+		{E6EA73EB-F133-4103-B375-768E6086339A}.Release_Visualisation|x64.Build.0 = Release_Visualisation|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

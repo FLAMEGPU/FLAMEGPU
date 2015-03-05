@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup
+    Condition="'$(FLAMEGPU_Template_Build_RuleBeforeTargets)' == '' and '$(FLAMEGPU_Template_Build_RuleAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
+    <FLAMEGPU_Template_Build_RuleBeforeTargets>AddCudaCompileDeps</FLAMEGPU_Template_Build_RuleBeforeTargets>
+    <FLAMEGPU_Template_Build_RuleAfterTargets>CustomBuild</FLAMEGPU_Template_Build_RuleAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup>
+    <FLAMEGPU_Template_Build_RuleDependsOn
+      Condition="'$(ConfigurationType)' != 'Makefile'">_SelectedFiles;$(FLAMEGPU_Template_Build_RuleDependsOn)</FLAMEGPU_Template_Build_RuleDependsOn>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <FLAMEGPU_Template_Build_Rule>
+		<XSLTProcessorLocation>..\..\tools\XSLTProcessor</XSLTProcessorLocation>
+		<TemplateDir>..\..\FLAMEGPU\templates\</TemplateDir>
+		<OutputDir>.\src\dynamic\</OutputDir>
+		<HeaderTransform>true</HeaderTransform>
+		<FLAMEGPUKernalsTransform>true</FLAMEGPUKernalsTransform>
+		<IOTransform>true</IOTransform>
+		<SimulationTransform>true</SimulationTransform>
+		<MainTransform>true</MainTransform>
+		<VisualisationTransform>false</VisualisationTransform>
+		
+		<CommandLineTemplate>[HeaderTransform] [FLAMEGPUKernalsTransform] [IOTransform] [SimulationTransform] [MainTransform] [VisualisationTransform]</CommandLineTemplate>
+		<Outputs>.\src\dynamic\header.h;.\src\dynamic\FLAMEGPU_kernals.cu;.\src\dynamic\io.cu;.\src\dynamic\simulation.cu;.\src\dynamic\main.cu;.\src\dynamic\visualisation.cu</Outputs>
+      <ExecutionDescription>Generating Dynamic Code from FLAMEGPU Templates</ExecutionDescription>
+    </FLAMEGPU_Template_Build_Rule>
+  </ItemDefinitionGroup>
+</Project>
