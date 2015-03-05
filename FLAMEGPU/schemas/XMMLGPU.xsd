@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2011 University of Sheffield.
+ * Author: Dr Paul Richmond 
+ * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+ *
+ * University of Sheffield retain all intellectual property and 
+ * proprietary rights in and to this software and related documentation. 
+ * Any use, reproduction, disclosure, or distribution of this software 
+ * and related documentation without an express license agreement from
+ * University of Sheffield is strictly prohibited.
+ *
+ * For terms of licence agreement please attached licence or view licence 
+ * on www.flamegpu.com website.
+ * 
+ */
+
+-->
+
+<xs:schema id="XMMLGPU" targetNamespace="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" elementFormDefault="qualified" xmlns="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns:mstns="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML">
+	<xs:import namespace="http://www.dcs.shef.ac.uk/~paul/XMML">
+	</xs:import>
+	<xs:complexType name="xmodel_type" abstract="false">
+		<xs:complexContent>
+			<xs:extension base="xmml:xmodel_type">
+				<xs:sequence>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="variable_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:variable_type">
+				<xs:sequence>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="environment_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:environment_type">
+				<xs:sequence>
+					<xs:element ref="initFunctions" maxOccurs="1" minOccurs="0" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="constants_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:constants_type">
+				<xs:sequence>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="functionFiles_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:functionFiles_type">
+				<xs:sequence>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="xagent_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:xagent_type">
+				<xs:sequence>
+					<xs:element name="type" type="xagent_type_options" />
+					<xs:element name="bufferSize" type="xs:int" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="function_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:function_type">
+				<xs:sequence>
+					<xs:element name="reallocate" type="xs:boolean" />
+					<xs:element name="RNG" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="input_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:input_type">
+				<xs:sequence>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="output_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:output_type">
+				<xs:sequence>
+					<xs:element name="type" type="output_type_option" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="xagentOutput_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:xagentOutput_type">
+				<xs:sequence>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="message_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:message_type">
+				<xs:sequence>
+					<xs:element ref="partitioningNone" />
+					<xs:element name="bufferSize" type="xs:int" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element substitutionGroup="xmml:message" name="message" type="message_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:xagentOutput" name="xagentOutput" type="xagentOutput_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:output" name="output" type="output_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:input" name="input" type="input_type">
+	</xs:element>
+	<xs:complexType name="state_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:state_type">
+				<xs:sequence>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element substitutionGroup="xmml:state" name="state" type="state_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:function" name="function" type="function_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:xagent" name="xagent" type="xagent_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:variable" name="variable" type="variable_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:environment" name="environment" type="environment_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:constants" name="constants" type="constants_type">
+	</xs:element>
+	<xs:element substitutionGroup="xmml:functionFiles" name="functionFiles" type="functionFiles_type">
+	</xs:element>
+	<xs:element name="xmodel" type="xmodel_type">
+		<xs:key name="xagent_func_name_key">
+			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:functions/mstns:function" />
+			<xs:field xpath="xmml:name" />
+		</xs:key>
+		<xs:keyref name="layer_functions" refer="xagent_func_name_key">
+			<xs:selector xpath=".//xmml:layers/xmml:layer/mstns:layerFunction" />
+			<xs:field xpath="xmml:name" />
+		</xs:keyref>
+		<xs:key name="xagent_state_key">
+			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:states/mstns:state" />
+			<xs:field xpath="xmml:name" />
+		</xs:key>
+		<xs:keyref name="xagent_function_currentState" refer="xagent_state_key">
+			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:functions/mstns:function" />
+			<xs:field xpath="xmml:currentState" />
+		</xs:keyref>
+		<xs:keyref name="initial_state" refer="xagent_state_key">
+			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:states" />
+			<xs:field xpath="xmml:initialState" />
+		</xs:keyref>
+		<xs:keyref name="xagentOutput_state" refer="xagent_state_key">
+			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:functions/mstns:function/xmml:xagentOutputs/mstns:xagentOutput" />
+			<xs:field xpath="xmml:state" />
+		</xs:keyref>
+		<xs:keyref name="xagent_function_nextState" refer="xagent_state_key">
+			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:functions/mstns:function" />
+			<xs:field xpath="xmml:nextState" />
+		</xs:keyref>
+		<xs:key name="message_name_key">
+			<xs:selector xpath=".//xmml:messages/mstns:message" />
+			<xs:field xpath="xmml:name" />
+		</xs:key>
+		<xs:keyref name="xagent_func_input" refer="message_name_key">
+			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:functions/mstns:function/xmml:inputs/mstns:input" />
+			<xs:field xpath="xmml:messageName" />
+		</xs:keyref>
+		<xs:keyref name="xagent_func_output" refer="message_name_key">
+			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:functions/mstns:function/xmml:outputs/mstns:output" />
+			<xs:field xpath="xmml:messageName" />
+		</xs:keyref>
+	</xs:element>
+	<xs:simpleType name="output_type_option">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="single_message" />
+			<xs:enumeration value="optional_message" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="xagent_type_options">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="continuous" />
+			<xs:enumeration value="discrete" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="partitioning_type">
+		<xs:sequence>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="partitioningNone" type="partitioning_type" />
+	<xs:complexType name="partitioning_discrete_type">
+		<xs:complexContent>
+			<xs:extension base="partitioning_type">
+				<xs:sequence>
+					<xs:element name="radius" type="xs:int" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element substitutionGroup="partitioningNone" name="partitioningDiscrete" type="partitioning_discrete_type">
+	</xs:element>
+	<xs:complexType name="partitioning_spatial_type">
+		<xs:complexContent>
+			<xs:extension base="partitioning_type">
+				<xs:sequence>
+					<xs:element name="radius" type="xs:decimal" />
+					<xs:element name="xmin" type="xs:decimal" />
+					<xs:element name="xmax" type="xs:decimal" />
+					<xs:element name="ymin" type="xs:decimal" />
+					<xs:element name="ymax" type="xs:decimal" />
+					<xs:element name="zmin" type="xs:decimal" />
+					<xs:element name="zmax" type="xs:decimal" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element substitutionGroup="partitioningNone" name="partitioningSpatial" type="partitioning_spatial_type" />
+	<xs:element name="initFunction">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="name" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="initFunctions_type">
+		<xs:sequence>
+			<xs:element ref="initFunction" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="initFunctions" type="initFunctions_type">
+	</xs:element>
+	<xs:complexType name="layer_function_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:layer_function_type">
+				<xs:sequence />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element substitutionGroup="xmml:layerFunction" name="layerFunction" type="layer_function_type" />
+	<xs:complexType name="globalCondition_type">
+		<xs:complexContent>
+			<xs:extension base="xmml:condition_type">
+				<xs:sequence>
+					<xs:element name="maxItterations" type="xs:int" />
+					<xs:element name="mustEvaluateTo" type="xs:boolean" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element substitutionGroup="xmml:condition" name="globalCondition" type="globalCondition_type">
+	</xs:element>
+</xs:schema>

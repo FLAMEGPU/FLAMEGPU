@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
+        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+  <name>Optional </name>
+  <gpu:environment>
+    <gpu:functionFiles>
+      <file>functions.c</file> 
+    </gpu:functionFiles>
+  </gpu:environment>
+  <xagents>
+    <gpu:xagent>
+      <name>agent</name>
+      <memory>
+        <gpu:variable>
+          <type>int</type>
+          <name>location_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>agent_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>state</name>
+        </gpu:variable>
+        <!-- agent specific variables-->
+        <gpu:variable>
+          <type>int</type>
+          <name>sugar_level</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>metabolism</name>
+        </gpu:variable>
+        <!-- environment specific var -->
+        <gpu:variable>
+          <type>int</type>
+          <name>env_sugar_level</name>
+        </gpu:variable>
+      </memory>
+      <functions>
+        
+        <gpu:function>
+          <name>metabolise_and_growback</name>
+          <description>decreases the sugar level and increases and agents sugar store</description>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <gpu:globalCondition>
+            <lhs><agentVariable>state</agentVariable></lhs>
+            <operator>!=</operator>
+            <rhs><value>AGENT_STATE_MOVEMENT_UNRESOLVED</value></rhs>
+            <gpu:maxItterations>9</gpu:maxItterations>
+            <gpu:mustEvaluateTo>true</gpu:mustEvaluateTo>
+          </gpu:globalCondition>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        
+        <gpu:function>
+          <name>output_cell_state</name>
+          <description>outputs the state of the cell</description>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>cell_state</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        
+        <gpu:function>
+          <name>movement_request</name>
+          <description>an agents requests to move to a new location</description>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>cell_state</messageName>
+            </gpu:input>
+          </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>movement_request</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        
+        <gpu:function>
+          <name>movement_response</name>
+          <description>an agents responds to requests flagging itself for a transaction</description>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>movement_request</messageName>
+            </gpu:input>
+          </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>movement_response</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>true</gpu:RNG>
+        </gpu:function>
+        
+        <gpu:function>
+          <name>movement_transaction</name>
+          <description>completes the transaction by removing the agent from its old position</description>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>movement_response</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+      
+      <states>
+        <gpu:state><name>default</name></gpu:state>
+        <initialState>default</initialState>
+      </states>
+      
+      <gpu:type>discrete</gpu:type>
+      <gpu:bufferSize>1048576</gpu:bufferSize>
+    </gpu:xagent>
+  </xagents>
+  
+  <messages>
+    <gpu:message>
+      <name>cell_state</name>
+      <variables>
+        <gpu:variable>
+          <type>int</type>
+          <name>location_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>state</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>env_sugar_level</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningDiscrete>
+        <gpu:radius>1</gpu:radius>
+      </gpu:partitioningDiscrete>
+      <gpu:bufferSize>1048576</gpu:bufferSize>
+    </gpu:message>
+    
+    <gpu:message>
+      <name>movement_request</name>
+      <variables>
+        <gpu:variable>
+          <type>int</type>
+          <name>agent_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>location_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>sugar_level</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>metabolism</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningDiscrete>
+        <gpu:radius>1</gpu:radius>
+      </gpu:partitioningDiscrete>
+      <gpu:bufferSize>1048576</gpu:bufferSize>
+    </gpu:message>
+    
+    <gpu:message>
+      <name>movement_response</name>
+      <variables>
+        <gpu:variable>
+          <type>int</type>
+          <name>location_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>agent_id</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningDiscrete>
+        <gpu:radius>1</gpu:radius>
+      </gpu:partitioningDiscrete>
+      <gpu:bufferSize>1048576</gpu:bufferSize>
+    </gpu:message>
+    
+    
+  </messages>
+  
+  <layers>
+    <layer>
+      <gpu:layerFunction><name>metabolise_and_growback</name></gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction><name>output_cell_state</name></gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction><name>movement_request</name></gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction><name>movement_response</name></gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction><name>movement_transaction</name></gpu:layerFunction>
+    </layer>
+  </layers>
+
+
+</gpu:xmodel>

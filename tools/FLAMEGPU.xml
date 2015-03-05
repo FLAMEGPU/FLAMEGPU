@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:transformCallback="Microsoft.Cpp.Dev10.ConvertPropertyCallback">
+  <Rule
+    Name="FLAMEGPU_Template_Build_Rule"
+    PageTemplate="tool"
+    DisplayName="FLAMEGPU Template Build Rule"
+    Order="200">
+    <Rule.DataSource>
+      <DataSource
+        Persistence="ProjectFile"
+        ItemType="FLAMEGPU_Template_Build_Rule" />
+    </Rule.DataSource>
+    <Rule.Categories>
+      <Category
+        Name="General">
+        <Category.DisplayName>
+          <sys:String>General</sys:String>
+        </Category.DisplayName>
+      </Category>
+      <Category
+        Name="Command Line"
+        Subtype="CommandLine">
+        <Category.DisplayName>
+          <sys:String>Command Line</sys:String>
+        </Category.DisplayName>
+      </Category>
+    </Rule.Categories>
+    <StringListProperty
+      Name="Inputs"
+      Category="Command Line"
+      IsRequired="true"
+      Switch=" ">
+      <StringListProperty.DataSource>
+        <DataSource
+          Persistence="ProjectFile"
+          ItemType="FLAMEGPU_Template_Build_Rule"
+          SourceType="Item" />
+      </StringListProperty.DataSource>
+    </StringListProperty>
+	<StringProperty Name="XSLTProcessorLocation" DisplayName="XSLT Processor Location" Category="XSLT Options" />
+	<StringProperty Name="TemplateDir" DisplayName="Template Directory" Category="XSLT Options"  />
+	<StringProperty Name="OutputDir" DisplayName="Output Directory" Category="XSLT Options"  />
+    <BoolProperty
+      Name="HeaderTransform"
+      Category="XSLT Options"
+      HelpContext="0"
+      DisplayName="Transform header.xslt enabled"
+      Description="Toggle XSLT Processing for the header.xslt FLAMEGPU Template File"
+      />
+    <BoolProperty
+      Name="FLAMEGPUKernalsTransform"
+      Category="XSLT Options"
+      HelpContext="0"
+      DisplayName="Transform FLAMEGPU_kernals.xslt enabled"
+      Description="Toggle XSLT Processing for the FLAMEGPU_kernals.xslt FLAMEGPU Template File"
+       />
+    <BoolProperty
+      Name="IOTransform"
+      Category="XSLT Options"
+      HelpContext="0"
+      DisplayName="Transform io.xslt enabled"
+      Description="Toggle XSLT Processing for the io.xslt FLAMEGPU Template File"
+      />
+    <BoolProperty
+      Name="SimulationTransform"
+      Category="XSLT Options"
+      HelpContext="0"
+      DisplayName="Transform simulation.xslt enabled"
+      Description="Toggle XSLT Processing for the simulation.xslt FLAMEGPU Template File"
+       />
+    <BoolProperty
+      Name="MainTransform"
+      Category="XSLT Options"
+      HelpContext="0"
+      DisplayName="Transform main.xslt enabled"
+      Description="Toggle XSLT Processing for the main.xslt FLAMEGPU Template File"
+      />
+    <BoolProperty
+      Name="VisualisationTransform"
+      Category="XSLT Options"
+      HelpContext="0"
+      DisplayName="Transform visualisation.xslt enabled"
+      Description="Toggle XSLT Processing for the visualisation.xslt FLAMEGPU Template File"
+       />
+    <StringProperty
+      Name="CommandLineTemplate"
+      DisplayName="Command Line"
+      Visible="False"
+      IncludeInCommandLine="False" />
+    <DynamicEnumProperty
+      Name="FLAMEGPU_Template_Build_RuleBeforeTargets"
+      Category="General"
+      EnumProvider="Targets"
+      IncludeInCommandLine="False">
+      <DynamicEnumProperty.DisplayName>
+        <sys:String>Execute Before</sys:String>
+      </DynamicEnumProperty.DisplayName>
+      <DynamicEnumProperty.Description>
+        <sys:String>Specifies the targets for the build customization to run before.</sys:String>
+      </DynamicEnumProperty.Description>
+      <DynamicEnumProperty.ProviderSettings>
+        <NameValuePair
+          Name="Exclude"
+          Value="^FLAMEGPU_Template_Build_RuleBeforeTargets|^Compute" />
+      </DynamicEnumProperty.ProviderSettings>
+      <DynamicEnumProperty.DataSource>
+        <DataSource
+          Persistence="ProjectFile"
+          HasConfigurationCondition="true" />
+      </DynamicEnumProperty.DataSource>
+    </DynamicEnumProperty>
+    <DynamicEnumProperty
+      Name="FLAMEGPU_Template_Build_RuleAfterTargets"
+      Category="General"
+      EnumProvider="Targets"
+      IncludeInCommandLine="False">
+      <DynamicEnumProperty.DisplayName>
+        <sys:String>Execute After</sys:String>
+      </DynamicEnumProperty.DisplayName>
+      <DynamicEnumProperty.Description>
+        <sys:String>Specifies the targets for the build customization to run after.</sys:String>
+      </DynamicEnumProperty.Description>
+      <DynamicEnumProperty.ProviderSettings>
+        <NameValuePair
+          Name="Exclude"
+          Value="^FLAMEGPU_Template_Build_RuleAfterTargets|^Compute" />
+      </DynamicEnumProperty.ProviderSettings>
+      <DynamicEnumProperty.DataSource>
+        <DataSource
+          Persistence="ProjectFile"
+          ItemType=""
+          HasConfigurationCondition="true" />
+      </DynamicEnumProperty.DataSource>
+    </DynamicEnumProperty>
+    <StringListProperty
+      Name="Outputs"
+      DisplayName="Outputs"
+      Visible="False"
+      IncludeInCommandLine="False" />
+    <StringProperty
+      Name="ExecutionDescription"
+      DisplayName="Execution Description"
+      Visible="False"
+      IncludeInCommandLine="False" />
+    <StringListProperty
+      Name="AdditionalDependencies"
+      DisplayName="Additional Dependencies"
+      IncludeInCommandLine="False"
+      Visible="false" />
+    <StringProperty
+      Subtype="AdditionalOptions"
+      Name="AdditionalOptions"
+      Category="Command Line">
+      <StringProperty.DisplayName>
+        <sys:String>Additional Options</sys:String>
+      </StringProperty.DisplayName>
+      <StringProperty.Description>
+        <sys:String>Additional Options</sys:String>
+      </StringProperty.Description>
+    </StringProperty>
+  </Rule>
+  <ItemType
+    Name="FLAMEGPU_Template_Build_Rule"
+    DisplayName="FLAMEGPU Template Build Rule" />
+  <FileExtension
+    Name="*.xml"
+    ContentType="FLAMEGPU_Template_Build_Rule" />
+  <ContentType
+    Name="FLAMEGPU_Template_Build_Rule"
+    DisplayName="FLAMEGPU Template Build Rule"
+    ItemType="FLAMEGPU_Template_Build_Rule" />
+</ProjectSchemaDefinitions>

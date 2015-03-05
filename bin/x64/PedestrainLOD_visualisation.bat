@@ -1,0 +1,1 @@
+Release_Visualisation\PedestrianLOD.exe "..\..\examples\PedestrianLOD\iterations\0.xml"
