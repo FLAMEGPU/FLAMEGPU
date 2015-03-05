@@ -4,7 +4,7 @@
 
 examples_private/
 bin_private/
-example/*/x64
+examples/*/x64
 cityModel.obj
 stadium.obj
 
