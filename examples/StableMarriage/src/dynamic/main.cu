@@ -111,7 +111,7 @@ void initCUDA(int argc, char** argv){
 	}
 #endif
 
-	if (device > device_count){
+	if (device >= device_count){
 		fprintf(stderr, "Error selecting CUDA device! Device id '%d' is not found?", device);
 		exit(0);
 	}

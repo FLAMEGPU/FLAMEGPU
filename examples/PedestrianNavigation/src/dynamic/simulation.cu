@@ -784,6 +784,7 @@ void agent_output_pedestrian_location(cudaStream_t &stream){
 	
 	//reset partition matrix
 	gpuErrchk( cudaMemset( (void*) d_pedestrian_location_partition_matrix, 0, sizeof(xmachine_message_pedestrian_location_PBM)));
+<<<<<<< HEAD
   //PR Bug fix: 10/11/2015 optional messages where no message
   if (message_outputs > 0){
 #ifdef FAST_ATOMIC_SORTING
@@ -801,6 +802,22 @@ void agent_output_pedestrian_location(cudaStream_t &stream){
 	  gridSize = (message_outputs + blockSize - 1) / blockSize; 	// Round up according to array size 
 	  reorder_pedestrian_location_messages <<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_local_bin_index, d_xmachine_message_pedestrian_location_unsorted_index, d_pedestrian_location_partition_matrix->start, d_pedestrian_locations, d_pedestrian_locations_swap, message_outputs);
 	  gpuErrchkLaunch();
+=======
+  //
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, hist_pedestrian_location_messages, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	hist_pedestrian_location_messages<<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_local_bin_index, d_xmachine_message_pedestrian_location_unsorted_index, d_pedestrian_location_partition_matrix->end_or_count, d_pedestrian_locations, state_list_size);
+	gpuErrchkLaunch();
+	
+	thrust::device_ptr<int> ptr_count = thrust::device_pointer_cast(d_pedestrian_location_partition_matrix->end_or_count);
+	thrust::device_ptr<int> ptr_index = thrust::device_pointer_cast(d_pedestrian_location_partition_matrix->start);
+	thrust::exclusive_scan(thrust::cuda::par.on(stream), ptr_count, ptr_count + xmachine_message_pedestrian_location_grid_size, ptr_index); // scan
+	
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_pedestrian_location_messages, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize; 	// Round up according to array size 
+	reorder_pedestrian_location_messages <<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_local_bin_index, d_xmachine_message_pedestrian_location_unsorted_index, d_pedestrian_location_partition_matrix->start, d_pedestrian_locations, d_pedestrian_locations_swap, state_list_size);
+	gpuErrchkLaunch();
+>>>>>>> origin/master
 #else
 	  //HASH, SORT, REORDER AND BUILD PMB FOR SPATIAL PARTITIONING MESSAGE OUTPUTS
 	  //Get message hash values for sorting
