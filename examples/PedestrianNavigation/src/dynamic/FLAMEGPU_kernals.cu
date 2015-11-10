@@ -473,10 +473,14 @@ __device__ unsigned int message_pedestrian_location_hash(int3 gridPos)
 		 * @param local_bin_index output index of the message within the calculated bin
 		 * @param unsorted_index output bin index (hash) value
 		 * @param messages the message list used to generate the hash value outputs
+		 * @param agent_count the current number of agents outputting messages
 		 */
-	__global__ void hist_pedestrian_location_messages(uint* local_bin_index, uint* unsorted_index, int* global_bin_count, xmachine_message_pedestrian_location_list* messages)
+	__global__ void hist_pedestrian_location_messages(uint* local_bin_index, uint* unsorted_index, int* global_bin_count, xmachine_message_pedestrian_location_list* messages, int agent_count)
 	{
 		unsigned int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+		if (index >= agent_count)
+			return;
 
 		float3 position = make_float3(messages->x[index], messages->y[index], messages->z[index]);
 		int3 grid_position = message_pedestrian_location_grid_position(position);
@@ -493,10 +497,14 @@ __device__ unsigned int message_pedestrian_location_hash(int3 gridPos)
 	 * @param pbm_start_index the start indices of the partition boundary matrix
 	 * @param unordered_messages the original unordered message data
 	 * @param ordered_messages buffer used to scatter messages into the correct order
+	  @param agent_count the current number of agents outputting messages
 	 */
-	 __global__ void reorder_pedestrian_location_messages(uint* local_bin_index, uint* unsorted_index, int* pbm_start_index, xmachine_message_pedestrian_location_list* unordered_messages, xmachine_message_pedestrian_location_list* ordered_messages)
+	 __global__ void reorder_pedestrian_location_messages(uint* local_bin_index, uint* unsorted_index, int* pbm_start_index, xmachine_message_pedestrian_location_list* unordered_messages, xmachine_message_pedestrian_location_list* ordered_messages, int agent_count)
 	{
 		int index = (blockIdx.x *blockDim.x) + threadIdx.x;
+
+		if (index >= agent_count)
+			return;
 
 		uint i = unsorted_index[index];
 		unsigned int sorted_index = local_bin_index[index] + pbm_start_index[i];
@@ -633,14 +641,16 @@ __device__ int load_next_pedestrian_location_message(xmachine_message_pedestrian
 			int next_cell_hash = message_pedestrian_location_hash(next_cell_position);
 			//use the hash to calculate the start index
 			int cell_index_min = tex1Dfetch(tex_xmachine_message_pedestrian_location_pbm_start, next_cell_hash + d_tex_xmachine_message_pedestrian_location_pbm_start_offset);
-
-			//check for messages in the cell (empty cells with have a start index of baadf00d
+			cell_index_max = tex1Dfetch(tex_xmachine_message_pedestrian_location_pbm_end_or_count, next_cell_hash + d_tex_xmachine_message_pedestrian_location_pbm_end_or_count_offset);
+			//check for messages in the cell (cell index max is the count for atomic sorting)
+#ifdef FAST_ATOMIC_SORTING
+			if (cell_index_max > 0)
+			{
+				//when using fast atomics value represents bin count not last index!
+				cell_index_max += cell_index_min; //when using fast atomics value represents bin count not last index!
+#else
 			if (cell_index_min != 0xffffffff)
 			{
-				//if there are messages in the cell then update the cell index max value
-				cell_index_max = tex1Dfetch(tex_xmachine_message_pedestrian_location_pbm_end_or_count, next_cell_hash + d_tex_xmachine_message_pedestrian_location_pbm_end_or_count_offset);
-#ifdef FAST_ATOMIC_SORTING
-				cell_index_max += cell_index_min; //when using fast atomics value represents bin count not last index!
 #endif
 				//start from the cell index min
 				cell_index = cell_index_min;

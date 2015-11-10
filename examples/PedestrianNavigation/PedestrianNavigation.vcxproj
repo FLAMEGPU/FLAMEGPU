@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E6EA73EB-F133-4103-B375-768E6086339A}</ProjectGuid>
+    <ProjectGuid>{071BB28A-4F01-417B-B6A1-F38DF0F2E04E}</ProjectGuid>
     <RootNamespace>PedestrianNavigation_</RootNamespace>
     <ProjectName>PedestrianNavigation</ProjectName>
   </PropertyGroup>

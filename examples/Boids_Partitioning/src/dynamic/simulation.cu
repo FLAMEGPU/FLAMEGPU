@@ -547,6 +547,15 @@ void Boid_outputdata(cudaStream_t &stream){
 	gridSize = (state_list_size + blockSize - 1) / blockSize; 	// Round up according to array size 
 	reorder_location_messages <<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_location_local_bin_index, d_xmachine_message_location_unsorted_index, d_location_partition_matrix->start, d_locations, d_locations_swap);
 	gpuErrchkLaunch();
+
+	xmachine_message_location_PBM h_location_partition_matrix;
+	gpuErrchk(cudaMemcpy(&h_location_partition_matrix, d_location_partition_matrix, sizeof(xmachine_message_location_PBM), cudaMemcpyDeviceToHost));
+	int range = 0;
+	for (int i=0; i< xmachine_message_location_grid_size; i++){
+		if (h_location_partition_matrix.end_or_count[i] > 0)
+			range++;
+	}
+	printf ("%d\n", range);
 #else
 	//HASH, SORT, REORDER AND BUILD PMB FOR SPATIAL PARTITIONING MESSAGE OUTPUTS
 	//Get message hash values for sorting
