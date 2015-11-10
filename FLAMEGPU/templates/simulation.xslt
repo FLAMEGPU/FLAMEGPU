@@ -539,11 +539,12 @@ int <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_
  */
 void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>(cudaStream_t &amp;stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+  int sm_size;
+  int blockSize;
+  int minGridSize;
+  int gridSize;
+  int state_list_size;
+  <xsl:if test="xmml:outputs/gpu:output">int message_outputs;</xsl:if>
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -843,12 +844,16 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	gpuErrchk( cudaMemcpy( &amp;scan_last_sum, &amp;d_<xsl:value-of select="xmml:name"/>s_swap->_position[h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count-1], sizeof(int), cudaMemcpyDeviceToHost));
 	gpuErrchk( cudaMemcpy( &amp;scan_last_included, &amp;d_<xsl:value-of select="xmml:name"/>s_swap->_scan_input[h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count-1], sizeof(int), cudaMemcpyDeviceToHost));
 	//If last item in prefix sum was 1 then increase its index to get the count
-	if (scan_last_included == 1)
+	if (scan_last_included == 1){
 		h_message_<xsl:value-of select="xmml:name"/>_count += scan_last_sum+1;
-	else
+		message_outputs = scan_last_sum+1;
+	}else{
 		h_message_<xsl:value-of select="xmml:name"/>_count += scan_last_sum;
-	</xsl:if><xsl:if test="$outputType='single_message'">
+		message_outputs = scan_last_sum;
+	}
+  </xsl:if><xsl:if test="$outputType='single_message'">
 	h_message_<xsl:value-of select="xmml:name"/>_count += h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count;	
+  message_outputs = h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count;
 	</xsl:if>//Copy count to device
 	gpuErrchk( cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_count, &amp;h_message_<xsl:value-of select="xmml:name"/>_count, sizeof(int)));	
 	</xsl:if>
@@ -917,42 +922,44 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	<xsl:if test="xmml:outputs/gpu:output"><xsl:variable name="messageName" select="xmml:outputs/gpu:output/xmml:messageName"/>
 	<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]">
 	<xsl:if test="gpu:partitioningSpatial">
-#ifdef FAST_ATOMIC_SORTING
-  //USE ATOMICS TO BUILD PARTITION BOUNDARY
 	//reset partition matrix
 	gpuErrchk( cudaMemset( (void*) d_<xsl:value-of select="xmml:name"/>_partition_matrix, 0, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>_PBM)));
-  //
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hist_<xsl:value-of select="xmml:name"/>_messages, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	hist_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count, d_<xsl:value-of select="xmml:name"/>s, state_list_size);
-	gpuErrchkLaunch();
+  //PR Bug fix: 10/11/2015 optional messages where no message
+  if (message_outputs > 0){
+#ifdef FAST_ATOMIC_SORTING
+    //USE ATOMICS TO BUILD PARTITION BOUNDARY
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hist_<xsl:value-of select="xmml:name"/>_messages, no_sm, message_outputs); 
+	  gridSize = (message_outputs + blockSize - 1) / blockSize;
+	  hist_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count, d_<xsl:value-of select="xmml:name"/>s, message_outputs);
+	  gpuErrchkLaunch();
 	
-	thrust::device_ptr&lt;int&gt; ptr_count = thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count);
-	thrust::device_ptr&lt;int&gt; ptr_index = thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start);
-	thrust::exclusive_scan(thrust::cuda::par.on(stream), ptr_count, ptr_count + xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size, ptr_index); // scan
+	  thrust::device_ptr&lt;int&gt; ptr_count = thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count);
+	  thrust::device_ptr&lt;int&gt; ptr_index = thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start);
+	  thrust::exclusive_scan(thrust::cuda::par.on(stream), ptr_count, ptr_count + xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size, ptr_index); // scan
 	
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize; 	// Round up according to array size 
-	reorder_<xsl:value-of select="xmml:name"/>_messages &lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, d_<xsl:value-of select="xmml:name"/>s, d_<xsl:value-of select="xmml:name"/>s_swap, state_list_size);
-	gpuErrchkLaunch();
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, no_sm, message_outputs); 
+	  gridSize = (message_outputs + blockSize - 1) / blockSize; 	// Round up according to array size 
+	  reorder_<xsl:value-of select="xmml:name"/>_messages &lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, d_<xsl:value-of select="xmml:name"/>s, d_<xsl:value-of select="xmml:name"/>s_swap, message_outputs);
+	  gpuErrchkLaunch();
 #else
-	//HASH, SORT, REORDER AND BUILD PMB FOR SPATIAL PARTITIONING MESSAGE OUTPUTS
-	//Get message hash values for sorting
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hash_<xsl:value-of select="xmml:name"/>_messages, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	hash_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_<xsl:value-of select="xmml:name"/>s);
-	gpuErrchkLaunch();
-	//Sort
-	thrust::sort_by_key(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys),  thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys) + h_message_<xsl:value-of select="xmml:name"/>_count,  thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_values));
-	gpuErrchkLaunch();
-	//reorder and build pcb
-	gpuErrchk(cudaMemset(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, 0xffffffff, xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size* sizeof(int)));
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, reorder_messages_sm_size, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	int reorder_sm_size = reorder_messages_sm_size(blockSize);
-	reorder_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, reorder_sm_size, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_<xsl:value-of select="xmml:name"/>_partition_matrix, d_<xsl:value-of select="xmml:name"/>s, d_<xsl:value-of select="xmml:name"/>s_swap);
-	gpuErrchkLaunch();
+	  //HASH, SORT, REORDER AND BUILD PMB FOR SPATIAL PARTITIONING MESSAGE OUTPUTS
+	  //Get message hash values for sorting
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hash_<xsl:value-of select="xmml:name"/>_messages, no_sm, message_outputs); 
+	  gridSize = (message_outputs + blockSize - 1) / blockSize;
+	  hash_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_<xsl:value-of select="xmml:name"/>s);
+	  gpuErrchkLaunch();
+	  //Sort
+	  thrust::sort_by_key(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys),  thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys) + h_message_<xsl:value-of select="xmml:name"/>_count,  thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_values));
+	  gpuErrchkLaunch();
+	  //reorder and build pcb
+	  gpuErrchk(cudaMemset(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, 0xffffffff, xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size* sizeof(int)));
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, reorder_messages_sm_size, message_outputs); 
+	  gridSize = (message_outputs + blockSize - 1) / blockSize;
+	  int reorder_sm_size = reorder_messages_sm_size(blockSize);
+	  reorder_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, reorder_sm_size, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_<xsl:value-of select="xmml:name"/>_partition_matrix, d_<xsl:value-of select="xmml:name"/>s, d_<xsl:value-of select="xmml:name"/>s_swap);
+	  gpuErrchkLaunch();
 #endif
+  }
 	//swap ordered list
 	xmachine_message_<xsl:value-of select="xmml:name"/>_list* d_<xsl:value-of select="xmml:name"/>s_temp = d_<xsl:value-of select="xmml:name"/>s;
 	d_<xsl:value-of select="xmml:name"/>s = d_<xsl:value-of select="xmml:name"/>s_swap;
