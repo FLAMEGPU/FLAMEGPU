@@ -191,32 +191,22 @@ void setPaddingAndOffset()
 	gpuErrchk(cudaMemcpyToSymbol( d_PADDING, &amp;PADDING, sizeof(int)));     
 }
 
-int closest_sqr_pow2(int x){
-	int h, h_d;
-	int l, l_d;
-	
-	//higher bound
-	h = (int)pow(4, ceil(log(x)/log(4)));
-	h_d = h-x;
+int is_sqr_pow2(int x){
+	int r = (int)pow(4, ceil(log(x)/log(4)));
+	return (r == x);
+}
+
+int lowest_sqr_pow2(int x){
+	int l;
 	
 	//escape early if x is square power of 2
-	if (h_d == x)
+	if (is_sqr_pow2(x))
 		return x;
 	
 	//lower bound		
 	l = (int)pow(4, floor(log(x)/log(4)));
-	l_d = x-l;
 	
-	//closest bound
-	if(h_d &lt; l_d)
-		return h;
-	else 
-		return l;
-}
-
-int is_sqr_pow2(int x){
-	int r = (int)pow(4, ceil(log(x)/log(4)));
-	return (r == x);
+	return l;
 }
 
 /* Unary function required for cudaOccupancyMaxPotentialBlockSizeVariableSMem to avoid warnings */
@@ -544,7 +534,8 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
   int minGridSize;
   int gridSize;
   int state_list_size;
-  <xsl:if test="xmml:outputs/gpu:output">int message_outputs;</xsl:if>
+  <xsl:if test="xmml:outputs/gpu:output">
+  int message_outputs;</xsl:if>
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -731,7 +722,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	b.x = blockSize;
 	g.x = gridSize;
 	</xsl:if><xsl:if test="../../gpu:type='discrete'">
-	blockSize = closest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
+	blockSize = lowest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	b.x = (int)sqrt(blockSize);
 	b.y = b.x;
