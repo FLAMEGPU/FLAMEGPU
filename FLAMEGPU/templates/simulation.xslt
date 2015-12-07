@@ -529,13 +529,11 @@ int <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_
  */
 void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>(cudaStream_t &amp;stream){
 
-  int sm_size;
-  int blockSize;
-  int minGridSize;
-  int gridSize;
-  int state_list_size;
-  <xsl:if test="xmml:outputs/gpu:output">
-  int message_outputs;</xsl:if>
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -837,14 +835,11 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//If last item in prefix sum was 1 then increase its index to get the count
 	if (scan_last_included == 1){
 		h_message_<xsl:value-of select="xmml:name"/>_count += scan_last_sum+1;
-		message_outputs = scan_last_sum+1;
 	}else{
 		h_message_<xsl:value-of select="xmml:name"/>_count += scan_last_sum;
-		message_outputs = scan_last_sum;
 	}
-  </xsl:if><xsl:if test="$outputType='single_message'">
-	h_message_<xsl:value-of select="xmml:name"/>_count += h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count;	
-  message_outputs = h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count;
+    </xsl:if><xsl:if test="$outputType='single_message'">
+	h_message_<xsl:value-of select="xmml:name"/>_count += h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count;
 	</xsl:if>//Copy count to device
 	gpuErrchk( cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_count, &amp;h_message_<xsl:value-of select="xmml:name"/>_count, sizeof(int)));	
 	</xsl:if>
@@ -915,28 +910,28 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	<xsl:if test="gpu:partitioningSpatial">
 	//reset partition matrix
 	gpuErrchk( cudaMemset( (void*) d_<xsl:value-of select="xmml:name"/>_partition_matrix, 0, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>_PBM)));
-  //PR Bug fix: 10/11/2015 optional messages where no message
-  if (message_outputs > 0){
+    //PR Bug fix: Second fix. This should prevent future problems when multiple agents write the same message as now the message structure is completely rebuilt after an output.
+    if (h_message_<xsl:value-of select="xmml:name"/>_count > 0){
 #ifdef FAST_ATOMIC_SORTING
-    //USE ATOMICS TO BUILD PARTITION BOUNDARY
-	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hist_<xsl:value-of select="xmml:name"/>_messages, no_sm, message_outputs); 
-	  gridSize = (message_outputs + blockSize - 1) / blockSize;
-	  hist_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count, d_<xsl:value-of select="xmml:name"/>s, message_outputs);
+      //USE ATOMICS TO BUILD PARTITION BOUNDARY
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hist_<xsl:value-of select="xmml:name"/>_messages, no_sm, h_message_<xsl:value-of select="xmml:name"/>_count); 
+	  gridSize = (h_message_<xsl:value-of select="xmml:name"/>_count + blockSize - 1) / blockSize;
+	  hist_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count, d_<xsl:value-of select="xmml:name"/>s, h_message_<xsl:value-of select="xmml:name"/>_count);
 	  gpuErrchkLaunch();
 	
 	  thrust::device_ptr&lt;int&gt; ptr_count = thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count);
 	  thrust::device_ptr&lt;int&gt; ptr_index = thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start);
 	  thrust::exclusive_scan(thrust::cuda::par.on(stream), ptr_count, ptr_count + xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size, ptr_index); // scan
 	
-	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, no_sm, message_outputs); 
-	  gridSize = (message_outputs + blockSize - 1) / blockSize; 	// Round up according to array size 
-	  reorder_<xsl:value-of select="xmml:name"/>_messages &lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, d_<xsl:value-of select="xmml:name"/>s, d_<xsl:value-of select="xmml:name"/>s_swap, message_outputs);
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, no_sm, h_message_<xsl:value-of select="xmml:name"/>_count); 
+	  gridSize = (h_message_<xsl:value-of select="xmml:name"/>_count + blockSize - 1) / blockSize; 	// Round up according to array size 
+	  reorder_<xsl:value-of select="xmml:name"/>_messages &lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, d_<xsl:value-of select="xmml:name"/>s, d_<xsl:value-of select="xmml:name"/>s_swap, h_message_<xsl:value-of select="xmml:name"/>_count);
 	  gpuErrchkLaunch();
 #else
 	  //HASH, SORT, REORDER AND BUILD PMB FOR SPATIAL PARTITIONING MESSAGE OUTPUTS
 	  //Get message hash values for sorting
-	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hash_<xsl:value-of select="xmml:name"/>_messages, no_sm, message_outputs); 
-	  gridSize = (message_outputs + blockSize - 1) / blockSize;
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hash_<xsl:value-of select="xmml:name"/>_messages, no_sm, h_message_<xsl:value-of select="xmml:name"/>_count); 
+	  gridSize = (h_message_<xsl:value-of select="xmml:name"/>_count + blockSize - 1) / blockSize;
 	  hash_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_<xsl:value-of select="xmml:name"/>s);
 	  gpuErrchkLaunch();
 	  //Sort
@@ -944,8 +939,8 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	  gpuErrchkLaunch();
 	  //reorder and build pcb
 	  gpuErrchk(cudaMemset(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, 0xffffffff, xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size* sizeof(int)));
-	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, reorder_messages_sm_size, message_outputs); 
-	  gridSize = (message_outputs + blockSize - 1) / blockSize;
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, reorder_messages_sm_size, h_message_<xsl:value-of select="xmml:name"/>_count); 
+	  gridSize = (h_message_<xsl:value-of select="xmml:name"/>_count + blockSize - 1) / blockSize;
 	  int reorder_sm_size = reorder_messages_sm_size(blockSize);
 	  reorder_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, reorder_sm_size, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_<xsl:value-of select="xmml:name"/>_partition_matrix, d_<xsl:value-of select="xmml:name"/>s, d_<xsl:value-of select="xmml:name"/>s_swap);
 	  gpuErrchkLaunch();

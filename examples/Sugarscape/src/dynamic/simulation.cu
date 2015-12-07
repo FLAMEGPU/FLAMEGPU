@@ -203,32 +203,22 @@ void setPaddingAndOffset()
 	gpuErrchk(cudaMemcpyToSymbol( d_PADDING, &PADDING, sizeof(int)));     
 }
 
-int closest_sqr_pow2(int x){
-	int h, h_d;
-	int l, l_d;
-	
-	//higher bound
-	h = (int)pow(4, ceil(log(x)/log(4)));
-	h_d = h-x;
+int is_sqr_pow2(int x){
+	int r = (int)pow(4, ceil(log(x)/log(4)));
+	return (r == x);
+}
+
+int lowest_sqr_pow2(int x){
+	int l;
 	
 	//escape early if x is square power of 2
-	if (h_d == x)
+	if (is_sqr_pow2(x))
 		return x;
 	
 	//lower bound		
 	l = (int)pow(4, floor(log(x)/log(4)));
-	l_d = x-l;
 	
-	//closest bound
-	if(h_d < l_d)
-		return h;
-	else 
-		return l;
-}
-
-int is_sqr_pow2(int x){
-	int r = (int)pow(4, ceil(log(x)/log(4)));
-	return (r == x);
+	return l;
 }
 
 /* Unary function required for cudaOccupancyMaxPotentialBlockSizeVariableSMem to avoid warnings */
@@ -488,11 +478,11 @@ int agent_metabolise_and_growback_sm_size(int blockSize){
  */
 void agent_metabolise_and_growback(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -568,7 +558,7 @@ void agent_metabolise_and_growback(cudaStream_t &stream){
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_metabolise_and_growback, agent_metabolise_and_growback_sm_size, state_list_size);
-	blockSize = closest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
+	blockSize = lowest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	b.x = (int)sqrt(blockSize);
 	b.y = b.x;
@@ -618,11 +608,11 @@ int agent_output_cell_state_sm_size(int blockSize){
  */
 void agent_output_cell_state(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -657,7 +647,7 @@ void agent_output_cell_state(cudaStream_t &stream){
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_output_cell_state, agent_output_cell_state_sm_size, state_list_size);
-	blockSize = closest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
+	blockSize = lowest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	b.x = (int)sqrt(blockSize);
 	b.y = b.x;
@@ -717,11 +707,11 @@ int agent_movement_request_sm_size(int blockSize){
  */
 void agent_movement_request(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -756,7 +746,7 @@ void agent_movement_request(cudaStream_t &stream){
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_movement_request, agent_movement_request_sm_size, state_list_size);
-	blockSize = closest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
+	blockSize = lowest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	b.x = (int)sqrt(blockSize);
 	b.y = b.x;
@@ -826,11 +816,11 @@ int agent_movement_response_sm_size(int blockSize){
  */
 void agent_movement_response(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -865,7 +855,7 @@ void agent_movement_response(cudaStream_t &stream){
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_movement_response, agent_movement_response_sm_size, state_list_size);
-	blockSize = closest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
+	blockSize = lowest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	b.x = (int)sqrt(blockSize);
 	b.y = b.x;
@@ -935,11 +925,11 @@ int agent_movement_transaction_sm_size(int blockSize){
  */
 void agent_movement_transaction(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -974,7 +964,7 @@ void agent_movement_transaction(cudaStream_t &stream){
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_movement_transaction, agent_movement_transaction_sm_size, state_list_size);
-	blockSize = closest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
+	blockSize = lowest_sqr_pow2(blockSize); //For discrete agents the block size must be a square power of 2
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	b.x = (int)sqrt(blockSize);
 	b.y = b.x;

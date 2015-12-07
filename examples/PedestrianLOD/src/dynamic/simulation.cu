@@ -184,32 +184,22 @@ void setPaddingAndOffset()
 	gpuErrchk(cudaMemcpyToSymbol( d_PADDING, &PADDING, sizeof(int)));     
 }
 
-int closest_sqr_pow2(int x){
-	int h, h_d;
-	int l, l_d;
-	
-	//higher bound
-	h = (int)pow(4, ceil(log(x)/log(4)));
-	h_d = h-x;
+int is_sqr_pow2(int x){
+	int r = (int)pow(4, ceil(log(x)/log(4)));
+	return (r == x);
+}
+
+int lowest_sqr_pow2(int x){
+	int l;
 	
 	//escape early if x is square power of 2
-	if (h_d == x)
+	if (is_sqr_pow2(x))
 		return x;
 	
 	//lower bound		
 	l = (int)pow(4, floor(log(x)/log(4)));
-	l_d = x-l;
 	
-	//closest bound
-	if(h_d < l_d)
-		return h;
-	else 
-		return l;
-}
-
-int is_sqr_pow2(int x){
-	int r = (int)pow(4, ceil(log(x)/log(4)));
-	return (r == x);
+	return l;
 }
 
 /* Unary function required for cudaOccupancyMaxPotentialBlockSizeVariableSMem to avoid warnings */
@@ -486,11 +476,11 @@ int agent_output_pedestrian_location_sm_size(int blockSize){
  */
 void agent_output_pedestrian_location(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -562,46 +552,48 @@ void agent_output_pedestrian_location(cudaStream_t &stream){
 	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
 	
 	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
-	h_message_pedestrian_location_count += h_xmachine_memory_agent_count;	
+	h_message_pedestrian_location_count += h_xmachine_memory_agent_count;
 	//Copy count to device
 	gpuErrchk( cudaMemcpyToSymbol( d_message_pedestrian_location_count, &h_message_pedestrian_location_count, sizeof(int)));	
 	
-#ifdef FAST_ATOMIC_SORTING
-  //USE ATOMICS TO BUILD PARTITION BOUNDARY
 	//reset partition matrix
 	gpuErrchk( cudaMemset( (void*) d_pedestrian_location_partition_matrix, 0, sizeof(xmachine_message_pedestrian_location_PBM)));
-  //
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, hist_pedestrian_location_messages, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	hist_pedestrian_location_messages<<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_local_bin_index, d_xmachine_message_pedestrian_location_unsorted_index, d_pedestrian_location_partition_matrix->end_or_count, d_pedestrian_locations, state_list_size);
-	gpuErrchkLaunch();
+    //PR Bug fix: Second fix. This should prevent future problems when multiple agents write the same message as now the message structure is completely rebuilt after an output.
+    if (h_message_pedestrian_location_count > 0){
+#ifdef FAST_ATOMIC_SORTING
+      //USE ATOMICS TO BUILD PARTITION BOUNDARY
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, hist_pedestrian_location_messages, no_sm, h_message_pedestrian_location_count); 
+	  gridSize = (h_message_pedestrian_location_count + blockSize - 1) / blockSize;
+	  hist_pedestrian_location_messages<<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_local_bin_index, d_xmachine_message_pedestrian_location_unsorted_index, d_pedestrian_location_partition_matrix->end_or_count, d_pedestrian_locations, h_message_pedestrian_location_count);
+	  gpuErrchkLaunch();
 	
-	thrust::device_ptr<int> ptr_count = thrust::device_pointer_cast(d_pedestrian_location_partition_matrix->end_or_count);
-	thrust::device_ptr<int> ptr_index = thrust::device_pointer_cast(d_pedestrian_location_partition_matrix->start);
-	thrust::exclusive_scan(thrust::cuda::par.on(stream), ptr_count, ptr_count + xmachine_message_pedestrian_location_grid_size, ptr_index); // scan
+	  thrust::device_ptr<int> ptr_count = thrust::device_pointer_cast(d_pedestrian_location_partition_matrix->end_or_count);
+	  thrust::device_ptr<int> ptr_index = thrust::device_pointer_cast(d_pedestrian_location_partition_matrix->start);
+	  thrust::exclusive_scan(thrust::cuda::par.on(stream), ptr_count, ptr_count + xmachine_message_pedestrian_location_grid_size, ptr_index); // scan
 	
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_pedestrian_location_messages, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize; 	// Round up according to array size 
-	reorder_pedestrian_location_messages <<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_local_bin_index, d_xmachine_message_pedestrian_location_unsorted_index, d_pedestrian_location_partition_matrix->start, d_pedestrian_locations, d_pedestrian_locations_swap, state_list_size);
-	gpuErrchkLaunch();
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_pedestrian_location_messages, no_sm, h_message_pedestrian_location_count); 
+	  gridSize = (h_message_pedestrian_location_count + blockSize - 1) / blockSize; 	// Round up according to array size 
+	  reorder_pedestrian_location_messages <<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_local_bin_index, d_xmachine_message_pedestrian_location_unsorted_index, d_pedestrian_location_partition_matrix->start, d_pedestrian_locations, d_pedestrian_locations_swap, h_message_pedestrian_location_count);
+	  gpuErrchkLaunch();
 #else
-	//HASH, SORT, REORDER AND BUILD PMB FOR SPATIAL PARTITIONING MESSAGE OUTPUTS
-	//Get message hash values for sorting
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, hash_pedestrian_location_messages, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	hash_pedestrian_location_messages<<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_keys, d_xmachine_message_pedestrian_location_values, d_pedestrian_locations);
-	gpuErrchkLaunch();
-	//Sort
-	thrust::sort_by_key(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_xmachine_message_pedestrian_location_keys),  thrust::device_pointer_cast(d_xmachine_message_pedestrian_location_keys) + h_message_pedestrian_location_count,  thrust::device_pointer_cast(d_xmachine_message_pedestrian_location_values));
-	gpuErrchkLaunch();
-	//reorder and build pcb
-	gpuErrchk(cudaMemset(d_pedestrian_location_partition_matrix->start, 0xffffffff, xmachine_message_pedestrian_location_grid_size* sizeof(int)));
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_pedestrian_location_messages, reorder_messages_sm_size, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	int reorder_sm_size = reorder_messages_sm_size(blockSize);
-	reorder_pedestrian_location_messages<<<gridSize, blockSize, reorder_sm_size, stream>>>(d_xmachine_message_pedestrian_location_keys, d_xmachine_message_pedestrian_location_values, d_pedestrian_location_partition_matrix, d_pedestrian_locations, d_pedestrian_locations_swap);
-	gpuErrchkLaunch();
+	  //HASH, SORT, REORDER AND BUILD PMB FOR SPATIAL PARTITIONING MESSAGE OUTPUTS
+	  //Get message hash values for sorting
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, hash_pedestrian_location_messages, no_sm, h_message_pedestrian_location_count); 
+	  gridSize = (h_message_pedestrian_location_count + blockSize - 1) / blockSize;
+	  hash_pedestrian_location_messages<<<gridSize, blockSize, 0, stream>>>(d_xmachine_message_pedestrian_location_keys, d_xmachine_message_pedestrian_location_values, d_pedestrian_locations);
+	  gpuErrchkLaunch();
+	  //Sort
+	  thrust::sort_by_key(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_xmachine_message_pedestrian_location_keys),  thrust::device_pointer_cast(d_xmachine_message_pedestrian_location_keys) + h_message_pedestrian_location_count,  thrust::device_pointer_cast(d_xmachine_message_pedestrian_location_values));
+	  gpuErrchkLaunch();
+	  //reorder and build pcb
+	  gpuErrchk(cudaMemset(d_pedestrian_location_partition_matrix->start, 0xffffffff, xmachine_message_pedestrian_location_grid_size* sizeof(int)));
+	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_pedestrian_location_messages, reorder_messages_sm_size, h_message_pedestrian_location_count); 
+	  gridSize = (h_message_pedestrian_location_count + blockSize - 1) / blockSize;
+	  int reorder_sm_size = reorder_messages_sm_size(blockSize);
+	  reorder_pedestrian_location_messages<<<gridSize, blockSize, reorder_sm_size, stream>>>(d_xmachine_message_pedestrian_location_keys, d_xmachine_message_pedestrian_location_values, d_pedestrian_location_partition_matrix, d_pedestrian_locations, d_pedestrian_locations_swap);
+	  gpuErrchkLaunch();
 #endif
+  }
 	//swap ordered list
 	xmachine_message_pedestrian_location_list* d_pedestrian_locations_temp = d_pedestrian_locations;
 	d_pedestrian_locations = d_pedestrian_locations_swap;
@@ -648,11 +640,11 @@ int agent_avoid_pedestrians_sm_size(int blockSize){
  */
 void agent_avoid_pedestrians(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -780,11 +772,11 @@ int agent_move_sm_size(int blockSize){
  */
 void agent_move(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 

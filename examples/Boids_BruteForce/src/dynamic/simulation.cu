@@ -160,32 +160,22 @@ void setPaddingAndOffset()
 	gpuErrchk(cudaMemcpyToSymbol( d_PADDING, &PADDING, sizeof(int)));     
 }
 
-int closest_sqr_pow2(int x){
-	int h, h_d;
-	int l, l_d;
-	
-	//higher bound
-	h = (int)pow(4, ceil(log(x)/log(4)));
-	h_d = h-x;
+int is_sqr_pow2(int x){
+	int r = (int)pow(4, ceil(log(x)/log(4)));
+	return (r == x);
+}
+
+int lowest_sqr_pow2(int x){
+	int l;
 	
 	//escape early if x is square power of 2
-	if (h_d == x)
+	if (is_sqr_pow2(x))
 		return x;
 	
 	//lower bound		
 	l = (int)pow(4, floor(log(x)/log(4)));
-	l_d = x-l;
 	
-	//closest bound
-	if(h_d < l_d)
-		return h;
-	else 
-		return l;
-}
-
-int is_sqr_pow2(int x){
-	int r = (int)pow(4, ceil(log(x)/log(4)));
-	return (r == x);
+	return l;
 }
 
 /* Unary function required for cudaOccupancyMaxPotentialBlockSizeVariableSMem to avoid warnings */
@@ -397,11 +387,11 @@ int Boid_outputdata_sm_size(int blockSize){
  */
 void Boid_outputdata(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
@@ -473,7 +463,7 @@ void Boid_outputdata(cudaStream_t &stream){
 	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
 	
 	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
-	h_message_location_count += h_xmachine_memory_Boid_count;	
+	h_message_location_count += h_xmachine_memory_Boid_count;
 	//Copy count to device
 	gpuErrchk( cudaMemcpyToSymbol( d_message_location_count, &h_message_location_count, sizeof(int)));	
 	
@@ -518,11 +508,11 @@ int Boid_inputdata_sm_size(int blockSize){
  */
 void Boid_inputdata(cudaStream_t &stream){
 
-	int sm_size;
-	int blockSize;
-	int minGridSize;
-	int gridSize;
-	int state_list_size;
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
 	dim3 g; //grid for agent func
 	dim3 b; //block for agent func
 
