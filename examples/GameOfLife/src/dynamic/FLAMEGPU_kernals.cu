@@ -61,7 +61,7 @@ __constant__ int d_SM_START;
 __constant__ int d_PADDING;
 
 //SM addressing macro to avoid conflicts (32 bit only)
-#define SHARE_INDEX(i, s) (((s + d_PADDING)* i)+d_SM_START) /**<offset struct size by padding to avoid bank conflicts */
+#define SHARE_INDEX(i, s) ((((s) + d_PADDING)* (i))+d_SM_START) /**<offset struct size by padding to avoid bank conflicts */
 
 //if doubel support is needed then define the following function which requires sm_13 or later
 #ifdef _DOUBLE_SUPPORT_REQUIRED_
@@ -269,7 +269,7 @@ __device__ void state_message_to_sm(xmachine_message_state_list* messages, char*
 
 //Get first state message 
 //Used by discrete agents this accesses messages with texture cache. Agent position is determined by position in the grid/block
-//Possibility of upto 8 thread divergances
+//Possibility of upto 8 thread divergences
 __device__ xmachine_message_state* get_first_state_message_discrete(xmachine_message_state_list* messages){
 
 	//shared memory get from offset dependant on sm usage in function
@@ -483,7 +483,7 @@ __device__ xmachine_message_state* get_next_state_message(xmachine_message_state
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created GPU kernals  */
+/* Dynamically created GPU kernels  */
 
 
 

@@ -101,7 +101,7 @@ __constant__ int d_SM_START;
 __constant__ int d_PADDING;
 
 //SM addressing macro to avoid conflicts (32 bit only)
-#define SHARE_INDEX(i, s) (((s + d_PADDING)* i)+d_SM_START) /**<offset struct size by padding to avoid bank conflicts */
+#define SHARE_INDEX(i, s) ((((s) + d_PADDING)* (i))+d_SM_START) /**<offset struct size by padding to avoid bank conflicts */
 
 //if doubel support is needed then define the following function which requires sm_13 or later
 #ifdef _DOUBLE_SUPPORT_REQUIRED_
@@ -675,15 +675,15 @@ __device__ unsigned int message_location_hash(int3 gridPos)
 
 /** load_next_location_message
  * Used to load the next message data to shared memory
- * Idea is check the current cell index to see if we can simpley get a message from the current cell
+ * Idea is check the current cell index to see if we can simply get a message from the current cell
  * If we are at the end of the current cell then loop till we find the next cell with messages (this way we ignore cells with no messages)
  * @param messages the message list
  * @param partition_matrix the PBM
  * @param relative_cell the relative partition cell position from the agent position
- * @param cell_index_max the maximum index of the currnt partition cell
+ * @param cell_index_max the maximum index of the current partition cell
  * @param agent_grid_cell the agents partition cell position
  * @param cell_index the current cell index in agent_grid_cell+relative_cell
- * @return true if a messag has been loaded into sm false otherwise
+ * @return true if a message has been loaded into sm false otherwise
  */
 __device__ int load_next_location_message(xmachine_message_location_list* messages, xmachine_message_location_PBM* partition_matrix, int3 relative_cell, int cell_index_max, int3 agent_grid_cell, int cell_index)
 {
@@ -726,7 +726,7 @@ __device__ int load_next_location_message(xmachine_message_location_list* messag
 		}
 		else
 		{
-			//we have exhausted all the neightbouring cells so there are no more messages
+			//we have exhausted all the neighbouring cells so there are no more messages
 			return false;
 		}
 	}
@@ -742,7 +742,7 @@ __device__ int load_next_location_message(xmachine_message_location_list* messag
   temp_message.id = tex1Dfetch(tex_xmachine_message_location_id, cell_index + d_tex_xmachine_message_location_id_offset); temp_message.type = tex1Dfetch(tex_xmachine_message_location_type, cell_index + d_tex_xmachine_message_location_type_offset); temp_message.x = tex1Dfetch(tex_xmachine_message_location_x, cell_index + d_tex_xmachine_message_location_x_offset); temp_message.y = tex1Dfetch(tex_xmachine_message_location_y, cell_index + d_tex_xmachine_message_location_y_offset); temp_message.z = tex1Dfetch(tex_xmachine_message_location_z, cell_index + d_tex_xmachine_message_location_z_offset); temp_message.dir = tex1Dfetch(tex_xmachine_message_location_dir, cell_index + d_tex_xmachine_message_location_dir_offset); temp_message.motility = tex1Dfetch(tex_xmachine_message_location_motility, cell_index + d_tex_xmachine_message_location_motility_offset); temp_message.range = tex1Dfetch(tex_xmachine_message_location_range, cell_index + d_tex_xmachine_message_location_range_offset); temp_message.iteration = tex1Dfetch(tex_xmachine_message_location_iteration, cell_index + d_tex_xmachine_message_location_iteration_offset); 
 
 	//load it into shared memory (no sync as no sharing between threads)
-	int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_location));
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_location));
 	xmachine_message_location* sm_message = ((xmachine_message_location*)&message_share[message_index]);
 	sm_message[0] = temp_message;
 
@@ -750,7 +750,7 @@ __device__ int load_next_location_message(xmachine_message_location_list* messag
 }
 
 /*
- * get first non partitioned location message (first batch load into shared memory)
+ * get first spatial partitioned location message (first batch load into shared memory)
  */
 __device__ xmachine_message_location* get_first_location_message(xmachine_message_location_list* messages, xmachine_message_location_PBM* partition_matrix, float x, float y, float z){
 
@@ -765,7 +765,7 @@ __device__ xmachine_message_location* get_first_location_message(xmachine_messag
 	
 	if (load_next_location_message(messages, partition_matrix, relative_cell, cell_index_max, agent_grid_cell, cell_index))
 	{
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_location));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_location));
 		return ((xmachine_message_location*)&message_share[message_index]);
 	}
 	else
@@ -775,7 +775,7 @@ __device__ xmachine_message_location* get_first_location_message(xmachine_messag
 }
 
 /*
- * get next non partitioned location message (either from SM or next batch load)
+ * get next spatial partitioned location message (either from SM or next batch load)
  */
 __device__ xmachine_message_location* get_next_location_message(xmachine_message_location* message, xmachine_message_location_list* messages, xmachine_message_location_PBM* partition_matrix){
 	
@@ -787,7 +787,7 @@ __device__ xmachine_message_location* get_next_location_message(xmachine_message
 	if (load_next_location_message(messages, partition_matrix, message->_relative_cell, message->_cell_index_max, message->_agent_grid_cell, message->_cell_index))
 	{
 		//get conflict free address of 
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_location));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_location));
 		return ((xmachine_message_location*)&message_share[message_index]);
 	}
 	else
@@ -1058,15 +1058,15 @@ __device__ unsigned int message_force_hash(int3 gridPos)
 
 /** load_next_force_message
  * Used to load the next message data to shared memory
- * Idea is check the current cell index to see if we can simpley get a message from the current cell
+ * Idea is check the current cell index to see if we can simply get a message from the current cell
  * If we are at the end of the current cell then loop till we find the next cell with messages (this way we ignore cells with no messages)
  * @param messages the message list
  * @param partition_matrix the PBM
  * @param relative_cell the relative partition cell position from the agent position
- * @param cell_index_max the maximum index of the currnt partition cell
+ * @param cell_index_max the maximum index of the current partition cell
  * @param agent_grid_cell the agents partition cell position
  * @param cell_index the current cell index in agent_grid_cell+relative_cell
- * @return true if a messag has been loaded into sm false otherwise
+ * @return true if a message has been loaded into sm false otherwise
  */
 __device__ int load_next_force_message(xmachine_message_force_list* messages, xmachine_message_force_PBM* partition_matrix, int3 relative_cell, int cell_index_max, int3 agent_grid_cell, int cell_index)
 {
@@ -1109,7 +1109,7 @@ __device__ int load_next_force_message(xmachine_message_force_list* messages, xm
 		}
 		else
 		{
-			//we have exhausted all the neightbouring cells so there are no more messages
+			//we have exhausted all the neighbouring cells so there are no more messages
 			return false;
 		}
 	}
@@ -1125,7 +1125,7 @@ __device__ int load_next_force_message(xmachine_message_force_list* messages, xm
   temp_message.type = tex1Dfetch(tex_xmachine_message_force_type, cell_index + d_tex_xmachine_message_force_type_offset); temp_message.x = tex1Dfetch(tex_xmachine_message_force_x, cell_index + d_tex_xmachine_message_force_x_offset); temp_message.y = tex1Dfetch(tex_xmachine_message_force_y, cell_index + d_tex_xmachine_message_force_y_offset); temp_message.z = tex1Dfetch(tex_xmachine_message_force_z, cell_index + d_tex_xmachine_message_force_z_offset); temp_message.id = tex1Dfetch(tex_xmachine_message_force_id, cell_index + d_tex_xmachine_message_force_id_offset); 
 
 	//load it into shared memory (no sync as no sharing between threads)
-	int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_force));
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_force));
 	xmachine_message_force* sm_message = ((xmachine_message_force*)&message_share[message_index]);
 	sm_message[0] = temp_message;
 
@@ -1133,7 +1133,7 @@ __device__ int load_next_force_message(xmachine_message_force_list* messages, xm
 }
 
 /*
- * get first non partitioned force message (first batch load into shared memory)
+ * get first spatial partitioned force message (first batch load into shared memory)
  */
 __device__ xmachine_message_force* get_first_force_message(xmachine_message_force_list* messages, xmachine_message_force_PBM* partition_matrix, float x, float y, float z){
 
@@ -1148,7 +1148,7 @@ __device__ xmachine_message_force* get_first_force_message(xmachine_message_forc
 	
 	if (load_next_force_message(messages, partition_matrix, relative_cell, cell_index_max, agent_grid_cell, cell_index))
 	{
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_force));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_force));
 		return ((xmachine_message_force*)&message_share[message_index]);
 	}
 	else
@@ -1158,7 +1158,7 @@ __device__ xmachine_message_force* get_first_force_message(xmachine_message_forc
 }
 
 /*
- * get next non partitioned force message (either from SM or next batch load)
+ * get next spatial partitioned force message (either from SM or next batch load)
  */
 __device__ xmachine_message_force* get_next_force_message(xmachine_message_force* message, xmachine_message_force_list* messages, xmachine_message_force_PBM* partition_matrix){
 	
@@ -1170,7 +1170,7 @@ __device__ xmachine_message_force* get_next_force_message(xmachine_message_force
 	if (load_next_force_message(messages, partition_matrix, message->_relative_cell, message->_cell_index_max, message->_agent_grid_cell, message->_cell_index))
 	{
 		//get conflict free address of 
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_force));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_force));
 		return ((xmachine_message_force*)&message_share[message_index]);
 	}
 	else
@@ -1182,7 +1182,7 @@ __device__ xmachine_message_force* get_next_force_message(xmachine_message_force
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created GPU kernals  */
+/* Dynamically created GPU kernels  */
 
 
 

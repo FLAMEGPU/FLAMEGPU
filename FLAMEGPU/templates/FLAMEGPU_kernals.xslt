@@ -118,7 +118,7 @@ __constant__ int d_SM_START;
 __constant__ int d_PADDING;
 
 //SM addressing macro to avoid conflicts (32 bit only)
-#define SHARE_INDEX(i, s) (((s + d_PADDING)* i)+d_SM_START) /**&lt;offset struct size by padding to avoid bank conflicts */
+#define SHARE_INDEX(i, s) ((((s) + d_PADDING)* (i))+d_SM_START) /**&lt;offset struct size by padding to avoid bank conflicts */
 
 //if doubel support is needed then define the following function which requires sm_13 or later
 #ifdef _DOUBLE_SUPPORT_REQUIRED_
@@ -493,7 +493,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	temp_message.<xsl:value-of select="xmml:name"/> = messages-><xsl:value-of select="xmml:name"/>[index];</xsl:for-each>
 
 	//AoS to shared memory
-	int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
 	xmachine_message_<xsl:value-of select="xmml:name"/>* sm_message = ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
 	sm_message[0] = temp_message;
 
@@ -526,7 +526,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 
 	//if count == Block Size load next tile int shared memory values
 	if (i == 0){
-		__syncthreads();					//make sure we dont change shared memeory until all threads are here (important for emu-debug mode)
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
 		
 		//SoA to AoS - xmachine_message_<xsl:value-of select="xmml:name"/> Coalesced memory read
 		int index = (tile* blockDim.x) + threadIdx.x;
@@ -535,11 +535,11 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 		temp_message.<xsl:value-of select="xmml:name"/> = messages-><xsl:value-of select="xmml:name"/>[index];</xsl:for-each>
 
 		//AoS to shared memory
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
 		xmachine_message_<xsl:value-of select="xmml:name"/>* sm_message = ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
 		sm_message[0] = temp_message;
 
-		__syncthreads();					//make sure we dont start returning messages untill all threads have updated shared memory
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
 	}
 
 	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
@@ -666,7 +666,7 @@ __device__ void <xsl:value-of select="xmml:name"/>_message_to_sm(xmachine_messag
 
 //Get first <xsl:value-of select="xmml:name"/> message 
 //Used by discrete agents this accesses messages with texture cache. Agent position is determined by position in the grid/block
-//Possibility of upto 8 thread divergances
+//Possibility of upto 8 thread divergences
 __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:value-of select="xmml:name"/>_message_discrete(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages){
 
 	//shared memory get from offset dependant on sm usage in function
@@ -1053,15 +1053,15 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(int3 gri
 
 /** load_next_<xsl:value-of select="xmml:name"/>_message
  * Used to load the next message data to shared memory
- * Idea is check the current cell index to see if we can simpley get a message from the current cell
+ * Idea is check the current cell index to see if we can simply get a message from the current cell
  * If we are at the end of the current cell then loop till we find the next cell with messages (this way we ignore cells with no messages)
  * @param messages the message list
  * @param partition_matrix the PBM
  * @param relative_cell the relative partition cell position from the agent position
- * @param cell_index_max the maximum index of the currnt partition cell
+ * @param cell_index_max the maximum index of the current partition cell
  * @param agent_grid_cell the agents partition cell position
  * @param cell_index the current cell index in agent_grid_cell+relative_cell
- * @return true if a messag has been loaded into sm false otherwise
+ * @return true if a message has been loaded into sm false otherwise
  */
 __device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix, int3 relative_cell, int cell_index_max, int3 agent_grid_cell, int cell_index)
 {
@@ -1104,7 +1104,7 @@ __device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_mes
 		}
 		else
 		{
-			//we have exhausted all the neightbouring cells so there are no more messages
+			//we have exhausted all the neighbouring cells so there are no more messages
 			return false;
 		}
 	}
@@ -1123,7 +1123,7 @@ __device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_mes
   <xsl:otherwise>temp_message.<xsl:value-of select="xmml:name"/> = tex1Dfetch(tex_xmachine_message_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>, cell_index + d_tex_xmachine_message_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_offset); </xsl:otherwise></xsl:choose> </xsl:for-each>
 
 	//load it into shared memory (no sync as no sharing between threads)
-	int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
 	xmachine_message_<xsl:value-of select="xmml:name"/>* sm_message = ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
 	sm_message[0] = temp_message;
 
@@ -1131,7 +1131,7 @@ __device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_mes
 }
 
 /*
- * get first non partitioned <xsl:value-of select="xmml:name"/> message (first batch load into shared memory)
+ * get first spatial partitioned <xsl:value-of select="xmml:name"/> message (first batch load into shared memory)
  */
 __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix, float x, float y, float z){
 
@@ -1146,7 +1146,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	
 	if (load_next_<xsl:value-of select="xmml:name"/>_message(messages, partition_matrix, relative_cell, cell_index_max, agent_grid_cell, cell_index))
 	{
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
 		return ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
 	}
 	else
@@ -1156,7 +1156,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 }
 
 /*
- * get next non partitioned <xsl:value-of select="xmml:name"/> message (either from SM or next batch load)
+ * get next spatial partitioned <xsl:value-of select="xmml:name"/> message (either from SM or next batch load)
  */
 __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>* message, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix){
 	
@@ -1168,7 +1168,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 	if (load_next_<xsl:value-of select="xmml:name"/>_message(messages, partition_matrix, message->_relative_cell, message->_cell_index_max, message->_agent_grid_cell, message->_cell_index))
 	{
 		//get conflict free address of 
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
 		return ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
 	}
 	else
@@ -1182,7 +1182,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created GPU kernals  */
+/* Dynamically created GPU kernels  */
 
 
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function">
