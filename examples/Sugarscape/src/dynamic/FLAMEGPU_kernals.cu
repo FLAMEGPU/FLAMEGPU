@@ -81,7 +81,7 @@ __constant__ int d_SM_START;
 __constant__ int d_PADDING;
 
 //SM addressing macro to avoid conflicts (32 bit only)
-#define SHARE_INDEX(i, s) (((s + d_PADDING)* i)+d_SM_START) /**<offset struct size by padding to avoid bank conflicts */
+#define SHARE_INDEX(i, s) ((((s) + d_PADDING)* (i))+d_SM_START) /**<offset struct size by padding to avoid bank conflicts */
 
 //if doubel support is needed then define the following function which requires sm_13 or later
 #ifdef _DOUBLE_SUPPORT_REQUIRED_
@@ -313,7 +313,7 @@ __device__ void cell_state_message_to_sm(xmachine_message_cell_state_list* messa
 
 //Get first cell_state message 
 //Used by discrete agents this accesses messages with texture cache. Agent position is determined by position in the grid/block
-//Possibility of upto 8 thread divergances
+//Possibility of upto 8 thread divergences
 __device__ xmachine_message_cell_state* get_first_cell_state_message_discrete(xmachine_message_cell_state_list* messages){
 
 	//shared memory get from offset dependant on sm usage in function
@@ -645,7 +645,7 @@ __device__ void movement_request_message_to_sm(xmachine_message_movement_request
 
 //Get first movement_request message 
 //Used by discrete agents this accesses messages with texture cache. Agent position is determined by position in the grid/block
-//Possibility of upto 8 thread divergances
+//Possibility of upto 8 thread divergences
 __device__ xmachine_message_movement_request* get_first_movement_request_message_discrete(xmachine_message_movement_request_list* messages){
 
 	//shared memory get from offset dependant on sm usage in function
@@ -973,7 +973,7 @@ __device__ void movement_response_message_to_sm(xmachine_message_movement_respon
 
 //Get first movement_response message 
 //Used by discrete agents this accesses messages with texture cache. Agent position is determined by position in the grid/block
-//Possibility of upto 8 thread divergances
+//Possibility of upto 8 thread divergences
 __device__ xmachine_message_movement_response* get_first_movement_response_message_discrete(xmachine_message_movement_response_list* messages){
 
 	//shared memory get from offset dependant on sm usage in function
@@ -1187,7 +1187,7 @@ __device__ xmachine_message_movement_response* get_next_movement_response_messag
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created GPU kernals  */
+/* Dynamically created GPU kernels  */
 
 
 

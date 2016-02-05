@@ -69,7 +69,7 @@ __constant__ int d_SM_START;
 __constant__ int d_PADDING;
 
 //SM addressing macro to avoid conflicts (32 bit only)
-#define SHARE_INDEX(i, s) (((s + d_PADDING)* i)+d_SM_START) /**<offset struct size by padding to avoid bank conflicts */
+#define SHARE_INDEX(i, s) ((((s) + d_PADDING)* (i))+d_SM_START) /**<offset struct size by padding to avoid bank conflicts */
 
 //if doubel support is needed then define the following function which requires sm_13 or later
 #ifdef _DOUBLE_SUPPORT_REQUIRED_
@@ -632,7 +632,7 @@ __device__ xmachine_message_proposal* get_first_proposal_message(xmachine_messag
 	temp_message.woman = messages->woman[index];
 
 	//AoS to shared memory
-	int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_proposal));
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_proposal));
 	xmachine_message_proposal* sm_message = ((xmachine_message_proposal*)&message_share[message_index]);
 	sm_message[0] = temp_message;
 
@@ -665,7 +665,7 @@ __device__ xmachine_message_proposal* get_next_proposal_message(xmachine_message
 
 	//if count == Block Size load next tile int shared memory values
 	if (i == 0){
-		__syncthreads();					//make sure we dont change shared memeory until all threads are here (important for emu-debug mode)
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
 		
 		//SoA to AoS - xmachine_message_proposal Coalesced memory read
 		int index = (tile* blockDim.x) + threadIdx.x;
@@ -675,11 +675,11 @@ __device__ xmachine_message_proposal* get_next_proposal_message(xmachine_message
 		temp_message.woman = messages->woman[index];
 
 		//AoS to shared memory
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_proposal));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_proposal));
 		xmachine_message_proposal* sm_message = ((xmachine_message_proposal*)&message_share[message_index]);
 		sm_message[0] = temp_message;
 
-		__syncthreads();					//make sure we dont start returning messages untill all threads have updated shared memory
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
 	}
 
 	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_proposal));
@@ -783,7 +783,7 @@ __device__ xmachine_message_notification* get_first_notification_message(xmachin
 	temp_message.suitor = messages->suitor[index];
 
 	//AoS to shared memory
-	int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_notification));
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_notification));
 	xmachine_message_notification* sm_message = ((xmachine_message_notification*)&message_share[message_index]);
 	sm_message[0] = temp_message;
 
@@ -816,7 +816,7 @@ __device__ xmachine_message_notification* get_next_notification_message(xmachine
 
 	//if count == Block Size load next tile int shared memory values
 	if (i == 0){
-		__syncthreads();					//make sure we dont change shared memeory until all threads are here (important for emu-debug mode)
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
 		
 		//SoA to AoS - xmachine_message_notification Coalesced memory read
 		int index = (tile* blockDim.x) + threadIdx.x;
@@ -826,11 +826,11 @@ __device__ xmachine_message_notification* get_next_notification_message(xmachine
 		temp_message.suitor = messages->suitor[index];
 
 		//AoS to shared memory
-		int message_index = SHARE_INDEX(threadIdx.x, sizeof(xmachine_message_notification));
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_notification));
 		xmachine_message_notification* sm_message = ((xmachine_message_notification*)&message_share[message_index]);
 		sm_message[0] = temp_message;
 
-		__syncthreads();					//make sure we dont start returning messages untill all threads have updated shared memory
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
 	}
 
 	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_notification));
@@ -840,7 +840,7 @@ __device__ xmachine_message_notification* get_next_notification_message(xmachine
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created GPU kernals  */
+/* Dynamically created GPU kernels  */
 
 
 
