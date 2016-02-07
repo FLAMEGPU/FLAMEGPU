@@ -511,7 +511,7 @@ int <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_
 	</xsl:for-each>
 	</xsl:if><xsl:if test="../../gpu:type='discrete'">
 	<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]">
-	<xsl:if test="gpu:partitioningNone">//Discrete agent and message input has no partitioning
+	<xsl:if test="gpu:partitioningNone  or gpu:partitioningSpatial">//Discrete agent and coninuous message input
 	sm_size += (blockSize * sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
 	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
 	sm_size += (blockSize * PADDING);
@@ -740,8 +740,8 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	
 	<xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messageName" select="xmml:inputs/gpu:input/xmml:messageName"/>
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
-	<xsl:if test="../../gpu:type='continuous'"><xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]">
-	<xsl:if test="gpu:partitioningDiscrete or gpu:partitioningSpatial">//continuous agent with discrete or partitioned message input uses texture caching
+	<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]">
+	<xsl:if test="gpu:partitioningDiscrete or gpu:partitioningSpatial">//any agent with discrete or partitioned message input uses texture caching
 	<xsl:for-each select="xmml:variables/gpu:variable">size_t tex_xmachine_message_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_byte_offset;    
 	gpuErrchk( cudaBindTexture(&amp;tex_xmachine_message_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_byte_offset, tex_xmachine_message_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>, d_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>, sizeof(int)*xmachine_message_<xsl:value-of select="../../xmml:name"/>_MAX));
 	h_tex_xmachine_message_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_offset = (int)tex_xmachine_message_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_byte_offset / sizeof(<xsl:value-of select="xmml:type"/>);
@@ -757,7 +757,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_<xsl:value-of select="xmml:name"/>_pbm_end_or_count_offset, &amp;h_tex_xmachine_message_<xsl:value-of select="xmml:name"/>_pbm_end_or_count_offset, sizeof(int)));
 
 	</xsl:if></xsl:if>
-	</xsl:for-each></xsl:if></xsl:if>
+	</xsl:for-each></xsl:if>
 	
 	<xsl:if test="xmml:outputs/gpu:output"><xsl:variable name="messageName" select="xmml:outputs/gpu:output/xmml:messageName"/><xsl:variable name="outputType" select="xmml:outputs/gpu:output/gpu:type"/>
 	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
@@ -795,14 +795,14 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	
 	<xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messageName" select="xmml:inputs/gpu:input/xmml:messageName"/>
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
-	<xsl:if test="../../gpu:type='continuous'"><xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]">
-	<xsl:if test="gpu:partitioningDiscrete or gpu:partitioningSpatial">//continuous agent with discrete or partitioned message input uses texture caching
+	<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]">
+	<xsl:if test="gpu:partitioningDiscrete or gpu:partitioningSpatial">//any agent with discrete or partitioned message input uses texture caching
 	<xsl:for-each select="xmml:variables/gpu:variable">gpuErrchk( cudaUnbindTexture(tex_xmachine_message_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>));
 	</xsl:for-each><xsl:if test="gpu:partitioningSpatial">//unbind pbm indices
     gpuErrchk( cudaUnbindTexture(tex_xmachine_message_<xsl:value-of select="xmml:name"/>_pbm_start));
     gpuErrchk( cudaUnbindTexture(tex_xmachine_message_<xsl:value-of select="xmml:name"/>_pbm_end_or_count));
     </xsl:if></xsl:if>
-	</xsl:for-each></xsl:if></xsl:if>
+	</xsl:for-each></xsl:if>
 
 	<xsl:if test="xmml:outputs/gpu:output"><xsl:variable name="messageName" select="xmml:outputs/gpu:output/xmml:messageName"/><xsl:variable name="outputType" select="xmml:outputs/gpu:output/gpu:type"/><xsl:variable name="xagentName" select="../../xmml:name"/>
 	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES

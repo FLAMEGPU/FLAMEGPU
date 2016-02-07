@@ -763,6 +763,19 @@ void agent_movement_request(cudaStream_t &stream){
 	}
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	//any agent with discrete or partitioned message input uses texture caching
+	size_t tex_xmachine_message_cell_state_location_id_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_cell_state_location_id_byte_offset, tex_xmachine_message_cell_state_location_id, d_cell_states->location_id, sizeof(int)*xmachine_message_cell_state_MAX));
+	h_tex_xmachine_message_cell_state_location_id_offset = (int)tex_xmachine_message_cell_state_location_id_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_cell_state_location_id_offset, &h_tex_xmachine_message_cell_state_location_id_offset, sizeof(int)));
+	size_t tex_xmachine_message_cell_state_state_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_cell_state_state_byte_offset, tex_xmachine_message_cell_state_state, d_cell_states->state, sizeof(int)*xmachine_message_cell_state_MAX));
+	h_tex_xmachine_message_cell_state_state_offset = (int)tex_xmachine_message_cell_state_state_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_cell_state_state_offset, &h_tex_xmachine_message_cell_state_state_offset, sizeof(int)));
+	size_t tex_xmachine_message_cell_state_env_sugar_level_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_cell_state_env_sugar_level_byte_offset, tex_xmachine_message_cell_state_env_sugar_level, d_cell_states->env_sugar_level, sizeof(int)*xmachine_message_cell_state_MAX));
+	h_tex_xmachine_message_cell_state_env_sugar_level_offset = (int)tex_xmachine_message_cell_state_env_sugar_level_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_cell_state_env_sugar_level_offset, &h_tex_xmachine_message_cell_state_env_sugar_level_offset, sizeof(int)));
 	
 	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
 	
@@ -777,6 +790,10 @@ void agent_movement_request(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	//any agent with discrete or partitioned message input uses texture caching
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_cell_state_location_id));
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_cell_state_state));
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_cell_state_env_sugar_level));
 	
 	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
 	
@@ -872,6 +889,23 @@ void agent_movement_response(cudaStream_t &stream){
 	}
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	//any agent with discrete or partitioned message input uses texture caching
+	size_t tex_xmachine_message_movement_request_agent_id_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_movement_request_agent_id_byte_offset, tex_xmachine_message_movement_request_agent_id, d_movement_requests->agent_id, sizeof(int)*xmachine_message_movement_request_MAX));
+	h_tex_xmachine_message_movement_request_agent_id_offset = (int)tex_xmachine_message_movement_request_agent_id_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_movement_request_agent_id_offset, &h_tex_xmachine_message_movement_request_agent_id_offset, sizeof(int)));
+	size_t tex_xmachine_message_movement_request_location_id_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_movement_request_location_id_byte_offset, tex_xmachine_message_movement_request_location_id, d_movement_requests->location_id, sizeof(int)*xmachine_message_movement_request_MAX));
+	h_tex_xmachine_message_movement_request_location_id_offset = (int)tex_xmachine_message_movement_request_location_id_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_movement_request_location_id_offset, &h_tex_xmachine_message_movement_request_location_id_offset, sizeof(int)));
+	size_t tex_xmachine_message_movement_request_sugar_level_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_movement_request_sugar_level_byte_offset, tex_xmachine_message_movement_request_sugar_level, d_movement_requests->sugar_level, sizeof(int)*xmachine_message_movement_request_MAX));
+	h_tex_xmachine_message_movement_request_sugar_level_offset = (int)tex_xmachine_message_movement_request_sugar_level_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_movement_request_sugar_level_offset, &h_tex_xmachine_message_movement_request_sugar_level_offset, sizeof(int)));
+	size_t tex_xmachine_message_movement_request_metabolism_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_movement_request_metabolism_byte_offset, tex_xmachine_message_movement_request_metabolism, d_movement_requests->metabolism, sizeof(int)*xmachine_message_movement_request_MAX));
+	h_tex_xmachine_message_movement_request_metabolism_offset = (int)tex_xmachine_message_movement_request_metabolism_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_movement_request_metabolism_offset, &h_tex_xmachine_message_movement_request_metabolism_offset, sizeof(int)));
 	
 	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
 	
@@ -886,6 +920,11 @@ void agent_movement_response(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	//any agent with discrete or partitioned message input uses texture caching
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_movement_request_agent_id));
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_movement_request_location_id));
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_movement_request_sugar_level));
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_movement_request_metabolism));
 	
 	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
 	
@@ -981,6 +1020,15 @@ void agent_movement_transaction(cudaStream_t &stream){
 	}
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	//any agent with discrete or partitioned message input uses texture caching
+	size_t tex_xmachine_message_movement_response_location_id_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_movement_response_location_id_byte_offset, tex_xmachine_message_movement_response_location_id, d_movement_responses->location_id, sizeof(int)*xmachine_message_movement_response_MAX));
+	h_tex_xmachine_message_movement_response_location_id_offset = (int)tex_xmachine_message_movement_response_location_id_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_movement_response_location_id_offset, &h_tex_xmachine_message_movement_response_location_id_offset, sizeof(int)));
+	size_t tex_xmachine_message_movement_response_agent_id_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_movement_response_agent_id_byte_offset, tex_xmachine_message_movement_response_agent_id, d_movement_responses->agent_id, sizeof(int)*xmachine_message_movement_response_MAX));
+	h_tex_xmachine_message_movement_response_agent_id_offset = (int)tex_xmachine_message_movement_response_agent_id_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_movement_response_agent_id_offset, &h_tex_xmachine_message_movement_response_agent_id_offset, sizeof(int)));
 	
 	
 	//MAIN XMACHINE FUNCTION CALL (movement_transaction)
@@ -993,6 +1041,9 @@ void agent_movement_transaction(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	//any agent with discrete or partitioned message input uses texture caching
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_movement_response_location_id));
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_movement_response_agent_id));
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************

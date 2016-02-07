@@ -1039,7 +1039,7 @@ void keratinocyte_differentiate(cudaStream_t &stream){
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	size_t tex_xmachine_message_location_id_byte_offset;    
 	gpuErrchk( cudaBindTexture(&tex_xmachine_message_location_id_byte_offset, tex_xmachine_message_location_id, d_locations->id, sizeof(int)*xmachine_message_location_MAX));
 	h_tex_xmachine_message_location_id_offset = (int)tex_xmachine_message_location_id_byte_offset / sizeof(int);
@@ -1098,7 +1098,7 @@ void keratinocyte_differentiate(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_id));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_type));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_x));
@@ -1206,7 +1206,7 @@ void keratinocyte_death_signal(cudaStream_t &stream){
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	size_t tex_xmachine_message_location_id_byte_offset;    
 	gpuErrchk( cudaBindTexture(&tex_xmachine_message_location_id_byte_offset, tex_xmachine_message_location_id, d_locations->id, sizeof(int)*xmachine_message_location_MAX));
 	h_tex_xmachine_message_location_id_offset = (int)tex_xmachine_message_location_id_byte_offset / sizeof(int);
@@ -1265,7 +1265,7 @@ void keratinocyte_death_signal(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_id));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_type));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_x));
@@ -1373,7 +1373,7 @@ void keratinocyte_migrate(cudaStream_t &stream){
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	size_t tex_xmachine_message_location_id_byte_offset;    
 	gpuErrchk( cudaBindTexture(&tex_xmachine_message_location_id_byte_offset, tex_xmachine_message_location_id, d_locations->id, sizeof(int)*xmachine_message_location_MAX));
 	h_tex_xmachine_message_location_id_offset = (int)tex_xmachine_message_location_id_byte_offset / sizeof(int);
@@ -1432,7 +1432,7 @@ void keratinocyte_migrate(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_id));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_type));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_x));
@@ -1699,7 +1699,7 @@ void keratinocyte_resolve_forces(cudaStream_t &stream){
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	size_t tex_xmachine_message_force_type_byte_offset;    
 	gpuErrchk( cudaBindTexture(&tex_xmachine_message_force_type_byte_offset, tex_xmachine_message_force_type, d_forces->type, sizeof(int)*xmachine_message_force_MAX));
 	h_tex_xmachine_message_force_type_offset = (int)tex_xmachine_message_force_type_byte_offset / sizeof(int);
@@ -1742,7 +1742,7 @@ void keratinocyte_resolve_forces(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_force_type));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_force_x));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_force_y));

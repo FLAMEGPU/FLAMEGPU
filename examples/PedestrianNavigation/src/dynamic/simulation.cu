@@ -907,7 +907,7 @@ void agent_avoid_pedestrians(cudaStream_t &stream){
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	size_t tex_xmachine_message_pedestrian_location_x_byte_offset;    
 	gpuErrchk( cudaBindTexture(&tex_xmachine_message_pedestrian_location_x_byte_offset, tex_xmachine_message_pedestrian_location_x, d_pedestrian_locations->x, sizeof(int)*xmachine_message_pedestrian_location_MAX));
 	h_tex_xmachine_message_pedestrian_location_x_offset = (int)tex_xmachine_message_pedestrian_location_x_byte_offset / sizeof(float);
@@ -942,7 +942,7 @@ void agent_avoid_pedestrians(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_pedestrian_location_x));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_pedestrian_location_y));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_pedestrian_location_z));
@@ -1045,7 +1045,7 @@ void agent_force_flow(cudaStream_t &stream){
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	size_t tex_xmachine_message_navmap_cell_x_byte_offset;    
 	gpuErrchk( cudaBindTexture(&tex_xmachine_message_navmap_cell_x_byte_offset, tex_xmachine_message_navmap_cell_x, d_navmap_cells->x, sizeof(int)*xmachine_message_navmap_cell_MAX));
 	h_tex_xmachine_message_navmap_cell_x_offset = (int)tex_xmachine_message_navmap_cell_x_byte_offset / sizeof(int);
@@ -1144,7 +1144,7 @@ void agent_force_flow(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_navmap_cell_x));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_navmap_cell_y));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_navmap_cell_exit_no));

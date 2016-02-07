@@ -534,6 +534,19 @@ void cell_update_state(cudaStream_t &stream){
 	}
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	//any agent with discrete or partitioned message input uses texture caching
+	size_t tex_xmachine_message_state_state_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_state_state_byte_offset, tex_xmachine_message_state_state, d_states->state, sizeof(int)*xmachine_message_state_MAX));
+	h_tex_xmachine_message_state_state_offset = (int)tex_xmachine_message_state_state_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_state_state_offset, &h_tex_xmachine_message_state_state_offset, sizeof(int)));
+	size_t tex_xmachine_message_state_x_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_state_x_byte_offset, tex_xmachine_message_state_x, d_states->x, sizeof(int)*xmachine_message_state_MAX));
+	h_tex_xmachine_message_state_x_offset = (int)tex_xmachine_message_state_x_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_state_x_offset, &h_tex_xmachine_message_state_x_offset, sizeof(int)));
+	size_t tex_xmachine_message_state_y_byte_offset;    
+	gpuErrchk( cudaBindTexture(&tex_xmachine_message_state_y_byte_offset, tex_xmachine_message_state_y, d_states->y, sizeof(int)*xmachine_message_state_MAX));
+	h_tex_xmachine_message_state_y_offset = (int)tex_xmachine_message_state_y_byte_offset / sizeof(int);
+	gpuErrchk(cudaMemcpyToSymbol( d_tex_xmachine_message_state_y_offset, &h_tex_xmachine_message_state_y_offset, sizeof(int)));
 	
 	
 	//MAIN XMACHINE FUNCTION CALL (update_state)
@@ -546,6 +559,10 @@ void cell_update_state(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	//any agent with discrete or partitioned message input uses texture caching
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_state_state));
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_state_x));
+	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_state_y));
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************

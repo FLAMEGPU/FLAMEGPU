@@ -662,7 +662,7 @@ void Circle_inputdata(cudaStream_t &stream){
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	size_t tex_xmachine_message_location_id_byte_offset;    
 	gpuErrchk( cudaBindTexture(&tex_xmachine_message_location_id_byte_offset, tex_xmachine_message_location_id, d_locations->id, sizeof(int)*xmachine_message_location_MAX));
 	h_tex_xmachine_message_location_id_offset = (int)tex_xmachine_message_location_id_byte_offset / sizeof(int);
@@ -701,7 +701,7 @@ void Circle_inputdata(cudaStream_t &stream){
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
-	//continuous agent with discrete or partitioned message input uses texture caching
+	//any agent with discrete or partitioned message input uses texture caching
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_id));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_x));
 	gpuErrchk( cudaUnbindTexture(tex_xmachine_message_location_y));

@@ -6,7 +6,7 @@
     <gpu:functionFiles> 
       <file>functions.c</file> 
     </gpu:functionFiles>
-  </gpu:environment> 
+  </gpu:environment>
   <xagents>
     <gpu:xagent>
       <name>Circle</name>
