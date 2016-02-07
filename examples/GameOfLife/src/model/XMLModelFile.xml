@@ -5,7 +5,7 @@
   <gpu:environment> 
     <gpu:functionFiles>
       <file>functions.c</file>
-    </gpu:functionFiles> 
+    </gpu:functionFiles>
   </gpu:environment>
   <xagents>
     <gpu:xagent>
