@@ -65,8 +65,6 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Circle* xmemory, xmachine_messa
         location_message = get_next_location_message(location_message, location_messages, partition_matrix);
     }
 	
-	
-	xmemory->fx = count;
 	return 0;
 }
 
