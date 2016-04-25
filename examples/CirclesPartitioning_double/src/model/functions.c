@@ -25,52 +25,51 @@
 __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Circle* xmemory, xmachine_message_location_list* location_messages, xmachine_message_location_PBM* partition_matrix)
 {
 	
-	int kr = 0.1; /* Stiffness variable for repulsion */
-	int ka = 0.0; /* Stiffness variable for attraction */
+	const float kr = 0.1f; /* Stiffness variable for repulsion */
+	const float ka = 0.0f; /* Stiffness variable for attraction */
 
-	float x1, y1, x2, y2;
-    float deep_distance_check, separation_distance;
+	double x1, y1, x2, y2, fx, fy;
+    double location_distance, separation_distance;
     float k;
-    xmemory->fx = 0.0f;
-    xmemory->fy = 0.0f;
     x1 = xmemory->x;
+    fx = 0.0f;
     y1 = xmemory->y;
+    fy = 0.0f;
     
     // Loop through all messages 
 	xmachine_message_location* location_message = get_first_location_message(location_messages, partition_matrix, (float)xmemory->x, (float)xmemory->y, (float)xmemory->z);
 	
-	
-	int count = 0;
-    while(location_message)
+	while(location_message)
     {
-		count++;
-
         if((location_message->id != xmemory->id))
         {
             x2 = location_message->x;
             y2 = location_message->y;
-            //Deep (expensive) check 
-            deep_distance_check = sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-            separation_distance = (deep_distance_check - radius - radius);
+            // Deep (expensive) check 
+            location_distance = sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+            separation_distance = (location_distance - radius);
             if(separation_distance < radius)
             {
                 if(separation_distance > 0.0) k = ka;
-                else k = kr;
-                xmemory->fx += k*(separation_distance)*((x2-x1)/deep_distance_check);
-                xmemory->fy += k*(separation_distance)*((y2-y1)/deep_distance_check);
+                else k = -kr;
+				
+				fx += k*(separation_distance)*((x1-x2)/radius);
+				fy += k*(separation_distance)*((y1-y2)/radius);
 				
             }
         }
         //Move onto next message to check 
         location_message = get_next_location_message(location_message, location_messages, partition_matrix);
     }
+    xmemory->fx = fx;
+    xmemory->fy = fy;
 	
 	return 0;
 }
 
 __FLAME_GPU_FUNC__ int outputdata(xmachine_memory_Circle* xmemory, xmachine_message_location_list* location_messages)
 {
-    float x, y, z;
+    double x, y, z;
 
 	x = xmemory->x;
     y = xmemory->y;
