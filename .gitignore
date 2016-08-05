@@ -11,7 +11,7 @@ stadium.obj
 **/bin/**/cudart*.dll
 **/dynamic/*.cu
 **/dynamic/*.h
-
+*.zip
 ######
 #CUDA#
 ######
