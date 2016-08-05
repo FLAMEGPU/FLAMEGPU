@@ -10,9 +10,6 @@
     <CudaCompile Include="src\dynamic\visualisation.cu">
       <Filter>dynamic</Filter>
     </CudaCompile>
-    <CudaCompile Include="src\dynamic\io.cpp">
-      <Filter>dynamic</Filter>
-    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="XMML.h" />
@@ -67,6 +64,9 @@
   <ItemGroup>
     <ClCompile Include="src\model\functions.c">
       <Filter>model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dynamic\io.cpp">
+      <Filter>dynamic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -139,6 +139,7 @@ void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each sel
 void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">xmachine_memory_<xsl:value-of select="xmml:name"/>_list* h_<xsl:value-of select="xmml:name"/>s, int* h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>)
 {
 
+  //These values aren't used
 	int temp = 0;
 	int* itno = &amp;temp;
 	
@@ -182,19 +183,31 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
   
   //Allocate nodes
   rapidxml::xml_node&lt;&gt; *root_node = doc.first_node("states");
-  rapidxml::xml_node&lt;&gt; *xagent_node = root_node->first_node("xagent");
+  rapidxml::xml_node&lt;&gt; *xagent_node = root_node-&gt;first_node("xagent");
+  rapidxml::xml_node&lt;&gt; *env_node = root_node-&gt;first_node("environment");
   rapidxml::xml_node&lt;&gt; *name_node=0, *t_node=0;
   bool noWarn = doc.first_node("nowarn")!=0;
+  
+  //Set itno
+  t_node = root_node-&gt;first_node("itno");
+  if(t_node)
+    (*itno) = atoi(t_node-&gt;value());
   
   //Iterate all xagent nodes
   while (xagent_node)
   {
     //Extract name of xagent
-    name_node = xagent_node->first_node("name");
+    name_node = xagent_node-&gt;first_node("name");
+    
+    //Check: Name node missing
+    if(!name_node){
+      printf("ERROR: Agent node missing name property.\n");
+      exit(0);
+    }
     <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
     <xsl:if test="position()!=1">else </xsl:if>if (strcmp(name_node-&gt;value(), "<xsl:value-of select="xmml:name"/>") == 0)
     {
-      //Too many agents
+      //Check: Too many agents
       if (*h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count &gt; xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX){
         printf("ERROR: MAX Buffer size (%i) for agent <xsl:value-of select="xmml:name"/> exceeded whilst reading data\n", xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX);
         exit(0);
@@ -240,8 +253,21 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     }
     </xsl:for-each>
     //Find next xagent node
-    xagent_node = xagent_node->next_sibling("xagent");
+    xagent_node = xagent_node-&gt;next_sibling("xagent");
 	}
+  
+  //Parse environment variables
+  if(env_node)
+  {
+    <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
+    t_node = env_node-&gt;first_node("<xsl:value-of select="xmml:name"/>");
+    if(t_node)
+    {
+      <xsl:value-of select="xmml:type"/> t = (<xsl:value-of select="xmml:type"/>)ato<xsl:choose><xsl:when test="xmml:type='int'">i</xsl:when><xsl:otherwise>f</xsl:otherwise></xsl:choose>(t_node-&gt;value());
+      set_<xsl:value-of select="xmml:name"/>(&amp;t);
+    }
+    </xsl:for-each>
+  }
 }
 
 glm::vec3 getMaximumBounds(){

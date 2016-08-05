@@ -16,9 +16,6 @@
     <CudaCompile Include="src\visualisation\PedestrianPopulation.cu">
       <Filter>visualisation</Filter>
     </CudaCompile>
-    <CudaCompile Include="src\dynamic\io.cpp">
-      <Filter>dynamic</Filter>
-    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="XMML.h" />
@@ -112,6 +109,9 @@
     </ClCompile>
     <ClCompile Include="src\visualisation\PedestrianPopulation.cpp">
       <Filter>visualisation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dynamic\io.cpp">
+      <Filter>dynamic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
