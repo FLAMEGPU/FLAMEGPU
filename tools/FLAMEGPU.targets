@@ -118,7 +118,7 @@
 		
 		<IOTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.IOTransform)' == 'true' ">"%(FLAMEGPU_Template_Build_Rule.XSLTProcessorLocation)" "%(FullPath)" "%(FLAMEGPU_Template_Build_Rule.TemplateDir)\io.xslt" "%(FLAMEGPU_Template_Build_Rule.OutputDir)\io.cpp" &#xA;</IOTransformOut>
 		<IOTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.IOTransform)' != 'true' "></IOTransformOut>
-		<IOTransformOutFile Condition=" '%(FLAMEGPU_Template_Build_Rule.IOTransform)' == 'true' ">%(FLAMEGPU_Template_Build_Rule.OutputDir)\io.cu ;</IOTransformOutFile>
+		<IOTransformOutFile Condition=" '%(FLAMEGPU_Template_Build_Rule.IOTransform)' == 'true' ">%(FLAMEGPU_Template_Build_Rule.OutputDir)\io.cpp ;</IOTransformOutFile>
 		
 		<SimulationTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.SimulationTransform)' == 'true' ">"%(FLAMEGPU_Template_Build_Rule.XSLTProcessorLocation)" "%(FullPath)" "%(FLAMEGPU_Template_Build_Rule.TemplateDir)\simulation.xslt" "%(FLAMEGPU_Template_Build_Rule.OutputDir)\simulation.cu" &#xA;</SimulationTransformOut>
 		<SimulationTransformOut Condition=" '%(FLAMEGPU_Template_Build_Rule.SimulationTransform)' != 'true' "></SimulationTransformOut>
