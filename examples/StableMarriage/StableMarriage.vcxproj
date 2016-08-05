@@ -123,7 +123,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="XMMLGPU.h">
       <DependentUpon>..\..\FLAMEGPU\schemas\XMMLGPU.xsd</DependentUpon>
     </ClInclude>
-    <CudaCompile Include="src\dynamic\io.cu" />
+    <ClCompile Include="src\dynamic\io.cpp">
+      <FileType>Document</FileType>
+    </ClCompile>
     <CudaCompile Include="src\dynamic\main.cu" />
     <CudaCompile Include="src\dynamic\simulation.cu" />
     <CudaCompile Include="src\dynamic\visualisation.cu">
