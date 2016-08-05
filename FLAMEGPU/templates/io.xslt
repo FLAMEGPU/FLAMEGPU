@@ -135,6 +135,7 @@ void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each sel
 	fclose(file);
 }
 
+//Add &lt;nowarn/&gt; to the root of init files to disable warnings about missing agent properties
 void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">xmachine_memory_<xsl:value-of select="xmml:name"/>_list* h_<xsl:value-of select="xmml:name"/>s, int* h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>)
 {
 
@@ -183,6 +184,7 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
   rapidxml::xml_node&lt;&gt; *root_node = doc.first_node("states");
   rapidxml::xml_node&lt;&gt; *xagent_node = root_node->first_node("xagent");
   rapidxml::xml_node&lt;&gt; *name_node=0, *t_node=0;
+  bool noWarn = doc.first_node("nowarn")!=0;
   
   //Iterate all xagent nodes
   while (xagent_node)
@@ -205,7 +207,7 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
           h_<xsl:value-of select="../../xmml:name"/>s-&gt;<xsl:value-of select="xmml:name"/>[(k*xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX)+(*h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count)] = <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>[k];    
         }</xsl:when><xsl:otherwise>
         h_<xsl:value-of select="../../xmml:name"/>s-&gt;<xsl:value-of select="xmml:name"/>[*h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count] = (<xsl:value-of select="xmml:type"/>) ato<xsl:choose><xsl:when test="xmml:type='int'">i</xsl:when><xsl:otherwise>f</xsl:otherwise></xsl:choose>(t_node->value());</xsl:otherwise></xsl:choose>
-      }else{printf("WARNING: Agent <xsl:value-of select="../../xmml:name"/>[%d] is missing property '<xsl:value-of select="xmml:name"/>' in init file.\n",(*h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count));}
+      }else if(!noWarn){printf("WARNING: Agent <xsl:value-of select="../../xmml:name"/>[%d] is missing property '<xsl:value-of select="xmml:name"/>' in init file, 0 used.\n",(*h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count));}
       </xsl:for-each>
 
       //Calculate agent min/max
