@@ -7,6 +7,10 @@
       Include="FLAMEGPU_Template_Build_Rule">
 	  <Targets>_FLAMEGPU_Template_Build_Rule</Targets>
     </AvailableItemName>
+    <AvailableItemName
+      Include="FLAMEGPU_Template_Clean_Rule">
+	  <Targets>_FLAMEGPU_Template_Clean_Rule</Targets>
+    </AvailableItemName>
 	
 	
   </ItemGroup>
@@ -16,9 +20,28 @@
     AssemblyName="Microsoft.Build.Tasks.v4.0">
     <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
   </UsingTask>
+  <UsingTask
+    TaskName="FLAMEGPU_Template_Clean_Rule"
+    TaskFactory="XamlTaskFactory"
+    AssemblyName="Microsoft.Build.Tasks.v4.0">
+    <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
+  </UsingTask>
   
  
- 
+ <Target
+    Name="_FLAMEGPU_Template_Clean_Rule"
+	  BeforeTargets="AfterRebuild;AfterClean"
+    AfterTargets="BeforeRebuild;BeforeClean"
+    >
+	  <Message Text="Cleaning XLST Outputs"/>
+    <Delete Files=".\src\dynamic\header.h"/>
+    <Delete Files=".\src\dynamic\FLAMEGPU_kernals.cu"/>
+    <Delete Files=".\src\dynamic\io.cpp"/>
+    <Delete Files=".\src\dynamic\simulation.cu"/>
+    <Delete Files=".\src\dynamic\main.cu;"/>
+    <Delete Files=".\src\dynamic\visualisation.cu"/>
+  </Target>
+  
   
   <Target
     Name="_FLAMEGPU_Template_Build_Rule"
