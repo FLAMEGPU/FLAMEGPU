@@ -42,6 +42,16 @@
 
 // include FLAME kernels
 #include "FLAMEGPU_kernals.cu"
+<!--Compile time error if partitioning radius is not a factor of the partitioning dimensions as this causes partitioning to execute incorrectly-->
+<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message/gpu:partitioningSpatial">
+<xsl:if test="(gpu:xmax - gpu:xmin) != (floor((gpu:xmax - gpu:xmin ) div gpu:radius ) * gpu:radius)">
+#error "XML model spatial partitioning radius must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Xmin: <xsl:value-of select="gpu:xmin"/>, Xmax: <xsl:value-of select="gpu:xmax"/>"
+</xsl:if><xsl:if test="(gpu:ymax - gpu:ymin) != (floor((gpu:ymax - gpu:ymin ) div gpu:radius ) * gpu:radius)">
+#error "XML model spatial partitioning radius must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Ymin: <xsl:value-of select="gpu:ymin"/>, Ymax: <xsl:value-of select="gpu:ymax"/>"
+</xsl:if><xsl:if test="(gpu:zmax - gpu:zmin) != (floor((gpu:zmax - gpu:zmin ) div gpu:radius ) * gpu:radius)">
+#error "XML model spatial partitioning radius must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Zmin: <xsl:value-of select="gpu:zmin"/>, Zmax: <xsl:value-of select="gpu:zmax"/>"
+</xsl:if>
+</xsl:for-each>
 
 #pragma warning(pop)
 
