@@ -34,12 +34,12 @@
     AfterTargets="BeforeRebuild;BeforeClean"
     >
 	  <Message Text="Cleaning XLST Outputs"/>
-    <Delete Files=".\src\dynamic\header.h"/>
-    <Delete Files=".\src\dynamic\FLAMEGPU_kernals.cu"/>
-    <Delete Files=".\src\dynamic\io.cpp"/>
-    <Delete Files=".\src\dynamic\simulation.cu"/>
-    <Delete Files=".\src\dynamic\main.cu;"/>
-    <Delete Files=".\src\dynamic\visualisation.cu"/>
+    <Delete Condition=" '%(FLAMEGPU_Template_Build_Rule.HeaderTransform)' == 'true' " Files="%(FLAMEGPU_Template_Build_Rule.OutputDir)header.h"/>
+    <Delete Condition=" '%(FLAMEGPU_Template_Build_Rule.FLAMEGPUKernalsTransform)' == 'true' " Files="%(FLAMEGPU_Template_Build_Rule.OutputDir)FLAMEGPU_kernals.cu"/>
+    <Delete Condition=" '%(FLAMEGPU_Template_Build_Rule.IOTransform)' == 'true' " Files="%(FLAMEGPU_Template_Build_Rule.OutputDir)io.cu"/>
+    <Delete Condition=" '%(FLAMEGPU_Template_Build_Rule.SimulationTransform)' == 'true' " Files="%(FLAMEGPU_Template_Build_Rule.OutputDir)simulation.cu"/>
+    <Delete Condition=" '%(FLAMEGPU_Template_Build_Rule.MainTransform)' == 'true' " Files="%(FLAMEGPU_Template_Build_Rule.OutputDir)main.cu;"/>
+    <Delete Condition=" '%(FLAMEGPU_Template_Build_Rule.VisualisationTransform)' == 'true' " Files="%(FLAMEGPU_Template_Build_Rule.OutputDir)visualisation.cu"/>
   </Target>
   
   

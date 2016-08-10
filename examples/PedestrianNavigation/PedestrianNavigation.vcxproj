@@ -334,11 +334,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <FLAMEGPU_Template_Build_Rule Include="src\model\XMLModelFile.xml">
       <VisualisationTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">false</VisualisationTransform>
       <VisualisationTransform Condition="'$(Configuration)|$(Platform)'=='Release_Visualisation|x64'">false</VisualisationTransform>
-      <HeaderTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">false</HeaderTransform>
-      <FLAMEGPUKernalsTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">false</FLAMEGPUKernalsTransform>
-      <IOTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">false</IOTransform>
+      <HeaderTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">true</HeaderTransform>
+      <FLAMEGPUKernalsTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">true</FLAMEGPUKernalsTransform>
+      <IOTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">true</IOTransform>
       <SimulationTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">true</SimulationTransform>
-      <MainTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">false</MainTransform>
+      <MainTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">true</MainTransform>
       <SubType>Designer</SubType>
       <HeaderTransform Condition="'$(Configuration)|$(Platform)'=='Release_Visualisation|x64'">true</HeaderTransform>
       <FLAMEGPUKernalsTransform Condition="'$(Configuration)|$(Platform)'=='Release_Visualisation|x64'">true</FLAMEGPUKernalsTransform>
