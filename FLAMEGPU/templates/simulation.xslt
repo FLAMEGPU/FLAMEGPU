@@ -29,16 +29,14 @@
 // includes
 #include &lt;cuda_runtime.h&gt;
 #include &lt;device_launch_parameters.h&gt;
-#include &lt;vector_types.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include &lt;math.h&gt;
+#include &lt;cmath&gt;
 #include &lt;thrust/device_ptr.h&gt;
 #include &lt;thrust/scan.h&gt;
 #include &lt;thrust/sort.h&gt;
 #include &lt;thrust/system/cuda/execution_policy.h&gt;
-#include &lt;vector_operators.h&gt;
 
 // include FLAME kernels
 #include "FLAMEGPU_kernals.cu"
@@ -117,9 +115,9 @@ int h_message_<xsl:value-of select="xmml:name"/>_output_type;   /**&lt; message 
 	uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_values;  /**&lt; message sort identifier values */
 #endif
 xmachine_message_<xsl:value-of select="xmml:name"/>_PBM * d_<xsl:value-of select="xmml:name"/>_partition_matrix;  /**&lt; Pointer to PCB matrix */
-float3 h_message_<xsl:value-of select="xmml:name"/>_min_bounds;           /**&lt; min bounds (x,y,z) of partitioning environment */
-float3 h_message_<xsl:value-of select="xmml:name"/>_max_bounds;           /**&lt; max bounds (x,y,z) of partitioning environment */
-int3 h_message_<xsl:value-of select="xmml:name"/>_partitionDim;           /**&lt; partition dimensions (x,y,z) of partitioning environment */
+glm::vec3 h_message_<xsl:value-of select="xmml:name"/>_min_bounds;           /**&lt; min bounds (x,y,z) of partitioning environment */
+glm::vec3 h_message_<xsl:value-of select="xmml:name"/>_max_bounds;           /**&lt; max bounds (x,y,z) of partitioning environment */
+glm::ivec3 h_message_<xsl:value-of select="xmml:name"/>_partitionDim;           /**&lt; partition dimensions (x,y,z) of partitioning environment */
 float h_message_<xsl:value-of select="xmml:name"/>_radius;                 /**&lt; partition radius (used to determin the size of the partitions) */
 </xsl:if><xsl:if test="gpu:partitioningDiscrete">/* Discrete Partitioning Variables*/
 int h_message_<xsl:value-of select="xmml:name"/>_range;     /**&lt; range of the discrete message*/
@@ -271,14 +269,14 @@ void initialise(char * inputfile){
 	/* Set spatial partitioning <xsl:value-of select="xmml:name"/> message variables (min_bounds, max_bounds)*/
 	h_message_<xsl:value-of select="xmml:name"/>_radius = (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:radius"/>;
 	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_radius, &amp;h_message_<xsl:value-of select="xmml:name"/>_radius, sizeof(float)));	
-	    h_message_<xsl:value-of select="xmml:name"/>_min_bounds = make_float3((float)<xsl:value-of select="gpu:partitioningSpatial/gpu:xmin"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:ymin"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:zmin"/>);
-	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_min_bounds, &amp;h_message_<xsl:value-of select="xmml:name"/>_min_bounds, sizeof(float3)));	
-	h_message_<xsl:value-of select="xmml:name"/>_max_bounds = make_float3((float)<xsl:value-of select="gpu:partitioningSpatial/gpu:xmax"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:ymax"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:zmax"/>);
-	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_max_bounds, &amp;h_message_<xsl:value-of select="xmml:name"/>_max_bounds, sizeof(float3)));	
+	    h_message_<xsl:value-of select="xmml:name"/>_min_bounds = glm::vec3((float)<xsl:value-of select="gpu:partitioningSpatial/gpu:xmin"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:ymin"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:zmin"/>);
+	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_min_bounds, &amp;h_message_<xsl:value-of select="xmml:name"/>_min_bounds, sizeof(glm::vec3)));	
+	h_message_<xsl:value-of select="xmml:name"/>_max_bounds = glm::vec3((float)<xsl:value-of select="gpu:partitioningSpatial/gpu:xmax"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:ymax"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:zmax"/>);
+	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_max_bounds, &amp;h_message_<xsl:value-of select="xmml:name"/>_max_bounds, sizeof(glm::vec3)));	
 	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.x = (int)ceil((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.x - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.x)/h_message_<xsl:value-of select="xmml:name"/>_radius);
 	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.y = (int)ceil((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.y - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.y)/h_message_<xsl:value-of select="xmml:name"/>_radius);
 	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.z = (int)ceil((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.z - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.z)/h_message_<xsl:value-of select="xmml:name"/>_radius);
-	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_partitionDim, &amp;h_message_<xsl:value-of select="xmml:name"/>_partitionDim, sizeof(int3)));	
+	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_partitionDim, &amp;h_message_<xsl:value-of select="xmml:name"/>_partitionDim, sizeof(glm::ivec3)));	
 	</xsl:if></xsl:for-each>
 	
 	
@@ -999,7 +997,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
     
 
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state"> 
-extern "C" void reset_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()
+extern void reset_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()
 {
     h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count = 0;
 }

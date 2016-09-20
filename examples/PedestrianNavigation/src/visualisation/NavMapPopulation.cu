@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <cuda_gl_interop.h>
@@ -48,11 +48,11 @@ __constant__ int currentMap;
 int h_currentMap;
 
 
-inline __device__ float dot(float2 a, float2 b)
+inline __device__ float dot(glm::vec2 a, glm::vec2 b)
 { 
     return a.x * b.x + a.y * b.y;
 }
-inline __device__ float length(float2 v)
+inline __device__ float length(glm::vec2 v)
 {
     return sqrtf(dot(v, v));
 }
@@ -63,29 +63,29 @@ inline __device__ float length(float2 v)
  * @param	agents	navmap agent list from FLAME GPU
  * @param	data four component vector used to output instance data 
  */
-__global__ void output_navmaps_to_TBO(xmachine_memory_navmap_list* agents, float4* data){
+__global__ void output_navmaps_to_TBO(xmachine_memory_navmap_list* agents, glm::vec4* data){
 
 	//global thread index
 	int index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
 
 	//change thenext two outputs to visualise different sets of forces
-	float2 velocity;
+	glm::vec2 velocity;
 	if (currentMap == 0)
-		velocity = make_float2(agents->collision_x[index], agents->collision_y[index]);
+		velocity = glm::vec2(agents->collision_x[index], agents->collision_y[index]);
 	else if(currentMap == 1)
-		velocity = make_float2(agents->exit0_x[index], agents->exit0_y[index]);
+		velocity = glm::vec2(agents->exit0_x[index], agents->exit0_y[index]);
 	else if(currentMap == 2)
-		velocity = make_float2(agents->exit1_x[index], agents->exit1_y[index]);
+		velocity = glm::vec2(agents->exit1_x[index], agents->exit1_y[index]);
 	else if(currentMap == 3)
-		velocity = make_float2(agents->exit2_x[index], agents->exit2_y[index]);
+		velocity = glm::vec2(agents->exit2_x[index], agents->exit2_y[index]);
 	else if(currentMap == 4)
-		velocity = make_float2(agents->exit3_x[index], agents->exit3_y[index]);
+		velocity = glm::vec2(agents->exit3_x[index], agents->exit3_y[index]);
 	else if(currentMap == 5)
-		velocity = make_float2(agents->exit4_x[index], agents->exit4_y[index]);
+		velocity = glm::vec2(agents->exit4_x[index], agents->exit4_y[index]);
 	else if(currentMap == 6)
-		velocity = make_float2(agents->exit5_x[index], agents->exit5_y[index]);
+		velocity = glm::vec2(agents->exit5_x[index], agents->exit5_y[index]);
 	else if(currentMap == 7)
-		velocity = make_float2(agents->exit6_x[index], agents->exit6_y[index]);
+		velocity = glm::vec2(agents->exit6_x[index], agents->exit6_y[index]);
 	
 
 	float angle;	
@@ -106,7 +106,7 @@ __global__ void output_navmaps_to_TBO(xmachine_memory_navmap_list* agents, float
 }
 
 //EXTERNAL FUNCTIONS DEFINED IN NavMapPopulation.h
-extern "C" void generate_instances(GLuint* instances_tbo)
+void generate_instances(GLuint* instances_tbo)
 {
 	//kernals sizes
 	int threads_per_tile = 128;
@@ -115,7 +115,7 @@ extern "C" void generate_instances(GLuint* instances_tbo)
     dim3 threads;
 
 	//pointer
-	float4 *dptr_1;
+	glm::vec4 *dptr_1;
 	
 	if (get_agent_navmap_static_count() > 0)
 	{
@@ -133,12 +133,12 @@ extern "C" void generate_instances(GLuint* instances_tbo)
 	}
 }
 
-extern "C" void displayMapNumber(int map_no){
+void displayMapNumber(int map_no){
 	h_currentMap = map_no;
 	gpuErrchk(cudaMemcpyToSymbol( currentMap, &map_no, sizeof(int)));	
 }
 
-extern "C" int getCurrentMap()
+int getCurrentMap()
 {
 	return h_currentMap;
 }

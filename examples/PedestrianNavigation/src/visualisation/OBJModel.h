@@ -22,24 +22,21 @@ static const char* VERTEX_NORMAL_IDENTIFIER = "vn";
 static const char* FACE_IDENTIFIER = "f";
 
 //Type definitions
-typedef float float3[3];
-typedef float float4[4];
-typedef int int3[3];
-typedef int int4[4];
+#include <glm/glm.hpp>
 
 //OBJ1 FORMAT FUNCTIONS
-void allocateObjModel(int vertex_count, int face_count, float3** vertices, float3** normals, int3** faces);
-void cleanupObjModel(float3** vertices, float3** normals, int3** faces);
-void loadObjFromFile(char* name, int vertex_count, int face_count, float3* vertices, float3* normals, int3* faces);
-void scaleObj(float scale_factor, int vertex_count, float3* vertices);
-void drawObj(int vertex_count, int face_count, float3* vertices, float3* normals, int3* faces);
+void allocateObjModel(int vertex_count, int face_count, glm::vec3** vertices, glm::vec3** normals, glm::ivec3** faces);
+void cleanupObjModel(glm::vec3** vertices, glm::vec3** normals, glm::ivec3** faces);
+void loadObjFromFile(char* name, int vertex_count, int face_count, glm::vec3* vertices, glm::vec3* normals, glm::ivec3* faces);
+void scaleObj(float scale_factor, int vertex_count, glm::vec3* vertices);
+void drawObj(int vertex_count, int face_count, glm::vec3* vertices, glm::vec3* normals, glm::ivec3* faces);
 
 //OBJ2 FORMAT FUNCTIONS
-void xAllocateObjModel(int vertex_count, int normal_count, int face_count, float3** vertices, float3** normals, int4** faces);
-void xCleanupObjModel(float3** vertices, float3** normals, int4** faces);
-void xLoadObjFromFile(char* name, int vertex_count, int normal_count, int face_count, float3* vertices, float3* normals, int4* faces);
-void xScaleObj(float scale_factor, int vertex_count, float3* vertices);
-void xDrawObj(int vertex_count, int normal_count, int face_count, float3* vertices, float3* normals, int4* faces);
+void xAllocateObjModel(int vertex_count, int normal_count, int face_count, glm::vec3** vertices, glm::vec3** normals, glm::ivec4** faces);
+void xCleanupObjModel(glm::vec3** vertices, glm::vec3** normals, glm::ivec4** faces);
+void xLoadObjFromFile(char* name, int vertex_count, int normal_count, int face_count, glm::vec3* vertices, glm::vec3* normals, glm::ivec4* faces);
+void xScaleObj(float scale_factor, int vertex_count, glm::vec3* vertices);
+void xDrawObj(int vertex_count, int normal_count, int face_count, glm::vec3* vertices, glm::vec3* normals, glm::ivec4* faces);
 
 
 #endif __OBJMODEL

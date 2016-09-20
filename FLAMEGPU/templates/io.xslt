@@ -25,15 +25,15 @@
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include &lt;math.h&gt;
+#include &lt;cmath&gt;
 #include &lt;limits.h&gt;
 	
 
 // include header
 #include "header.h"
 
-float3 agent_maximum;
-float3 agent_minimum;
+glm::vec3 agent_maximum;
+glm::vec3 agent_minimum;
 
 void readIntArrayInput(char* buffer, int *array, unsigned int expected_items){
     unsigned int i = 0;
@@ -318,11 +318,11 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 	fclose(file);
 }
 
-float3 getMaximumBounds(){
+glm::vec3 getMaximumBounds(){
     return agent_maximum;
 }
 
-float3 getMinimumBounds(){
+glm::vec3 getMinimumBounds(){
     return agent_minimum;
 }
 
