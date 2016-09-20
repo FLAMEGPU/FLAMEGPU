@@ -23,6 +23,8 @@
 
 #ifndef __HEADER
 #define __HEADER
+#define GLM_FORCE_NO_CTOR_INIT
+#include &lt;glm/glm.hpp&gt;
 
 /* General standard definitions */
 //Threads per block (agents per block)
@@ -110,12 +112,12 @@ struct __align__(16) xmachine_memory_<xsl:value-of select="xmml:name"/>
 struct __align__(16) xmachine_message_<xsl:value-of select="xmml:name"/>
 {	
     <xsl:if test="gpu:partitioningDiscrete">/* Discrete Partitioning Variables */
-    int2 _position;         /**&lt; 2D position of message*/
-    int2 _relative;         /**&lt; 2D position of message relative to the agent (range +- radius) */</xsl:if><xsl:if test="gpu:partitioningNone">/* Brute force Partitioning Variables */
+    glm::ivec2 _position;         /**&lt; 2D position of message*/
+    glm::ivec2 _relative;         /**&lt; 2D position of message relative to the agent (range +- radius) */</xsl:if><xsl:if test="gpu:partitioningNone">/* Brute force Partitioning Variables */
     int _position;          /**&lt; 1D position of message in linear message list */ </xsl:if><xsl:if test="gpu:partitioningSpatial">/* Spatial Partitioning Variables */
-    int3 _relative_cell;    /**&lt; Relative cell position from agent grid cell poistion range -1 to 1 */
+    glm::ivec3 _relative_cell;    /**&lt; Relative cell position from agent grid cell poistion range -1 to 1 */
     int _cell_index_max;    /**&lt; Max boundary value of current cell */
-    int3 _agent_grid_cell;  /**&lt; Agents partition cell position */
+    glm::ivec3 _agent_grid_cell;  /**&lt; Agents partition cell position */
     int _cell_index;        /**&lt; Index of position in current cell */</xsl:if><xsl:text>  
     </xsl:text><xsl:for-each select="xmml:variables/gpu:variable"><xsl:text>  
     </xsl:text><xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/>;        /**&lt; Message variable <xsl:value-of select="xmml:name"/> of type <xsl:value-of select="xmml:type"/>.*/</xsl:for-each>
@@ -177,8 +179,8 @@ struct xmachine_message_<xsl:value-of select="xmml:name"/>_PBM
  */
 struct RNG_rand48
 {
-  uint2 A, C;
-  uint2 seeds[buffer_size_MAX];
+  glm::uvec2 A, C;
+  glm::uvec2 seeds[buffer_size_MAX];
 };
 
 
@@ -324,17 +326,17 @@ __FLAME_GPU_FUNC__ void set_<xsl:value-of select="xmml:name"/>_agent_array_value
  * Initialise the simulation. Allocated host and device memory. Reads the initial agent configuration from XML.
  * @param input	XML file path for agent initial configuration
  */
-extern "C" void initialise(char * input);
+extern void initialise(char * input);
 
 /** cleanup
  * Function cleans up any memory allocations on the host and device
  */
-extern "C" void cleanup();
+extern void cleanup();
 
 /** singleIteration
  *	Performs a single itteration of the simulation. I.e. performs each agent function on each function layer in the correct order.
  */
-extern "C" void singleIteration();
+extern void singleIteration();
 
 /** saveIterationData
  * Reads the current agent data fromt he device and saves it to XML
@@ -344,7 +346,7 @@ extern "C" void singleIteration();
  * @param d_<xsl:value-of select="xmml:name"/>s Pointer to agent list on the GPU device
  * @param h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count Pointer to agent counter
  </xsl:for-each>*/
-extern "C" void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* h_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>, int h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>);
+extern void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* h_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>, int h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>);
 
 
 /** readInitialStates
@@ -353,7 +355,7 @@ extern "C" void saveIterationData(char* outputpath, int iteration_number, <xsl:f
  <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">* @param h_<xsl:value-of select="xmml:name"/>s Pointer to agent list on the host
  * @param h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count Pointer to agent counter
  </xsl:for-each>*/
-extern "C" void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">xmachine_memory_<xsl:value-of select="xmml:name"/>_list* h_<xsl:value-of select="xmml:name"/>s, int* h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>);
+extern void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">xmachine_memory_<xsl:value-of select="xmml:name"/>_list* h_<xsl:value-of select="xmml:name"/>s, int* h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>);
 
 
 /* Return functions used by external code to get agent data from device */
@@ -363,7 +365,7 @@ extern "C" void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmo
  * Gets the max agent count for the <xsl:value-of select="xmml:name"/> agent type 
  * @return		the maximum <xsl:value-of select="xmml:name"/> agent count
  */
-extern "C" int get_agent_<xsl:value-of select="xmml:name"/>_MAX_count();
+extern int get_agent_<xsl:value-of select="xmml:name"/>_MAX_count();
 
 
 <xsl:for-each select="xmml:states/gpu:state">
@@ -371,24 +373,24 @@ extern "C" int get_agent_<xsl:value-of select="xmml:name"/>_MAX_count();
  * Gets the agent count for the <xsl:value-of select="../../xmml:name"/> agent type in state <xsl:value-of select="xmml:name"/>
  * @return		the current <xsl:value-of select="../../xmml:name"/> agent count in state <xsl:value-of select="xmml:name"/>
  */
-extern "C" int get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count();
+extern int get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count();
 
 /** reset_<xsl:value-of select="xmml:name"/>_count
  * Resets the agent count of the <xsl:value-of select="../../xmml:name"/> in state <xsl:value-of select="xmml:name"/> to 0. This is usefull for interacting with some visualisations.
  */
-extern "C" void reset_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count();
+extern void reset_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count();
 
 /** get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents
  * Gets a pointer to xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list on the GPU device
  * @return		a xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list on the GPU device
  */
-extern "C" xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents();
+extern xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents();
 
 /** get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents
  * Gets a pointer to xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list on the CPU host
  * @return		a xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list on the CPU host
  */
-extern "C" xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents();
+extern xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents();
 
 <xsl:if test="../../gpu:type='continuous'">
 /** sort_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>
@@ -404,7 +406,7 @@ void sort_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:n
  * Gets an int value representing the xmachine_memory_<xsl:value-of select="xmml:name"/> population width.
  * @return		xmachine_memory_<xsl:value-of select="xmml:name"/> population width
  */
-extern "C" int get_<xsl:value-of select="xmml:name"/>_population_width();
+extern int get_<xsl:value-of select="xmml:name"/>_population_width();
 </xsl:if>
 </xsl:for-each>
   
@@ -419,20 +421,20 @@ __constant__ <xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-
  * Sets the constant variable <xsl:value-of select="xmml:name"/> on the device which can then be used in the agent functions.
  * @param h_<xsl:value-of select="xmml:name"/> value to set the variable
  */
-extern "C" void set_<xsl:value-of select="xmml:name"/>(<xsl:value-of select="xmml:type"/>* h_<xsl:value-of select="xmml:name"/>);
+extern void set_<xsl:value-of select="xmml:name"/>(<xsl:value-of select="xmml:type"/>* h_<xsl:value-of select="xmml:name"/>);
 </xsl:for-each>
 
 /** getMaximumBound
  * Returns the maximum agent positions determined from the initial loading of agents
  * @return 	a three component float indicating the maximum x, y and z positions of all agents
  */
-float3 getMaximumBounds();
+glm::vec3 getMaximumBounds();
 
 /** getMinimumBounds
  * Returns the minimum agent positions determined from the initial loading of agents
  * @return 	a three component float indicating the minimum x, y and z positions of all agents
  */
-float3 getMinimumBounds();
+glm::vec3 getMinimumBounds();
     
     
 #ifdef VISUALISATION
@@ -441,9 +443,9 @@ float3 getMinimumBounds();
  * @param argc	the argument count from the main function used with GLUT
  * @param argv	the argument values fromt the main function used with GLUT
  */
-extern "C" void initVisualisation();
+extern void initVisualisation();
 
-extern "C" void runVisualisation();
+extern void runVisualisation();
 
 
 #endif

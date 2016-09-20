@@ -279,31 +279,31 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\visualisation\BufferObjects.c">
+    <ClCompile Include="src\visualisation\BufferObjects.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\visualisation\CustomVisualisation.c">
+    <ClCompile Include="src\visualisation\CustomVisualisation.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\visualisation\GlobalsController.c">
+    <ClCompile Include="src\visualisation\GlobalsController.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\visualisation\GLUTInputController.c">
+    <ClCompile Include="src\visualisation\GLUTInputController.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\visualisation\MenuDisplay.c">
+    <ClCompile Include="src\visualisation\MenuDisplay.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\visualisation\OBJModel.c">
+    <ClCompile Include="src\visualisation\OBJModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\visualisation\PedestrianPopulation.c">
+    <ClCompile Include="src\visualisation\PedestrianPopulation.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
     </ClCompile>

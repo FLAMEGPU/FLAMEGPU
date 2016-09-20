@@ -26,14 +26,12 @@
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include &lt;math.h&gt;
+#include &lt;cmath&gt;
 
 #include &lt;GL/glew.h&gt;
 #include &lt;GL/glut.h&gt;
 #include &lt;cuda_gl_interop.h&gt;
-	
-#include &lt;vector_operators.h&gt;
-    
+	    
 #include "header.h"
 #include "visualisation.h"
 
@@ -172,7 +170,7 @@ const char fragmentShaderSource[] =
 
 //GPU Kernels
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
-__global__ void output_<xsl:value-of select="xmml:name"/>_agent_to_VBO(xmachine_memory_<xsl:value-of select="xmml:name"/>_list* agents, float4* vbo, float3 centralise<xsl:if test="gpu:type='discrete'">, int population_width</xsl:if>){
+__global__ void output_<xsl:value-of select="xmml:name"/>_agent_to_VBO(xmachine_memory_<xsl:value-of select="xmml:name"/>_list* agents, glm::vec4* vbo, glm::vec3 centralise<xsl:if test="gpu:type='discrete'">, int population_width</xsl:if>){
 
 	//global thread index
 	int index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
@@ -229,12 +227,12 @@ void initVisualisation()
 	glutMotionFunc( motion);
     
 	// create VBO's
-	createVBO( &amp;sphereVerts, SPHERE_SLICES* (SPHERE_STACKS+1) * sizeof(float3));
-	createVBO( &amp;sphereNormals, SPHERE_SLICES* (SPHERE_STACKS+1) * sizeof (float3));
+	createVBO( &amp;sphereVerts, SPHERE_SLICES* (SPHERE_STACKS+1) * sizeof(glm::vec3));
+	createVBO( &amp;sphereNormals, SPHERE_SLICES* (SPHERE_STACKS+1) * sizeof (glm::vec3));
 	setVertexBufferData();
 
 	// create TBO<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-	createTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_displacementTex, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX * sizeof( float4));
+	createTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_displacementTex, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX * sizeof( glm::vec4));
 	</xsl:for-each>
 
 	//set shader uniforms
@@ -270,10 +268,10 @@ void runCuda()
 	int tile_size;
 	dim3 grid;
 	dim3 threads;
-	float3 centralise;
+	glm::vec3 centralise;
 
 	//pointer
-	float4 *dptr;
+	glm::vec4 *dptr;
 
 	<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
 	if (get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count() > 0)
@@ -461,7 +459,7 @@ void deleteTBO( GLuint* tbo)
 //! Set Sphere Vertex Data
 ////////////////////////////////////////////////////////////////////////////////
 
-static void setSphereVertex(float3* data, int slice, int stack) {
+static void setSphereVertex(glm::vec3* data, int slice, int stack) {
 	float PI = 3.14159265358;
     
 	double sl = 2*PI*slice/SPHERE_SLICES;
@@ -477,7 +475,7 @@ static void setSphereVertex(float3* data, int slice, int stack) {
 //! Set Sphere Normal Data
 ////////////////////////////////////////////////////////////////////////////////
 
-static void setSphereNormal(float3* data, int slice, int stack) {
+static void setSphereNormal(glm::vec3* data, int slice, int stack) {
 	float PI = 3.14159265358;
     
 	double sl = 2*PI*slice/SPHERE_SLICES;
@@ -499,7 +497,7 @@ void setVertexBufferData()
 
 	// upload vertex points data
 	glBindBuffer(GL_ARRAY_BUFFER, sphereVerts);
-	float3* verts =( float3*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	glm::vec3* verts =( glm::vec3*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	i = 0;
 	for (slice=0; slice&lt;SPHERE_SLICES/2; slice++) {
 		for (stack=0; stack&lt;=SPHERE_STACKS; stack++) {
@@ -511,7 +509,7 @@ void setVertexBufferData()
 
 	// upload vertex normal data
 	glBindBuffer(GL_ARRAY_BUFFER, sphereNormals);
-	float3* normals =( float3*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	glm::vec3* normals =( glm::vec3*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	i = 0;
 	for (slice=0; slice&lt;SPHERE_SLICES/2; slice++) {
 		for (stack=0; stack&lt;=SPHERE_STACKS; stack++) {
