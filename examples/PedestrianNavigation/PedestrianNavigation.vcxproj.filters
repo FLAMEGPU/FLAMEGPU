@@ -98,28 +98,28 @@
     <ClCompile Include="src\model\functions.c">
       <Filter>model</Filter>
     </ClCompile>
-    <ClCompile Include="src\visualisation\BufferObjects.c">
+    <ClCompile Include="src\visualisation\BufferObjects.cpp">
       <Filter>visualisation</Filter>
     </ClCompile>
-    <ClCompile Include="src\visualisation\CustomVisualisation.c">
+    <ClCompile Include="src\visualisation\CustomVisualisation.cpp">
       <Filter>visualisation</Filter>
     </ClCompile>
-    <ClCompile Include="src\visualisation\GlobalsController.c">
+    <ClCompile Include="src\visualisation\GlobalsController.cpp">
       <Filter>visualisation</Filter>
     </ClCompile>
-    <ClCompile Include="src\visualisation\GLUTInputController.c">
+    <ClCompile Include="src\visualisation\GLUTInputController.cpp">
       <Filter>visualisation</Filter>
     </ClCompile>
-    <ClCompile Include="src\visualisation\MenuDisplay.c">
+    <ClCompile Include="src\visualisation\MenuDisplay.cpp">
       <Filter>visualisation</Filter>
     </ClCompile>
-    <ClCompile Include="src\visualisation\NavMapPopulation.c">
+    <ClCompile Include="src\visualisation\NavMapPopulation.cpp">
       <Filter>visualisation</Filter>
     </ClCompile>
-    <ClCompile Include="src\visualisation\OBJModel.c">
+    <ClCompile Include="src\visualisation\OBJModel.cpp">
       <Filter>visualisation</Filter>
     </ClCompile>
-    <ClCompile Include="src\visualisation\PedestrianPopulation.c">
+    <ClCompile Include="src\visualisation\PedestrianPopulation.cpp">
       <Filter>visualisation</Filter>
     </ClCompile>
   </ItemGroup>

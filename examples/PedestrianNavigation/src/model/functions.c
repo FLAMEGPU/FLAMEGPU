@@ -30,33 +30,6 @@
 
 #define PI 3.1415f
 #define RADIANS(x) (PI / 180.0f) * x
-inline __FLAME_GPU_FUNC__ float dot(float3 a, float3 b)
-{ 
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-inline __FLAME_GPU_FUNC__ float length(float3 v)
-{
-    return sqrtf(dot(v, v));
-}
-inline __FLAME_GPU_FUNC__ float3 normalize(float3 v)
-{
-    float invLen = rsqrtf(dot(v, v));
-    return v * invLen;
-}
-inline __FLAME_GPU_FUNC__ float dot(float2 a, float2 b)
-{ 
-    return a.x * b.x + a.y * b.y;
-}
-inline __FLAME_GPU_FUNC__ float length(float2 v)
-{
-    return sqrtf(dot(v, v));
-}
-inline __FLAME_GPU_FUNC__ float2 normalize(float2 v)
-{
-    float invLen = rsqrtf(dot(v, v));
-    return v * invLen;
-}
-
 
 __FLAME_GPU_FUNC__ int getNewExitLocation(RNG_rand48* rand48){
 
@@ -142,31 +115,31 @@ __FLAME_GPU_FUNC__ int output_navmap_cells(xmachine_memory_navmap* agent, xmachi
  */
 __FLAME_GPU_FUNC__ int avoid_pedestrians(xmachine_memory_agent* agent, xmachine_message_pedestrian_location_list* pedestrian_location_messages, xmachine_message_pedestrian_location_PBM* partition_matrix, RNG_rand48* rand48){
 
-    float2 agent_pos = make_float2(agent->x, agent->y);
-	float2 agent_vel = make_float2(agent->velx, agent->vely);
+	glm::vec2 agent_pos = glm::vec2(agent->x, agent->y);
+	glm::vec2 agent_vel = glm::vec2(agent->velx, agent->vely);
 
-	float2 navigate_velocity = make_float2(0.0f, 0.0f);
-	float2 avoid_velocity = make_float2(0.0f, 0.0f);
+	glm::vec2 navigate_velocity = glm::vec2(0.0f, 0.0f);
+	glm::vec2 avoid_velocity = glm::vec2(0.0f, 0.0f);
 
 	xmachine_message_pedestrian_location* current_message = get_first_pedestrian_location_message(pedestrian_location_messages, partition_matrix, agent->x, agent->y, 0.0);
 	while (current_message)
 	{
-		float2 message_pos = make_float2(current_message->x, current_message->y);
+		glm::vec2 message_pos = glm::vec2(current_message->x, current_message->y);
 		float separation = length(agent_pos - message_pos);
 		if ((separation < MESSAGE_RADIUS)&&(separation>MIN_DISTANCE)){
-			float2 to_agent = normalize(agent_pos-message_pos);	
+			glm::vec2 to_agent = normalize(agent_pos - message_pos);
 			float ang = acosf(dot(agent_vel, to_agent));
 			float perception = 45.0f;
 
 			//STEER
 			if ((ang < RADIANS(perception)) || (ang > 3.14159265f-RADIANS(perception))){
-				float2 s_velocity = to_agent;
+				glm::vec2 s_velocity = to_agent;
 				s_velocity *= powf(I_SCALER/separation, 1.25f)*STEER_WEIGHT;
 				navigate_velocity += s_velocity;
 			}
 
 			//AVOID
-			float2 a_velocity = to_agent;
+			glm::vec2 a_velocity = to_agent;
 			a_velocity *= powf(I_SCALER/separation, 2.00f)*AVOID_WEIGHT;
 			avoid_velocity += a_velocity;						
 
@@ -175,7 +148,7 @@ __FLAME_GPU_FUNC__ int avoid_pedestrians(xmachine_memory_agent* agent, xmachine_
 	}
 
 	//maximum velocity rule
-	float2 steer_velocity = navigate_velocity + avoid_velocity;
+	glm::vec2 steer_velocity = navigate_velocity + avoid_velocity;
 
 	agent->steer_x = steer_velocity.x;
 	agent->steer_y = steer_velocity.y;
@@ -199,7 +172,7 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
 	//lookup single message
     xmachine_message_navmap_cell* current_message = get_first_navmap_cell_message<CONTINUOUS>(navmap_cell_messages, x, y);
   
-	float2 collision_force = make_float2(current_message->collision_x, current_message->collision_y);
+	glm::vec2 collision_force = glm::vec2(current_message->collision_x, current_message->collision_y);
 	collision_force *= COLLISION_WEIGHT;
 
 	//exit location of cell
@@ -209,10 +182,10 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
 	int kill_agent = 0;
 
 	//goal force
-	float2 goal_force;
+	glm::vec2 goal_force;
 	if (agent->exit_no == 1)
 	{
-		goal_force = make_float2(current_message->exit0_x, current_message->exit0_y);
+		goal_force = glm::vec2(current_message->exit0_x, current_message->exit0_y);
 		if (exit_location == 1)
 		{
 			if (EXIT1_STATE)
@@ -223,7 +196,7 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
 	}
 	else if (agent->exit_no == 2)
 	{
-		goal_force = make_float2(current_message->exit1_x, current_message->exit1_y);
+		goal_force = glm::vec2(current_message->exit1_x, current_message->exit1_y);
 		if (exit_location == 2)
 			if (EXIT2_STATE)
 				kill_agent = 1;
@@ -232,7 +205,7 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
 	}
 	else if (agent->exit_no == 3)
 	{
-		goal_force = make_float2(current_message->exit2_x, current_message->exit2_y);
+		goal_force = glm::vec2(current_message->exit2_x, current_message->exit2_y);
 		if (exit_location == 3)
 			if (EXIT3_STATE)
 				kill_agent = 1;
@@ -241,7 +214,7 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
 	}
 	else if (agent->exit_no == 4)
 	{
-		goal_force = make_float2(current_message->exit3_x, current_message->exit3_y);
+		goal_force = glm::vec2(current_message->exit3_x, current_message->exit3_y);
 		if (exit_location == 4)
 			if (EXIT4_STATE)
 				kill_agent = 1;
@@ -250,7 +223,7 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
 	}
 	else if (agent->exit_no == 5)
 	{
-		goal_force = make_float2(current_message->exit4_x, current_message->exit4_y);
+		goal_force = glm::vec2(current_message->exit4_x, current_message->exit4_y);
 		if (exit_location == 5)
 			if (EXIT5_STATE)
 				kill_agent = 1;
@@ -259,7 +232,7 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
 	}
 	else if (agent->exit_no == 6)
 	{
-		goal_force = make_float2(current_message->exit5_x, current_message->exit5_y);
+		goal_force = glm::vec2(current_message->exit5_x, current_message->exit5_y);
 		if (exit_location == 6)
 			if (EXIT6_STATE)
 				kill_agent = 1;
@@ -268,7 +241,7 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
 	}
 	else if (agent->exit_no == 7)
 	{
-		goal_force = make_float2(current_message->exit6_x, current_message->exit6_y);
+		goal_force = glm::vec2(current_message->exit6_x, current_message->exit6_y);
 		if (exit_location == 7)
 			if (EXIT7_STATE)
 				kill_agent = 1;
@@ -296,9 +269,9 @@ __FLAME_GPU_FUNC__ int force_flow(xmachine_memory_agent* agent, xmachine_message
  */
 __FLAME_GPU_FUNC__ int move(xmachine_memory_agent* agent){
 
-	float2 agent_pos = make_float2(agent->x, agent->y);
-	float2 agent_vel = make_float2(agent->velx, agent->vely);
-	float2 agent_steer = make_float2(agent->steer_x, agent->steer_y);
+	glm::vec2 agent_pos = glm::vec2(agent->x, agent->y);
+	glm::vec2 agent_vel = glm::vec2(agent->velx, agent->vely);
+	glm::vec2 agent_steer = glm::vec2(agent->steer_x, agent->steer_y);
 
 	float current_speed = length(agent_vel)+0.025f;//(powf(length(agent_vel), 1.75f)*0.01f)+0.025f;
 

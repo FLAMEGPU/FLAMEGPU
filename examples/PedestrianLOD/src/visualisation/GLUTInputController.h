@@ -47,9 +47,9 @@ void keyboard( unsigned char key, int x, int y);
 void specialKeyboard(int key, int x, int y);
 
 //viewpoint vectors and eye distance
-float eye[3];
-float up[3];
-float look[3];
-float eye_distance;
+extern float eye[3];
+extern float up[3];
+extern float look[3];
+extern float eye_distance;
 
 #endif __GLUT_INPUT_CONTROLLER
