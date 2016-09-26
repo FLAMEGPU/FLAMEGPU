@@ -16,11 +16,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <cuda_gl_interop.h>
-#include <vector_types.h>
+#include <glm/glm.hpp>
 #include "header.h"
 
 /* Error check function for safe CUDA API calling */
@@ -50,7 +50,7 @@ inline void gpuLaunchAssert(const char *file, int line, bool abort=true)
  * @param	data1 four component vector used to output instance data 
  * @param	data2 four component vector used to output instance data 
  */
-__global__ void output_pedestrians_to_TBO(xmachine_memory_agent_list* agents, float4* data1, float4* data2){
+__global__ void output_pedestrians_to_TBO(xmachine_memory_agent_list* agents, glm::vec4* data1, glm::vec4* data2){
 
 	//global thread index
 	int index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
@@ -67,7 +67,7 @@ __global__ void output_pedestrians_to_TBO(xmachine_memory_agent_list* agents, fl
 }
 
 
-extern "C" void generate_pedestrian_instances(GLuint* instances_data1_tbo, GLuint* instances_data2_tbo)
+void generate_pedestrian_instances(GLuint* instances_data1_tbo, GLuint* instances_data2_tbo)
 {
 	//kernals sizes
 	int threads_per_tile = 128;
@@ -76,8 +76,8 @@ extern "C" void generate_pedestrian_instances(GLuint* instances_data1_tbo, GLuin
     dim3 threads;
 
 	//pointer
-	float4 *dptr_1;
-	float4 *dptr_2;
+	glm::vec4 *dptr_1;
+	glm::vec4 *dptr_2;
 	
 	if (get_agent_agent_default_count() > 0)
 	{
@@ -98,7 +98,7 @@ extern "C" void generate_pedestrian_instances(GLuint* instances_data1_tbo, GLuin
 }
 
 
-extern "C" int getPedestrianCount()
+int getPedestrianCount()
 {
 	return get_agent_agent_default_count();
 }

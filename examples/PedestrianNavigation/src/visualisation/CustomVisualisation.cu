@@ -16,20 +16,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <cuda_gl_interop.h>
 
 #include "header.h"
 
-extern "C" void stepFLAMESimulation()
+extern void stepFLAMESimulation()
 {
 	singleIteration();
 }
 
 
-extern "C" void setCudaDevice()
+extern void setCudaDevice()
 {
 	//set the CUDA GL device: Will cause an error without this since CUDA 3.0
     cudaGLSetGLDevice(0);

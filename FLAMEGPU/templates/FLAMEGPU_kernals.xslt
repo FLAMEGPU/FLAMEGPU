@@ -81,9 +81,9 @@ __constant__ int d_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl
 __constant__ int d_message_<xsl:value-of select="xmml:name"/>_count;         /**&lt; message list counter*/
 __constant__ int d_message_<xsl:value-of select="xmml:name"/>_output_type;   /**&lt; message output type (single or optional)*/
 </xsl:if><xsl:if test="gpu:partitioningSpatial">//Spatial Partitioning Variables
-__constant__ float3 d_message_<xsl:value-of select="xmml:name"/>_min_bounds;           /**&lt; min bounds (x,y,z) of partitioning environment */
-__constant__ float3 d_message_<xsl:value-of select="xmml:name"/>_max_bounds;           /**&lt; max bounds (x,y,z) of partitioning environment */
-__constant__ int3 d_message_<xsl:value-of select="xmml:name"/>_partitionDim;           /**&lt; partition dimensions (x,y,z) of partitioning environment */
+__constant__ glm::vec3 d_message_<xsl:value-of select="xmml:name"/>_min_bounds;           /**&lt; min bounds (x,y,z) of partitioning environment */
+__constant__ glm::vec3 d_message_<xsl:value-of select="xmml:name"/>_max_bounds;           /**&lt; max bounds (x,y,z) of partitioning environment */
+__constant__ glm::ivec3 d_message_<xsl:value-of select="xmml:name"/>_partitionDim;           /**&lt; partition dimensions (x,y,z) of partitioning environment */
 __constant__ float d_message_<xsl:value-of select="xmml:name"/>_radius;                 /**&lt; partition radius (used to determin the size of the partitions) */
 </xsl:if><xsl:if test="gpu:partitioningDiscrete">//Discrete Partitioning Variables
 __constant__ int d_message_<xsl:value-of select="xmml:name"/>_range;     /**&lt; range of the discrete message*/
@@ -138,7 +138,7 @@ __inline__ __device__ double tex1DfetchDouble(texture&lt;int2, 1, cudaReadModeEl
  * @param relative_cell pointer to the relative cell position
  * @return boolean if there is a next cell. True unless relative_Cell value was 1,1,1
  */
-__device__ int next_cell3D(int3* relative_cell)
+__device__ int next_cell3D(glm::ivec3* relative_cell)
 {
 	if (relative_cell->x &lt; 1)
 	{
@@ -170,7 +170,7 @@ __device__ int next_cell3D(int3* relative_cell)
  * @param relative_cell pointer to the relative cell position
  * @return boolean if there is a next cell. True unless relative_Cell value was 1,1
  */
-__device__ int next_cell2D(int3* relative_cell)
+__device__ int next_cell2D(glm::ivec3* relative_cell)
 {
 	if (relative_cell->x &lt; 1)
 	{
@@ -328,7 +328,7 @@ __device__ void add_<xsl:value-of select="xmml:name"/>_agent(xmachine_memory_<xs
     //calculate the agents index in global agent list (depends on agent type)
 	if (AGENT_TYPE == DISCRETE_2D){
 		int width = (blockDim.x* gridDim.x);
-		int2 global_position;
+		glm::ivec2 global_position;
 		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
 		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
 		index = global_position.x + (global_position.y* width);
@@ -555,7 +555,7 @@ template &lt;int AGENT_TYPE&gt;
 __device__ void add_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, <xsl:for-each select="xmml:variables/gpu:variable"><xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/><xsl:if test="position()!=last()">, </xsl:if></xsl:for-each>){
 	if (AGENT_TYPE == DISCRETE_2D){
 		int width = (blockDim.x * gridDim.x);
-		int2 global_position;
+		glm::ivec2 global_position;
 		global_position.x = (blockIdx.x * blockDim.x) + threadIdx.x;
 		global_position.y = (blockIdx.y * blockDim.y) + threadIdx.y;
 
@@ -578,7 +578,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	int range = d_message_<xsl:value-of select="xmml:name"/>_range;
 	int width = d_message_<xsl:value-of select="xmml:name"/>_width;
 	
-	int2 global_position;
+	glm::ivec2 global_position;
 	global_position.x = sWRAP(agent_x-range , width);
 	global_position.y = sWRAP(agent_y-range , width);
 	
@@ -586,8 +586,8 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	int index = ((global_position.y)* width) + global_position.x;
 	
 	xmachine_message_<xsl:value-of select="xmml:name"/> temp_message;
-	temp_message._position = make_int2(agent_x, agent_y);
-	temp_message._relative = make_int2(-range, -range);
+	temp_message._position = glm::ivec2(agent_x, agent_y);
+	temp_message._relative = glm::ivec2(-range, -range);
 
 	<xsl:for-each select="xmml:variables/gpu:variable">
   <xsl:choose>
@@ -613,7 +613,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 	int width = d_message_<xsl:value-of select="xmml:name"/>_width;
 
 	//Get previous position
-	int2 previous_relative = message->_relative;
+	glm::ivec2 previous_relative = message->_relative;
 
 	//exit if at (range, range)
 	if (previous_relative.x == (range))
@@ -621,7 +621,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 		    return false;
 
 	//calculate next message relative position
-	int2 next_relative = previous_relative;
+	glm::ivec2 next_relative = previous_relative;
 	next_relative.x += 1;
 	if ((next_relative.x)>range){
 		next_relative.x = -range;
@@ -633,7 +633,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
         if (next_relative.y == 0)
 		    next_relative.x += 1;
 
-	int2 global_position;
+	glm::ivec2 global_position;
 	global_position.x =	sWRAP(message->_position.x + next_relative.x, width);
 	global_position.y = sWRAP(message->_position.y + next_relative.y, width);
 
@@ -681,14 +681,14 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	int sm_grid_width = blockDim.x + (range* 2);
 	
 	
-	int2 global_position;
+	glm::ivec2 global_position;
 	global_position.x = (blockIdx.x * blockDim.x) + threadIdx.x;
 	global_position.y = (blockIdx.y * blockDim.y) + threadIdx.y;
 	int index = global_position.x + (global_position.y * width);
 	
 
 	//calculate the position in shared memeory of first load
-	int2 sm_pos;
+	glm::ivec2 sm_pos;
 	sm_pos.x = threadIdx.x + range;
 	sm_pos.y = threadIdx.y + range;
 	int sm_index = (sm_pos.y * sm_grid_width) + sm_pos.x;
@@ -708,7 +708,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	//left
 	if (left_border){	
-		int2 border_index_2d = global_position;
+		glm::ivec2 border_index_2d = global_position;
 		border_index_2d.x = sWRAP(border_index_2d.x - range, width);
 		border_index = (border_index_2d.y * width) + border_index_2d.x;
 		sm_border_index = (sm_pos.y * sm_grid_width) + threadIdx.x;
@@ -718,7 +718,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	//right
 	if (right_border){
-		int2 border_index_2d = global_position;
+		glm::ivec2 border_index_2d = global_position;
 		border_index_2d.x = sWRAP(border_index_2d.x + range, width);
 		border_index = (border_index_2d.y * width) + border_index_2d.x;
 		sm_border_index = (sm_pos.y * sm_grid_width) + (sm_pos.x + range);
@@ -728,7 +728,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	//top
 	if (top_border){
-		int2 border_index_2d = global_position;
+		glm::ivec2 border_index_2d = global_position;
 		border_index_2d.y = sWRAP(border_index_2d.y - range, width);
 		border_index = (border_index_2d.y * width) + border_index_2d.x;
 		sm_border_index = (threadIdx.y * sm_grid_width) + sm_pos.x;
@@ -738,7 +738,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	//bottom
 	if (bottom_border){
-		int2 border_index_2d = global_position;
+		glm::ivec2 border_index_2d = global_position;
 		border_index_2d.y = sWRAP(border_index_2d.y + range, width);
 		border_index = (border_index_2d.y * width) + border_index_2d.x;
 		sm_border_index = ((sm_pos.y + range) * sm_grid_width) + sm_pos.x;
@@ -748,7 +748,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	//top left
 	if ((top_border)&amp;&amp;(left_border)){	
-		int2 border_index_2d = global_position;
+		glm::ivec2 border_index_2d = global_position;
 		border_index_2d.x = sWRAP(border_index_2d.x - range, width);
 		border_index_2d.y = sWRAP(border_index_2d.y - range, width);
 		border_index = (border_index_2d.y * width) + border_index_2d.x;
@@ -759,7 +759,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	//top right
 	if ((top_border)&amp;&amp;(right_border)){	
-		int2 border_index_2d = global_position;
+		glm::ivec2 border_index_2d = global_position;
 		border_index_2d.x = sWRAP(border_index_2d.x + range, width);
 		border_index_2d.y = sWRAP(border_index_2d.y - range, width);
 		border_index = (border_index_2d.y * width) + border_index_2d.x;
@@ -770,7 +770,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	//bottom right
 	if ((bottom_border)&amp;&amp;(right_border)){	
-		int2 border_index_2d = global_position;
+		glm::ivec2 border_index_2d = global_position;
 		border_index_2d.x = sWRAP(border_index_2d.x + range, width);
 		border_index_2d.y = sWRAP(border_index_2d.y + range, width);
 		border_index = (border_index_2d.y * width) + border_index_2d.x;
@@ -781,7 +781,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	//bottom left
 	if ((bottom_border)&amp;&amp;(left_border)){	
-		int2 border_index_2d = global_position;
+		glm::ivec2 border_index_2d = global_position;
 		border_index_2d.x = sWRAP(border_index_2d.x - range, width);
 		border_index_2d.y = sWRAP(border_index_2d.y + range, width);
 		border_index = (border_index_2d.y * width) + border_index_2d.x;
@@ -798,7 +798,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	
 	int message_index = SHARE_INDEX(sm_index, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
 	xmachine_message_<xsl:value-of select="xmml:name"/>* temp = ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
-	temp->_relative = make_int2(-range, -range); //this is the relative position
+	temp->_relative = glm::ivec2(-range, -range); //this is the relative position
 	return temp;
 }
 
@@ -818,7 +818,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 
 
 	//Get previous position
-	int2 previous_relative = message->_relative;
+	glm::ivec2 previous_relative = message->_relative;
 
 	//exit if at (range, range)
 	if (previous_relative.x == range)
@@ -826,7 +826,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 		    return false;
 
 	//calculate next message relative position
-	int2 next_relative = previous_relative;
+	glm::ivec2 next_relative = previous_relative;
 	next_relative.x += 1;
 	if ((next_relative.x)>range){
 		next_relative.x = -range;
@@ -840,7 +840,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 
 
 	//calculate the next message position
-	int2 next_position;// = block_position+next_relative;
+	glm::ivec2 next_position;// = block_position+next_relative;
 	//offset next position by the sm border size
 	next_position.x = threadIdx.x + next_relative.x + range;
 	next_position.y = threadIdx.y + next_relative.y + range;
@@ -881,12 +881,12 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 /* Message functions */
 
 /** message_<xsl:value-of select="xmml:name"/>_grid_position
- * Calculates the grid cell position given an float3 vector
- * @param position float3 vector representing a position
+ * Calculates the grid cell position given an glm::vec3 vector
+ * @param position glm::vec3 vector representing a position
  */
-__device__ int3 message_<xsl:value-of select="xmml:name"/>_grid_position(float3 position)
+__device__ glm::ivec3 message_<xsl:value-of select="xmml:name"/>_grid_position(glm::vec3 position)
 {
-    int3 gridPos;
+    glm::ivec3 gridPos;
     gridPos.x = floor((position.x - d_message_<xsl:value-of select="xmml:name"/>_min_bounds.x) * (float)d_message_<xsl:value-of select="xmml:name"/>_partitionDim.x / (d_message_<xsl:value-of select="xmml:name"/>_max_bounds.x - d_message_<xsl:value-of select="xmml:name"/>_min_bounds.x));
     gridPos.y = floor((position.y - d_message_<xsl:value-of select="xmml:name"/>_min_bounds.y) * (float)d_message_<xsl:value-of select="xmml:name"/>_partitionDim.y / (d_message_<xsl:value-of select="xmml:name"/>_max_bounds.y - d_message_<xsl:value-of select="xmml:name"/>_min_bounds.y));
     gridPos.z = floor((position.z - d_message_<xsl:value-of select="xmml:name"/>_min_bounds.z) * (float)d_message_<xsl:value-of select="xmml:name"/>_partitionDim.z / (d_message_<xsl:value-of select="xmml:name"/>_max_bounds.z - d_message_<xsl:value-of select="xmml:name"/>_min_bounds.z));
@@ -901,7 +901,7 @@ __device__ int3 message_<xsl:value-of select="xmml:name"/>_grid_position(float3 
  * Given the grid position in partition space this function calculates a hash value
  * @param gridPos The position in partition space
  */
-__device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(int3 gridPos)
+__device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(glm::ivec3 gridPos)
 {
 	//cheap bounding without mod (within range +- partition dimension)
 	gridPos.x = (gridPos.x&lt;0)? d_message_<xsl:value-of select="xmml:name"/>_partitionDim.x-1: gridPos.x; 
@@ -930,8 +930,8 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(int3 gri
 		if (index >= agent_count)
 			return;
 
-		float3 position = make_float3(messages->x[index], messages->y[index], messages->z[index]);
-		int3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
+		glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
+		glm::ivec3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 		unsigned int hash = message_<xsl:value-of select="xmml:name"/>_hash(grid_position);
 		unsigned int bin_idx = atomicInc((unsigned int*) &amp;global_bin_count[hash], 0xFFFFFFFF);
 		local_bin_index[index] = bin_idx;
@@ -973,8 +973,8 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(int3 gri
 	{
 		unsigned int index = (blockIdx.x * blockDim.x) + threadIdx.x;
 
-		float3 position = make_float3(messages->x[index], messages->y[index], messages->z[index]);
-		int3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
+		glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
+		glm::ivec3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 		unsigned int hash = message_<xsl:value-of select="xmml:name"/>_hash(grid_position);
 
 		keys[index] = hash;
@@ -1063,7 +1063,7 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(int3 gri
  * @param cell_index the current cell index in agent_grid_cell+relative_cell
  * @return true if a message has been loaded into sm false otherwise
  */
-__device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix, int3 relative_cell, int cell_index_max, int3 agent_grid_cell, int cell_index)
+__device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix, glm::ivec3 relative_cell, int cell_index_max, glm::ivec3 agent_grid_cell, int cell_index)
 {
 	extern __shared__ int sm_data [];
 	char* message_share = (char*)&amp;sm_data[0];
@@ -1081,7 +1081,7 @@ __device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_mes
         if (next_cell<xsl:choose><xsl:when test="ceiling((gpu:partitioningSpatial/gpu:zmax - gpu:partitioningSpatial/gpu:zmin) div gpu:partitioningSpatial/gpu:radius) = 1">2D</xsl:when><xsl:otherwise>3D</xsl:otherwise></xsl:choose>(&amp;relative_cell))
 		{
 			//calculate the next cells grid position and hash
-			int3 next_cell_position = agent_grid_cell + relative_cell;
+			glm::ivec3 next_cell_position = agent_grid_cell + relative_cell;
 			int next_cell_hash = message_<xsl:value-of select="xmml:name"/>_hash(next_cell_position);
 			//use the hash to calculate the start index
 			int cell_index_min = tex1Dfetch(tex_xmachine_message_<xsl:value-of select="xmml:name"/>_pbm_start, next_cell_hash + d_tex_xmachine_message_<xsl:value-of select="xmml:name"/>_pbm_start_offset);
@@ -1138,11 +1138,11 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	extern __shared__ int sm_data [];
 	char* message_share = (char*)&amp;sm_data[0];
 
-	int3 relative_cell = make_int3(-2, -1, -1);
+	glm::ivec3 relative_cell = glm::ivec3(-2, -1, -1);
 	int cell_index_max = 0;
 	int cell_index = 0;
-	float3 position = make_float3(x, y, z);
-	int3 agent_grid_cell = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
+	glm::vec3 position = glm::vec3(x, y, z);
+	glm::ivec3 agent_grid_cell = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 	
 	if (load_next_<xsl:value-of select="xmml:name"/>_message(messages, partition_matrix, relative_cell, cell_index_max, agent_grid_cell, cell_index))
 	{
@@ -1211,7 +1211,7 @@ __global__ void GPUFLAME_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl
     </xsl:if><xsl:if test="../../gpu:type='discrete'">
 	//discrete agent: index is position in 2D agent grid
 	int width = (blockDim.x * gridDim.x);
-	int2 global_position;
+	glm::ivec2 global_position;
 	global_position.x = (blockIdx.x * blockDim.x) + threadIdx.x;
 	global_position.y = (blockIdx.y * blockDim.y) + threadIdx.y;
 	int index = global_position.x + (global_position.y * width);
@@ -1240,7 +1240,7 @@ __global__ void GPUFLAME_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Rand48 functions */
 
-__device__ static uint2 RNG_rand48_iterate_single(uint2 Xn, uint2 A, uint2 C)
+__device__ static glm::uvec2 RNG_rand48_iterate_single(glm::uvec2 Xn, glm::uvec2 A, glm::uvec2 C)
 {
 	unsigned int R0, R1;
 
@@ -1264,7 +1264,7 @@ __device__ static uint2 RNG_rand48_iterate_single(uint2 Xn, uint2 A, uint2 C)
 
 	R1 &amp;= 0xFFFFFF;
 
-	return make_uint2(R0, R1);
+	return glm::uvec2(R0, R1);
 }
 
 //Templated function
@@ -1276,16 +1276,16 @@ __device__ float rnd(RNG_rand48* rand48){
 	//calculate the agents index in global agent list
 	if (AGENT_TYPE == DISCRETE_2D){
 		int width = (blockDim.x * gridDim.x);
-		int2 global_position;
+		glm::ivec2 global_position;
 		global_position.x = (blockIdx.x * blockDim.x) + threadIdx.x;
 		global_position.y = (blockIdx.y * blockDim.y) + threadIdx.y;
 		index = global_position.x + (global_position.y * width);
 	}else//AGENT_TYPE == CONTINOUS
 		index = threadIdx.x + blockIdx.x*blockDim.x;
 
-	uint2 state = rand48->seeds[index];
-	uint2 A = rand48->A;
-	uint2 C = rand48->C;
+	glm::uvec2 state = rand48->seeds[index];
+	glm::uvec2 A = rand48->A;
+	glm::uvec2 C = rand48->C;
 
 	int rand = ( state.x &gt;&gt; 17 ) | ( state.y &lt;&lt; 7);
 

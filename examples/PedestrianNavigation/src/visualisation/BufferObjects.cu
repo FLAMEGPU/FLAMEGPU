@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <cuda_gl_interop.h>
@@ -34,12 +34,12 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
-extern "C" void registerBO(GLuint* bo)
+extern void registerBO(GLuint* bo)
 {
     gpuErrchk(cudaGLRegisterBufferObject(*bo));
 }
 
-extern "C" void unregisterBO(GLuint* bo)
+extern void unregisterBO(GLuint* bo)
 {
 	gpuErrchk(cudaGLUnregisterBufferObject(*bo));
 }

@@ -16,6 +16,8 @@
 #ifndef __PEDESTRIAN_POPULATION
 #define __PEDESTRIAN_POPULATION
 
+#include <glm/glm.hpp>
+
 /** initPedestrianPopulation
  * Initialises the pedestrian population by loading model data and creating appropriate buffer objects and shaders
  */
