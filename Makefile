@@ -19,8 +19,8 @@
 # on www.flamegpu.com website.
 #
 ################################################################################
-# USAGE : make HELP
-HELP:
+# USAGE : make help
+help:
 	@echo "*********************************************************************"
 	@echo "*  Copyright 2016 University of Sheffield.  All rights reserved.    *"
 	@echo "*********************************************************************"
