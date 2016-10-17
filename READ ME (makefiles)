@@ -1,6 +1,6 @@
 Preq : install xmllint to validate the xml files -> sudo apt install libxml2-utils
 
-- To process and build the executables for each example, simply run 'make all'. 
+- To process and build the executables for each example, simply run 'make all' in 'examples' folder. 
 - To build the executables, simply run 'make build'.
 
 - By running 'make HELP', you would get instructions of how to build specific targets for each examples.

@@ -40,7 +40,7 @@ help:
 TARGET_ARCH ?= $(shell uname -m)
 
 # Project folders that contain FLAMEGPU examples
-PROJECTS ?= $(shell find examples/Boids_BruteForce examples/Boids_Partitioning examples/CirclesBruteForce_double examples/CirclesBruteForce_float examples/CirclesPartitioning_double examples/CirclesPartitioning_float examples/GameOfLife examples/Keratinocyte examples/PedestrianLOD examples/PedestrianNavigation examples/StableMarriage examples/Sugarscape -name Makefile)
+PROJECTS ?= $(shell find Boids_BruteForce Boids_Partitioning CirclesBruteForce_double CirclesBruteForce_float CirclesPartitioning_double CirclesPartitioning_float GameOfLife Keratinocyte PedestrianLOD PedestrianNavigation StableMarriage Sugarscape -name Makefile)
 
 %.ph_build :
 	+@$(MAKE) -C $(dir $*) $(MAKECMDGOALS)

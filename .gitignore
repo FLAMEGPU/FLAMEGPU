@@ -17,6 +17,7 @@ stadium.obj
 ######
 *.tlog
 *.deps
+*.o
 
 #################
 ## Eclipse
