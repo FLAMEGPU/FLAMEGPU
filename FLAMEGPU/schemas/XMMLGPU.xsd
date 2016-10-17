@@ -19,7 +19,7 @@
 -->
 
 <xs:schema id="XMMLGPU" targetNamespace="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" elementFormDefault="qualified" xmlns="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns:mstns="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML">
-	<xs:import namespace="http://www.dcs.shef.ac.uk/~paul/XMML">
+	<xs:import namespace="http://www.dcs.shef.ac.uk/~paul/XMML" schemaLocation="./XMML.xsd">
 	</xs:import>
 	<xs:complexType name="xmodel_type" abstract="false">
 		<xs:complexContent>
