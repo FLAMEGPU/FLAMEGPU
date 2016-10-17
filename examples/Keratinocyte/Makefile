@@ -19,7 +19,7 @@
 # on www.flamegpu.com website.
 #
 ################################################################################
-# USAGE : make HELP
+# USAGE : make help
 ################################################################################
 #
 # Makefile project only supported on Linux Platforms
@@ -46,7 +46,7 @@ FLAMELIB := -I $(IDIR) -I $(SRC_) -I $(SRC_CUDA) -I $(SRC_VIZ) -I $(IDIR)/GL/ -I
 
 XML_MODEL:=$(SRC_)XMLModelFile.xml
 
-all: XSLTPREP build_modes
+all: XSLTPREP build
 
 XML_Validate:
 	xmllint --noout $(XML_MODEL) --schema $(XSD_SCHEMA)XMMLGPU.xsd 
@@ -212,7 +212,7 @@ endif
 ################################################################################
 
 # Target rules
-HELP:
+help:
 	@echo "************************************************************************"
 	@echo "*  Copyright 2016 University of Sheffield.  All rights reserved.       *"
 	@echo "************************************************************************"
@@ -298,7 +298,7 @@ Keratinocyte_vis: io.o simulation.o main_.o visualisation.o
 
 Keratinocyte_console: BUILD_TYPE=$(Mode_TYPE)_Console
 Keratinocyte_console: io.o simulation.o  main.o 
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(OPENGL_FLAGS) -o $@ $+ $(LIBRARIES)
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
 	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
 	@echo ./$(BUILD_TYPE)/Keratinocyte_console ../../examples/Keratinocyte/$(INPUT_DATA) '$$'{1:-10}> $(BIN_DIR)Keratinocyte_console.sh
