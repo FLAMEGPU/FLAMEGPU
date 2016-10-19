@@ -1,5 +1,8 @@
 Preq : install xmllint to validate the xml files -> sudo apt install libxml2-utils
 
+- If you are using a different version of CUDA compiler, use below command first to change the CUDA_PATH enviroment variable:
+   export CUDA_PATH=/path/to/CUDA
+
 - To process and build the executables for each example, simply run 'make all' in 'examples' folder. 
 - To build the executables, simply run 'make build'.
 
