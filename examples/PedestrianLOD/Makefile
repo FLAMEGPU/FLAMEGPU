@@ -29,6 +29,8 @@
 BIN_DIR := ../../bin/x64/
  
 IDIR := ../../include/
+# For now this will only work for x64 linux. 32x is uninportant as deprecated in CUDA 8.0 Other systems are currently not possible to test.
+LDIR := ../../lib/x86_64-linux-gnu/
 TEMPLATE := ../../FLAMEGPU/templates/
 XSD_SCHEMA := ../../FLAMEGPU/schemas/
 
@@ -39,7 +41,7 @@ SRC_VIZ := src/visualisation/
 SRC_CUDA := src/dynamic/
 
 OPENGL_FLAGS := -lglut -lGLEW -lGLU -lGL
-FLAMELIB := -I $(IDIR) -I $(SRC_) -I $(SRC_CUDA) -I $(SRC_VIZ) -I $(IDIR)/GL/ -I../../lib/
+FLAMELIB := -I $(IDIR) -I $(SRC_) -I $(SRC_CUDA) -I $(SRC_VIZ) -I $(IDIR)GL/
 
 ################################################################################
 #Generating Dynamic Code from FLAMEGPU Templates
@@ -125,7 +127,7 @@ NVCC          := $(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
 # internal flags
 NVCCFLAGS   := -m${TARGET_SIZE}
 CCFLAGS     :=
-LDFLAGS     :=
+LDFLAGS     := -L$(LDIR)
 
 # build flags
 ifeq ($(TARGET_OS),darwin)
@@ -289,7 +291,7 @@ Vis_CO_FILES := $(addprefix $(SRC_VIZ),$(notdir $(Vis_C_FILES:.cpp=.o)))
 Vis_CU_FILES  := $(wildcard $(SRC_VIZ)*.cu)
 Vis_CUO_FILES := $(addprefix $(SRC_VIZ)temp/,$(notdir $(Vis_CU_FILES:.cu=.o)))
 
-$(SRC_VIZ)%.o: $(SRC_VIZ)%.c
+$(SRC_VIZ)%.o: $(SRC_VIZ)%.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
 
 $(SRC_VIZ)temp/%.o: $(SRC_VIZ)%.cu
