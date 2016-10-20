@@ -311,7 +311,7 @@ run_console: Sugarscape_console
 	$(EXEC) ./Sugarscape_console $(INPUT_DATA) $(iter)
 
 run_vis: Sugarscape_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/ ./Sugarscape_vis $(INPUT_DATA) 
+	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./Sugarscape_vis $(INPUT_DATA) 
 
 clean:
 	rm -f *.o

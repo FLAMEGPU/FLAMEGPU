@@ -311,7 +311,7 @@ run_console: GameOfLife_console
 	$(EXEC) ./GameOfLife_console $(INPUT_DATA) $(iter)
 
 run_vis: GameOfLife_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/ ./GameOfLife_vis $(INPUT_DATA) 
+	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./GameOfLife_vis $(INPUT_DATA) 
 
 clean:
 	rm -f *.o

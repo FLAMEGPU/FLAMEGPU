@@ -321,7 +321,7 @@ run_console: PedestrianLOD_console
 	$(EXEC) ./PedestrianLOD_console $(INPUT_DATA) $(iter)
 
 run_vis: PedestrianLOD_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/ ./PedestrianLOD_vis $(INPUT_DATA) 
+	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./PedestrianLOD_vis $(INPUT_DATA) 
 
 clean:
 	rm -f *.o
