@@ -294,7 +294,7 @@ Boids_Partitioning_vis: io.o simulation.o main_.o visualisation.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(OPENGL_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
 	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo "LD_LIBRARY_PATH=../../lib/ ./$(BUILD_TYPE)/Boids_Partitioning_vis ../../examples/Boids_Partitioning/$(INPUT_DATA)" > $(BIN_DIR)Boids_Partitioning_vis.sh
+	@echo "LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./$(BUILD_TYPE)/Boids_Partitioning_vis ../../examples/Boids_Partitioning/$(INPUT_DATA)" > $(BIN_DIR)Boids_Partitioning_vis.sh
 	chmod +x $(BIN_DIR)Boids_Partitioning_vis.sh
 
 
