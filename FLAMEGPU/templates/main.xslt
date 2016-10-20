@@ -32,7 +32,7 @@
 char inputfile[100];          /**&lt; Input path char buffer*/
 char outputpath[100];         /**&lt; Output path char buffer*/
 
-#define OUTPUT_TO_XML 0
+#define OUTPUT_TO_XML 1
 
 
 /** checkUsage
