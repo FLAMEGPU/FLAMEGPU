@@ -294,7 +294,7 @@ Sugarscape_vis: io.o simulation.o main_.o visualisation.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(OPENGL_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
 	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo "LD_LIBRARY_PATH=../../lib/ ./$(BUILD_TYPE)/Sugarscape_vis ../../examples/Sugarscape/$(INPUT_DATA)" > $(BIN_DIR)Sugarscape_vis.sh
+	@echo "LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./$(BUILD_TYPE)/Sugarscape_vis ../../examples/Sugarscape/$(INPUT_DATA)" > $(BIN_DIR)Sugarscape_vis.sh
 	chmod +x $(BIN_DIR)Sugarscape_vis.sh
 
 
@@ -311,7 +311,7 @@ run_console: Sugarscape_console
 	$(EXEC) ./Sugarscape_console $(INPUT_DATA) $(iter)
 
 run_vis: Sugarscape_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/ ./Sugarscape_vis $(INPUT_DATA) 
+	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./Sugarscape_vis $(INPUT_DATA) 
 
 clean:
 	rm -f *.o
