@@ -311,7 +311,7 @@ run_console: Keratinocyte_console
 	$(EXEC) ./Keratinocyte_console $(INPUT_DATA) $(iter)
 
 run_vis: Keratinocyte_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/ ./Keratinocyte_vis $(INPUT_DATA) 
+	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./Keratinocyte_vis $(INPUT_DATA) 
 
 clean:
 	rm -f *.o

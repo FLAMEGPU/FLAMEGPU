@@ -311,7 +311,7 @@ run_console: Boids_Partitioning_console
 	$(EXEC) ./Boids_Partitioning_console $(INPUT_DATA) $(iter)
 
 run_vis: Boids_Partitioning_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/ ./Boids_Partitioning_vis $(INPUT_DATA) 
+	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./Boids_Partitioning_vis $(INPUT_DATA) 
 
 clean:
 	rm -f *.o
