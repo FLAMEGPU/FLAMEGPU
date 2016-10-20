@@ -304,7 +304,7 @@ PedestrianLOD_vis: $(Vis_CO_FILES) $(Vis_CUO_FILES) io.o simulation.o main_.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(OPENGL_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
 	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo "LD_LIBRARY_PATH=../../lib/ ./$(BUILD_TYPE)/PedestrianLOD_vis ../../examples/PedestrianLOD/$(INPUT_DATA)" > $(BIN_DIR)PedestrianLOD_vis.sh
+	@echo "LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./$(BUILD_TYPE)/PedestrianLOD_vis ../../examples/PedestrianLOD/$(INPUT_DATA)" > $(BIN_DIR)PedestrianLOD_vis.sh
 	chmod +x $(BIN_DIR)PedestrianLOD_vis.sh
 
 
@@ -321,7 +321,7 @@ run_console: PedestrianLOD_console
 	$(EXEC) ./PedestrianLOD_console $(INPUT_DATA) $(iter)
 
 run_vis: PedestrianLOD_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/ ./PedestrianLOD_vis $(INPUT_DATA) 
+	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./PedestrianLOD_vis $(INPUT_DATA) 
 
 clean:
 	rm -f *.o

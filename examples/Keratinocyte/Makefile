@@ -294,7 +294,7 @@ Keratinocyte_vis: io.o simulation.o main_.o visualisation.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(OPENGL_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
 	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo "LD_LIBRARY_PATH=../../lib/ ./$(BUILD_TYPE)/Keratinocyte_vis ../../examples/Keratinocyte/$(INPUT_DATA)" > $(BIN_DIR)Keratinocyte_vis.sh
+	@echo "LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./$(BUILD_TYPE)/Keratinocyte_vis ../../examples/Keratinocyte/$(INPUT_DATA)" > $(BIN_DIR)Keratinocyte_vis.sh
 	chmod +x $(BIN_DIR)Keratinocyte_vis.sh
 
 
@@ -311,7 +311,7 @@ run_console: Keratinocyte_console
 	$(EXEC) ./Keratinocyte_console $(INPUT_DATA) $(iter)
 
 run_vis: Keratinocyte_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/ ./Keratinocyte_vis $(INPUT_DATA) 
+	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./Keratinocyte_vis $(INPUT_DATA) 
 
 clean:
 	rm -f *.o
