@@ -240,7 +240,8 @@ help:
 	@echo "                                'arg' -> 0 or 1 value                  *"
 	@echo "                                                                       *"
 	@echo "To run executables for console mode, run below command:                *"
-	@echo "make run_console iter='arg'                                            *"
+	@echo "make run_console 'arg'                                                 *"
+	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "                                                                       *"
 	@echo "           ------------------------------------------------            *"                
 	@echo "Alternatively, run the bash script stored in bin/x64. The iteration    *"
@@ -277,13 +278,13 @@ StableMarriage_console: BUILD_TYPE=$(Mode_TYPE)_Console
 StableMarriage_console: io.o simulation.o  main.o 
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/StableMarriage_console ../../examples/StableMarriage/$(INPUT_DATA) '$$'{1:-10}> $(BIN_DIR)StableMarriage_console.sh
+	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
+	@echo ./$(BUILD_TYPE)/StableMarriage_console ../../examples/StableMarriage/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)StableMarriage_console.sh
 	chmod +x $(BIN_DIR)StableMarriage_console.sh
 
 
 run_console: StableMarriage_console
-	$(EXEC) ./StableMarriage_console $(INPUT_DATA) $(iter)
+	$(EXEC) ./$(BIN_DIR)StableMarriage_console.sh
 
 clean:
 	rm -f *.o

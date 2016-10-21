@@ -243,8 +243,8 @@ help:
 	@echo "                                'arg' -> 0 or 1 value                  *"
 	@echo "                                                                       *"
 	@echo "To run executables for console mode, run below command:                *"
-	@echo "make run_console iter='arg'                                            *"
-	@echo "                                                                       *"
+	@echo "make run_console 'arg'                                                 *"
+	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "           ------------------------------------------------            *"   
 	@echo "To run executables for visualisation/console mode, run below command:  *"
 	@echo "make run_vis                                                           *"
@@ -303,7 +303,7 @@ PedestrianLOD_vis: BUILD_TYPE=$(Mode_TYPE)_Visualisation
 PedestrianLOD_vis: $(Vis_CO_FILES) $(Vis_CUO_FILES) io.o simulation.o main_.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(OPENGL_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
+	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
 	@echo "LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./$(BUILD_TYPE)/PedestrianLOD_vis ../../examples/PedestrianLOD/$(INPUT_DATA)" > $(BIN_DIR)PedestrianLOD_vis.sh
 	chmod +x $(BIN_DIR)PedestrianLOD_vis.sh
 
@@ -312,16 +312,16 @@ PedestrianLOD_console: BUILD_TYPE=$(Mode_TYPE)_Console
 PedestrianLOD_console: io.o simulation.o  main.o 
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/PedestrianLOD_console ../../examples/PedestrianLOD/$(INPUT_DATA) '$$'{1:-10}> $(BIN_DIR)PedestrianLOD_console.sh
+	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
+	@echo ./$(BUILD_TYPE)/PedestrianLOD_console ../../examples/PedestrianLOD/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)PedestrianLOD_console.sh
 	chmod +x $(BIN_DIR)PedestrianLOD_console.sh
 
 
 run_console: PedestrianLOD_console
-	$(EXEC) ./PedestrianLOD_console $(INPUT_DATA) $(iter)
+	$(EXEC) ./$(BIN_DIR)PedestrianLOD_console.sh
 
 run_vis: PedestrianLOD_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./PedestrianLOD_vis $(INPUT_DATA) 
+	$(EXEC) ./$(BIN_DIR)PedestrianLOD_vis.sh
 
 clean:
 	rm -f *.o
