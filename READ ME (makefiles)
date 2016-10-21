@@ -6,7 +6,7 @@ Preq : install xmllint to validate the xml files -> sudo apt install libxml2-uti
 - To process and build the executables for each example, simply run 'make all' in 'examples' folder. 
 - To build the executables, simply run 'make build'.
 
-- By running 'make HELP', you would get instructions of how to build specific targets for each examples.
+- By running 'make help', you would get instructions of how to build specific targets for each examples.
 
 - Out of all examples, 'PedestrianNavigation' and 'PedestrianLOD' come with a custom visualisation files. So, the makefiles for these two would be different from the rest of examples.
 - Furthermore, the below examples, are built in console mode only.
