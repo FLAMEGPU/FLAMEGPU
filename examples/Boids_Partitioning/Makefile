@@ -244,8 +244,8 @@ help:
 	@echo "                                'arg' -> 0 or 1 value                  *"
 	@echo "                                                                       *"
 	@echo "To run executables for console mode, run below command:                *"
-	@echo "make run_console iter='arg'                                            *"
-	@echo "                                                                       *"
+	@echo "make run_console 'arg'                                                 *"
+	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "           ------------------------------------------------            *"   
 	@echo "To run executables for visualisation/console mode, run below command:  *"
 	@echo "make run_vis                                                           *"
@@ -293,7 +293,7 @@ Boids_Partitioning_vis:	BUILD_TYPE=$(Mode_TYPE)_Visualisation
 Boids_Partitioning_vis: io.o simulation.o main_.o visualisation.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(OPENGL_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
+	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
 	@echo "LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./$(BUILD_TYPE)/Boids_Partitioning_vis ../../examples/Boids_Partitioning/$(INPUT_DATA)" > $(BIN_DIR)Boids_Partitioning_vis.sh
 	chmod +x $(BIN_DIR)Boids_Partitioning_vis.sh
 
@@ -302,16 +302,16 @@ Boids_Partitioning_console: BUILD_TYPE=$(Mode_TYPE)_Console
 Boids_Partitioning_console: io.o simulation.o  main.o 
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/Boids_Partitioning_console ../../examples/Boids_Partitioning/$(INPUT_DATA) '$$'{1:-10}> $(BIN_DIR)Boids_Partitioning_console.sh
+	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
+	@echo ./$(BUILD_TYPE)/Boids_Partitioning_console ../../examples/Boids_Partitioning/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)Boids_Partitioning_console.sh
 	chmod +x $(BIN_DIR)Boids_Partitioning_console.sh
 
 
 run_console: Boids_Partitioning_console
-	$(EXEC) ./Boids_Partitioning_console $(INPUT_DATA) $(iter)
+	$(EXEC) ./$(BIN_DIR)Boids_Partitioning_console.sh
 
 run_vis: Boids_Partitioning_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./Boids_Partitioning_vis $(INPUT_DATA) 
+	$(EXEC) ./$(BIN_DIR)Boids_Partitioning_vis.sh
 
 clean:
 	rm -f *.o
