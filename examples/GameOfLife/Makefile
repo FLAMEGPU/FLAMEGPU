@@ -244,7 +244,7 @@ help:
 	@echo "                                'arg' -> 0 or 1 value                  *"
 	@echo "                                                                       *"
 	@echo "To run executables for console mode, run below command:                *"
-	@echo "make run_console 'arg'                                                 *"
+	@echo "make run_console iter='arg'                                            *"
 	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "           ------------------------------------------------            *"   
 	@echo "To run executables for visualisation/console mode, run below command:  *"
@@ -308,10 +308,10 @@ GameOfLife_console: io.o simulation.o  main.o
 
 
 run_console: GameOfLife_console
-	$(EXEC) ./$(BIN_DIR)GameOfLife_console.sh
+	cd $(BIN_DIR) && ./GameOfLife_console.sh $(iter)
 
 run_vis: GameOfLife_vis
-	$(EXEC) ./$(BIN_DIR)GameOfLife_vis.sh
+	cd $(BIN_DIR) && ./GameOfLife_vis.sh
 clean:
 	rm -f *.o
 	#rm -rf $(BIN_DIR)GameOfLife*.sh
