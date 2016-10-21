@@ -240,7 +240,7 @@ help:
 	@echo "                                'arg' -> 0 or 1 value                  *"
 	@echo "                                                                       *"
 	@echo "To run executables for console mode, run below command:                *"
-	@echo "make run_console 'arg'                                                 *"
+	@echo "make run_console iter='arg'                                            *"
 	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "           ------------------------------------------------            *"                
 	@echo "Alternatively, run the bash script stored in bin/x64. The iteration    *"
@@ -283,7 +283,7 @@ CirclesBruteForce_float_console: io.o simulation.o  main.o
 
 
 run_console: CirclesBruteForce_float_console
-	$(EXEC) ./$(BIN_DIR)CirclesBruteForce_float_console.sh
+	cd $(BIN_DIR) && ./CirclesBruteForce_float_console.sh $(iter)
 
 clean:
 	rm -f *.o

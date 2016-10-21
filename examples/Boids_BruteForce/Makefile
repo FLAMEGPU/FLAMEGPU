@@ -244,7 +244,7 @@ help:
 	@echo "                                'arg' -> 0 or 1 value                  *"
 	@echo "                                                                       *"
 	@echo "To run executables for console mode, run below command:                *"
-	@echo "make run_console 'arg'                                                 *"
+	@echo "make run_console iter='arg'                                            *"
 	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "           ------------------------------------------------            *"   
 	@echo "To run executables for visualisation/console mode, run below command:  *"
@@ -308,10 +308,10 @@ Boids_BruteForce_console: io.o simulation.o  main.o
 
 
 run_console: Boids_BruteForce_console
-	$(EXEC) ./$(BIN_DIR)Boids_BruteForce_console.sh
+	cd $(BIN_DIR) && ./Boids_BruteForce_console.sh $(iter)
 
 run_vis: Boids_BruteForce_vis
-	$(EXEC) ./$(BIN_DIR)Boids_BruteForce_vis.sh
+	cd $(BIN_DIR) && ./Boids_BruteForce_vis.sh
 clean:
 	rm -f *.o
 	#rm -rf $(BIN_DIR)Boids_BruteForce*.sh
