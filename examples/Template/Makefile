@@ -245,7 +245,7 @@ help:
 	@echo "                                                                       *"
 	@echo "To run executables for console mode, run below command:                *"
 	@echo "make run_console iter='arg'                                            *"
-	@echo "                                                                       *"
+	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "           ------------------------------------------------            *"   
 	@echo "To run executables for visualisation/console mode, run below command:  *"
 	@echo "make run_vis                                                           *"
@@ -293,7 +293,7 @@ Template_vis:	BUILD_TYPE=$(Mode_TYPE)_Visualisation
 Template_vis: io.o simulation.o main_.o visualisation.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(OPENGL_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
+	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
 	@echo "LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./$(BUILD_TYPE)/Template_vis ../../examples/Template/$(INPUT_DATA)" > $(BIN_DIR)Template_vis.sh
 	chmod +x $(BIN_DIR)Template_vis.sh
 
@@ -302,16 +302,16 @@ Template_console: BUILD_TYPE=$(Mode_TYPE)_Console
 Template_console: io.o simulation.o  main.o 
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/Template_console ../../examples/Template/$(INPUT_DATA) '$$'{1:-10}> $(BIN_DIR)Template_console.sh
+	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
+	@echo ./$(BUILD_TYPE)/Template_console ../../examples/Template/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)Template_console.sh
 	chmod +x $(BIN_DIR)Template_console.sh
 
 
 run_console: Template_console
-	$(EXEC) ./Template_console $(INPUT_DATA) $(iter)
+	cd $(BIN_DIR) && ./Template_console.sh $(iter)
 
 run_vis: Template_vis
-	$(EXEC) LD_LIBRARY_PATH=../../lib/x86_64-linux-gnu/ ./Template_vis $(INPUT_DATA) 
+	cd $(BIN_DIR) && ./Template_vis.sh
 
 clean:
 	rm -f *.o

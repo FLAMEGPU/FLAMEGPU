@@ -241,7 +241,7 @@ help:
 	@echo "                                                                       *"
 	@echo "To run executables for console mode, run below command:                *"
 	@echo "make run_console iter='arg'                                            *"
-	@echo "                                                                       *"
+	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "           ------------------------------------------------            *"                
 	@echo "Alternatively, run the bash script stored in bin/x64. The iteration    *"
 	@echo "default value in console mode is 10. You can simple change it by       *"
@@ -277,13 +277,13 @@ CirclesPartitioning_float_console: BUILD_TYPE=$(Mode_TYPE)_Console
 CirclesPartitioning_float_console: io.o simulation.o  main.o 
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) cp $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/CirclesPartitioning_float_console ../../examples/CirclesPartitioning_float/$(INPUT_DATA) '$$'{1:-10}> $(BIN_DIR)CirclesPartitioning_float_console.sh
+	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
+	@echo ./$(BUILD_TYPE)/CirclesPartitioning_float_console ../../examples/CirclesPartitioning_float/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)CirclesPartitioning_float_console.sh
 	chmod +x $(BIN_DIR)CirclesPartitioning_float_console.sh
 
 
 run_console: CirclesPartitioning_float_console
-	$(EXEC) ./CirclesPartitioning_float_console $(INPUT_DATA) $(iter)
+	cd $(BIN_DIR) && ./CirclesPartitioning_float_console.sh $(iter)
 
 clean:
 	rm -f *.o
