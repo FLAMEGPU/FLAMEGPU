@@ -42,6 +42,8 @@
 			<xs:extension base="xmml:environment_type">
 				<xs:sequence>
 					<xs:element ref="initFunctions" maxOccurs="1" minOccurs="0" />
+          <xs:element ref="exitFunctions" maxOccurs="1" minOccurs="0" />
+          <xs:element ref="stepFunctions" maxOccurs="1" minOccurs="0" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -247,6 +249,34 @@
 	</xs:complexType>
 	<xs:element name="initFunctions" type="initFunctions_type">
 	</xs:element>
+  <xs:element name="exitFunction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="exitFunctions_type">
+    <xs:sequence>
+      <xs:element ref="exitFunction" minOccurs="1" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="exitFunctions" type="exitFunctions_type">
+  </xs:element>
+  <xs:element name="stepFunction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="stepFunctions_type">
+    <xs:sequence>
+      <xs:element ref="stepFunction" minOccurs="1" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="stepFunctions" type="stepFunctions_type">
+  </xs:element>
 	<xs:complexType name="layer_function_type">
 		<xs:complexContent>
 			<xs:extension base="xmml:layer_function_type">

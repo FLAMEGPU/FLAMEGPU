@@ -401,6 +401,11 @@ void sort_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:n
 
 void cleanup(){
 
+    /* Call all exit functions */
+	<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:exitFunctions/gpu:exitFunction">
+	<xsl:value-of select="gpu:name"/>();<xsl:text>
+	</xsl:text></xsl:for-each>
+
 	/* Agent data free*/
 	<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
 	/* <xsl:value-of select="xmml:name"/> Agent variables */
@@ -455,6 +460,11 @@ void singleIteration(){
 	<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>(stream<xsl:value-of select="$stream_num"/>);
 	</xsl:for-each></xsl:for-each>cudaDeviceSynchronize();
   </xsl:for-each>
+    
+    /* Call all step functions */
+	<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:stepFunctions/gpu:stepFunction">
+	<xsl:value-of select="gpu:name"/>();<xsl:text>
+	</xsl:text></xsl:for-each>
 }
 
 /* Environment functions */
@@ -495,6 +505,31 @@ int get_<xsl:value-of select="xmml:name"/>_population_width(){
 </xsl:if>
 
 </xsl:for-each>
+
+
+/*  Analytics Functions */
+
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+  <xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:for-each select="xmml:states/gpu:state">
+  <xsl:variable name="state" select="xmml:name"/>
+<xsl:for-each select="../../xmml:memory/gpu:variable">
+<xsl:value-of select="xmml:type"/> reduce_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>),  thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>) + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count);
+}
+
+<xsl:if test="xmml:type='int'">
+<xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>),  thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>) + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, count_value);
+}
+</xsl:if>
+
+</xsl:for-each>
+</xsl:for-each>
+</xsl:for-each>
+
 
 /* Agent functions */
 
