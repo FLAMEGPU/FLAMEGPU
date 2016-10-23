@@ -33,6 +33,8 @@
 #define __FLAME_GPU_FUNC__ __device__
 //Definition for a function used to initialise environment variables
 #define __FLAME_GPU_INIT_FUNC__
+#define __FLAME_GPU_STEP_FUNC__
+#define __FLAME_GPU_EXIT_FUNC__
 
 #define USE_CUDA_STREAMS
 #define FAST_ATOMIC_SORTING
@@ -410,6 +412,39 @@ extern int get_<xsl:value-of select="xmml:name"/>_population_width();
 </xsl:if>
 </xsl:for-each>
   
+  
+/* Analytics functions for each varible in each state*/
+typedef enum {
+  REDUCTION_MAX,
+  REDUCTION_MIN,
+  REDUCTION_SUM
+}reduction_operator;
+
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+  <xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:for-each select="xmml:states/gpu:state">
+  <xsl:variable name="state" select="xmml:name"/>
+<xsl:for-each select="../../xmml:memory/gpu:variable">
+/** <xsl:value-of select="xmml:type"/> reduce_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+<xsl:value-of select="xmml:type"/> reduce_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable();
+
+
+<xsl:if test="xmml:type='int'">
+/** <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state varaible list
+ */
+<xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value);
+</xsl:if>
+
+</xsl:for-each>
+</xsl:for-each>
+</xsl:for-each>
+
   
 /* global constant variables */
 <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
