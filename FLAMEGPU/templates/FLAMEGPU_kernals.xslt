@@ -687,13 +687,13 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	int index = global_position.x + (global_position.y * width);
 	
 
-	//calculate the position in shared memeory of first load
+	//calculate the position in shared memory of first load
 	glm::ivec2 sm_pos;
 	sm_pos.x = threadIdx.x + range;
 	sm_pos.y = threadIdx.y + range;
 	int sm_index = (sm_pos.y * sm_grid_width) + sm_pos.x;
 
-	//each thread loads to shared memeory (coalesced read)
+	//each thread loads to shared memory (coalesced read)
 	<xsl:value-of select="xmml:name"/>_message_to_sm(messages, message_share, sm_index, index);
 
 	//check for edge conditions
@@ -803,7 +803,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 }
 
 //Get next <xsl:value-of select="xmml:name"/> message 
-//Used by discrete agents this accesses messages through shared memeory which were all loaded on first message retrieval call.
+//Used by discrete agents this accesses messages through shared memory which were all loaded on first message retrieval call.
 __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:value-of select="xmml:name"/>_message_discrete(xmachine_message_<xsl:value-of select="xmml:name"/>* message, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages){
 
 	//shared memory get from offset dependant on sm usage in function

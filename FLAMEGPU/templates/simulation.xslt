@@ -84,7 +84,7 @@ int PADDING;
 /* <xsl:value-of select="xmml:name"/> Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
 xmachine_memory_<xsl:value-of select="xmml:name"/>_list* d_<xsl:value-of select="xmml:name"/>s;      /**&lt; Pointer to agent list (population) on the device*/
 xmachine_memory_<xsl:value-of select="xmml:name"/>_list* d_<xsl:value-of select="xmml:name"/>s_swap; /**&lt; Pointer to agent list swap on the device (used when killing agents)*/
-xmachine_memory_<xsl:value-of select="xmml:name"/>_list* d_<xsl:value-of select="xmml:name"/>s_new;  /**&lt; Pointer to new agent list on the device (used to hold new agents bfore they are appended to the population)*/
+xmachine_memory_<xsl:value-of select="xmml:name"/>_list* d_<xsl:value-of select="xmml:name"/>s_new;  /**&lt; Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
 int h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count;   /**&lt; Agent population size counter */ <xsl:if test="gpu:type='discrete'">
 int h_xmachine_memory_<xsl:value-of select="xmml:name"/>_pop_width;   /**&lt; Agent population width */</xsl:if>
 uint * d_xmachine_memory_<xsl:value-of select="xmml:name"/>_keys;	  /**&lt; Agent sort identifiers keys*/
@@ -235,7 +235,7 @@ void initialise(char * inputfile){
 	setPaddingAndOffset();
   
 
-	printf("Allocating Host and Device memeory\n");
+	printf("Allocating Host and Device memory\n");
   
 	/* Agent memory allocation (CPU) */<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
 	int xmachine_<xsl:value-of select="xmml:name"/>_SoA_size = sizeof(xmachine_memory_<xsl:value-of select="xmml:name"/>_list);<xsl:for-each select="xmml:states/gpu:state">
@@ -245,7 +245,7 @@ void initialise(char * inputfile){
 	int message_<xsl:value-of select="xmml:name"/>_SoA_size = sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>_list);
 	h_<xsl:value-of select="xmml:name"/>s = (xmachine_message_<xsl:value-of select="xmml:name"/>_list*)malloc(message_<xsl:value-of select="xmml:name"/>_SoA_size);</xsl:for-each>
 
-	//Exit if agent or message buffer sizes are to small for function outpus<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function/xmml:xagentOutputs/gpu:xagentOutput">
+	//Exit if agent or message buffer sizes are to small for function outputs<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function/xmml:xagentOutputs/gpu:xagentOutput">
 	<xsl:variable name="xagent_output" select="xmml:xagentName"/><xsl:variable name="xagent_buffer" select="../../../../gpu:bufferSize"/><xsl:if test="../../../../../gpu:xagent[xmml:name=$xagent_output]/gpu:bufferSize&lt;$xagent_buffer">
 	printf("ERROR: <xsl:value-of select="$xagent_output"/> agent buffer is too small to be used for output by <xsl:value-of select="../../../../xmml:name"/> agent in <xsl:value-of select="../../xmml:name"/> function!\n");
 	exit(0);
@@ -441,13 +441,13 @@ void cleanup(){
 
 void singleIteration(){
 
-	/* set all non partitioned and spatial partitionded message counts to 0*/<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:if test="gpu:partitioningNone or gpu:partitioningSpatial">
+	/* set all non partitioned and spatial partitioned message counts to 0*/<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:if test="gpu:partitioningNone or gpu:partitioningSpatial">
 	h_message_<xsl:value-of select="xmml:name"/>_count = 0;
 	//upload to device constant
 	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_count, &amp;h_message_<xsl:value-of select="xmml:name"/>_count, sizeof(int)));
 	</xsl:if></xsl:for-each>
 
-	/* Call agent functions in order itterating through the layer functions */
+	/* Call agent functions in order iterating through the layer functions */
 	<xsl:for-each select="gpu:xmodel/xmml:layers/xmml:layer">
 	/* Layer <xsl:value-of select="position()"/>*/
 	<xsl:for-each select="gpu:layerFunction">
@@ -519,7 +519,7 @@ int <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_
 	</xsl:for-each>
 	</xsl:if><xsl:if test="../../gpu:type='discrete'">
 	<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]">
-	<xsl:if test="gpu:partitioningNone  or gpu:partitioningSpatial">//Discrete agent and coninuous message input
+	<xsl:if test="gpu:partitioningNone  or gpu:partitioningSpatial">//Discrete agent and continuous message input
 	sm_size += (blockSize * sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
 	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
 	sm_size += (blockSize * PADDING);
@@ -682,7 +682,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	}
 	if ((h_<xsl:value-of select="xmml:name"/>_condition_count == <xsl:value-of select="gpu:globalCondition/gpu:maxItterations"/>))
 	{
-		printf("Global agent condition for <xsl:value-of select="xmml:name"/> funtion reached the maximum number of <xsl:value-of select="gpu:globalCondition/gpu:maxItterations"/> conditions\n");
+		printf("Global agent condition for <xsl:value-of select="xmml:name"/> function reached the maximum number of <xsl:value-of select="gpu:globalCondition/gpu:maxItterations"/> conditions\n");
 	}
 	
 	//RESET THE CONDITION COUNT
