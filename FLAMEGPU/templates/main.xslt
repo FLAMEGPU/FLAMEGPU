@@ -54,7 +54,7 @@ int checkUsage( int argc, char** argv){
 	printf("FLAMEGPU Console mode\n");
 	if(argc &lt; 3)
 	{
-		printf("Usage: main [XML model data] [Itterations] [Optional CUDA device ID]\n");
+		printf("Usage: main [XML model data] [Iterations] [Optional CUDA device ID]\n");
 		return false;
 	}
 #endif
@@ -84,7 +84,7 @@ void setFilePaths(char* input){
 	}
 	strcpy(outputpath, inputfile);
 	outputpath[lastd+1] = '\0';
-	printf("Ouput dir: %s\n", outputpath);
+	printf("Output dir: %s\n", outputpath);
 }
 
 
@@ -167,22 +167,22 @@ int main( int argc, char** argv)
 	cudaEventCreate(&amp;start);
 	cudaEventCreate(&amp;stop);
 	
-	//Get the number of itterations
-	int itterations = atoi(argv[2]);
-	if (itterations == 0)
+	//Get the number of iterations
+	int iterations = atoi(argv[2]);
+	if (iterations == 0)
 	{
-		printf("Second argument must be an integer (Number of Itterations)\n");
+		printf("Second argument must be an integer (Number of Iterations)\n");
 		exit(0);
 	}
   
 	//start timing
 	cudaEventRecord(start);
 
-	for (int i=0; i&lt; itterations; i++)
+	for (int i=0; i&lt; iterations; i++)
 	{
 		printf("Processing Simulation Step %i", i+1);
 
-		//single simulation itteration
+		//single simulation iteration
 		singleIteration();
 
 		if (OUTPUT_TO_XML)
