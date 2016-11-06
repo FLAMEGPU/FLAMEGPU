@@ -180,7 +180,7 @@ int main( int argc, char** argv)
 
 	for (int i=0; i&lt; itterations; i++)
 	{
-		printf("Processing Simulation Step %i", i+1);
+		printf("Processing Simulation Step %i\n", i+1);
 
 		//single simulation itteration
 		singleIteration();
@@ -192,10 +192,9 @@ int main( int argc, char** argv)
 				get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose>
 				</xsl:for-each>
 			
-				printf(": Saved to XML:");
+				printf("Iteration %i Saved to XML\n", i+1);
 		}
 
-		printf(": Done\n");
 	}
 
 	//CUDA stop timing
