@@ -468,12 +468,35 @@ void singleIteration(){
 }
 
 /* Environment functions */
-
+<!--
 <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
 void set_<xsl:value-of select="xmml:name"/>(<xsl:value-of select="xmml:type"/>* h_<xsl:value-of select="xmml:name"/>){
 	gpuErrchk(cudaMemcpyToSymbol(<xsl:value-of select="xmml:name"/>, h_<xsl:value-of select="xmml:name"/>, sizeof(<xsl:value-of select="xmml:type"/>)<xsl:if test="xmml:arrayLength">*<xsl:value-of select="xmml:arrayLength"/></xsl:if>));
 }
 </xsl:for-each>
+-->
+
+<!-- -->
+//host constant declaration
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
+<xsl:value-of select="xmml:type"/><xsl:text> h_env_</xsl:text><xsl:value-of select="xmml:name"/><xsl:if test="xmml:arrayLength">[<xsl:value-of select="xmml:arrayLength"/>]</xsl:if>;
+</xsl:for-each>
+
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
+
+//constant setter
+void set_<xsl:value-of select="xmml:name"/>(<xsl:value-of select="xmml:type"/>* h_<xsl:value-of select="xmml:name"/>){
+    gpuErrchk(cudaMemcpyToSymbol(<xsl:value-of select="xmml:name"/>, h_<xsl:value-of select="xmml:name"/>, sizeof(<xsl:value-of select="xmml:type"/>)<xsl:if test="xmml:arrayLength">*<xsl:value-of select="xmml:arrayLength"/></xsl:if>));
+    memcpy(&amp;h_env_<xsl:value-of select="xmml:name"/>, h_<xsl:value-of select="xmml:name"/>,sizeof(<xsl:value-of select="xmml:type"/>)<xsl:if test="xmml:arrayLength">*<xsl:value-of select="xmml:arrayLength"/></xsl:if>);
+}
+
+//constant getter
+const <xsl:value-of select="xmml:type"/>* get_<xsl:value-of select="xmml:name"/>(){
+    return &amp;h_env_<xsl:value-of select="xmml:name"/>;
+}
+</xsl:for-each>
+<!-- -->
+
 
 /* Agent data access functions*/
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
