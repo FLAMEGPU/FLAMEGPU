@@ -44,18 +44,22 @@
       <name>crystal</name>
       <memory>
         <gpu:variable>
-          <type>int</type>
+          <type>float</type>
           <name>rank</name>
         </gpu:variable>
         <gpu:variable>
-          <type>int</type>
+          <type>float</type>
           <name>l</name> <!-- size -->
+        </gpu:variable>
+ 	<gpu:variable>
+          <type>int</type>
+          <name>bin</name> <!-- for histogram -->
         </gpu:variable>
       </memory>
         
       <functions>
         <gpu:function>
-          <name>create_crystals</name>
+          <name>create_ranks</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
             <outputs>
@@ -66,19 +70,6 @@
             </outputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
-        </gpu:function>
-
-        <gpu:function>
-          <name>check_aggregate</name>
-          <currentState>default</currentState>
-          <nextState>default</nextState>
-                   <inputs>
-                        <gpu:input>
-                            <messageName>internal_coord</messageName>
-                        </gpu:input>
-                    </inputs>
-                    <gpu:reallocate>false</gpu:reallocate>
-                    <gpu:RNG>false</gpu:RNG>
         </gpu:function>
      
         <gpu:function>
@@ -91,7 +82,7 @@
                         </gpu:input>
                     </inputs>
                     <gpu:reallocate>true</gpu:reallocate>
-                    <gpu:RNG>true</gpu:RNG>
+                    <gpu:RNG>false</gpu:RNG>
         </gpu:function>
       </functions>
 
@@ -126,8 +117,7 @@
       
   </messages>
   <layers>
-    <layer><gpu:layerFunction><name>create_crystals</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>check_aggregate</name></gpu:layerFunction></layer>
+    <layer><gpu:layerFunction><name>create_ranks</name></gpu:layerFunction></layer>
     <layer><gpu:layerFunction><name>aggregate</name></gpu:layerFunction></layer>
   </layers>
 </gpu:xmodel>
