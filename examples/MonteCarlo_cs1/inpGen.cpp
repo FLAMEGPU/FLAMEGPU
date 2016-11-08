@@ -49,23 +49,23 @@ if (fp== NULL) {
   exit(-1); // must include stdlib.h 
 } 
 
-fprintf(fp, "%s \n", "<state>");
-fprintf(fp, "%s \n", "<itno>0</itno>");
+fprintf(fp, "<state>\n");
+fprintf(fp, "<itno>0</itno>\n");
 
 for (int i=0; i<iter ; i++){
 
   double l= CND(drand48());
 
 #ifdef CASE2
-   fprintf(fp, "<xagent><name>crystal</name><l>%f</l></xagent>", l);
+   fprintf(fp, "<xagent>\n<name>crystal</name>\n<l>%f</l>\n</xagent>\n", l);
 #endif
 
 #ifdef CASE1
-   fprintf(fp, "<xagent><name>crystal</name><rank>%d</rank><l>%f</l></xagent>",iter+1,l);
+   fprintf(fp, "<xagent>\n<name>crystal</name>\n<rank>%d</rank>\n<l>%f</l>\n</xagent>\n",i+1,l);
 #endif
 
 }
-fprintf(fp, "%s \n", "</state>");
+fprintf(fp, "</state>");
 fclose(fp);
 
 return 0;
