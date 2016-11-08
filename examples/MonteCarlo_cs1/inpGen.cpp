@@ -2,7 +2,7 @@
 This programs geneates the .xml input file.
 Author : Mozhgan K. Chimeh, Paul Richmond
 
-To Compile: g++ inpGen.cpp -D CASE1 -o inpGen
+To Compile: g++ inpGen.cpp -o inpGen
 To Execute: ./inpGen iterations/1.xml 10
 */
 
@@ -16,22 +16,24 @@ To Execute: ./inpGen iterations/1.xml 10
 #define BIN_WIDTH 0.1
 #define BIN_COUNT L_MAX/BIN_WIDTH 
 
-int hist[BIN_COUNT];
+int hist[int(BIN_COUNT)];
 
 int main( int argc, char** argv) 
 {
 	srand48(time(NULL));
 
-	int n_c = atoi(argv[2]);
-	char * fileName = argv[1];
+	int n_c = atoi(argv[3]);
+	char * fileName1 = argv[1];
+	char * fileName2 = argv[2];
 	int n = 0;
 
 	for (int i=0; i<BIN_COUNT; i++){
 		hist[i] = 0;
 	}
 
-	FILE *fp = fopen(fileName, "w"); // write only 
-	   
+	FILE *fp = fopen(fileName1, "w"); // write only 
+	FILE *hist_output = fopen(fileName2, "w"); // write only 	   
+
 	// test for files not existing. 
 	if (fp== NULL) {   
 		printf("Error! Could not open file\n"); 
@@ -44,7 +46,7 @@ int main( int argc, char** argv)
 	while (n < n_c){
 		double l_temp = drand48()*L_MAX;
 		double nl_temp = drand48()*NL_MAX; 
-		if (n_c*pow(l_temp, 2)*exp(-1*pow(l_temp, 3)) > nl_temp){
+		if (pow(l_temp, 2)*exp(-1*pow(l_temp, 3)) > nl_temp){ //n_c* -- we removed the n_c
 			fprintf(fp, "<xagent>\n<name>crystal</name>\n<rank>0</rank>\n<l>%f</l>\n</xagent>\n",l_temp);
 			int bin = l_temp / BIN_WIDTH;
 			if (bin >= BIN_COUNT){
@@ -59,6 +61,11 @@ int main( int argc, char** argv)
 	fprintf(fp, "</state>");
 	fclose(fp);
 
+	for (int i=0; i<BIN_COUNT; i++){
+		fprintf(hist_output,"%f %d\n", i*BIN_WIDTH, hist[i]);
+	}
+
+	fclose(hist_output);
 	//output the hist in some format useful to gnuplot or whatever
 
 	return 0;
