@@ -21,12 +21,12 @@
 
 #include <header.h>
 
-#define DELTA_T 0.0005f //time step
-#define B0 2*10^8f
-#define G0 0.0.00168f
-#define b 0.22615f
-#define y 1f
-#define m0 1 // real number of crystals per unit volume
+// #define DELTA_T 0.0005f //time step
+// #define B0 2*10^8f
+// #define G0 0.0.00168f
+// #define b 0.22615f
+// #define y 1f
+// #define m0 1 // real number of crystals per unit volume
 
 #define L_MAX 2.0
 #define NL_MAX 0.4
@@ -34,6 +34,10 @@
 #define BIN_COUNT L_MAX/BIN_WIDTH
 
 int *nuclNo;
+void gpuAssert(cudaError_t code, const char *file, int line, bool abort);
+/* Error check function for safe CUDA API calling */
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__, true); }
+
 
 __FLAME_GPU_INIT_FUNC__ void initConstants()
 {
@@ -62,41 +66,41 @@ __FLAME_GPU_INIT_FUNC__ void initConstants()
 // The function calculates the nucleation number needed for CASE STUDY 2
 __FLAME_GPU_STEP_FUNC__ void nuclNo_func(){
 
-	int nc_no = h_B0*h_DELTA_T*10^7; // equation 13, nuclNo = (B0*DELTA_T*popnNo)/m0, m0/Nc is the order of 10^7
+	int nc_no = (*get_B0)*(*get_DELTA_T)*10^7; // equation 13, nuclNo = (B0*DELTA_T*popnNo)/m0, m0/Nc is the order of 10^7
 
-	cudamalloc((void**)&nuclNo, sizeof(int));
-    gpuErrchk(cudaMemcpy(nuclNo, &nc_no, sizeof(int), cudaMemcpyHostToDevice));
+	gpuErrchk(cudamalloc((void**)&nuclNo, sizeof(int)));
+  gpuErrchk(cudaMemcpy(nuclNo, &nc_no, sizeof(int), cudaMemcpyHostToDevice));
 
 	printf("FLAME GPU Step function. nuclNo is %d\n", nc_no);
 }
 
 __FLAME_GPU_EXIT_FUNC__ void hist_func(){
 
-	printf("FLAME GPU Exit function");
-	FILE *hist_output = fopen("hist.dat", "a"); // write only - append
+	printf("FLAME GPU Exit function\n");
+  FILE *hist_output = fopen("histogram.dat", "a"); // write only - append
 
 	for (int i=0; i<BIN_COUNT; i++){
 		int count = count_crystal_default_bin_variable(i);
-		printf("bin index=%d, count = %d", i, count);
+		printf("bin index=%d, count = %d\n", i, count);
 		fprintf(hist_output,"%f %d\n", i*BIN_WIDTH, count);
 		//output into same format as initial states
 	}
-		fprintf(hist_output,"\n\n\n");
+		fprintf(hist_output,"\n\n");
 	fclose(hist_output);
 }
 
 // we may not be needing this function as we can create a an input .xml file to include all possible inputs
 // so, no agents will create another agent
-__FLAME_GPU_FUNC__ int output_crystals(xmachine_memory_crystal* agent, xmachine_message_crystal_list* internal_coords){
+__FLAME_GPU_FUNC__ int output_crystals(xmachine_memory_crystal* agent, xmachine_message_internal_coord_list* internal_coord){
 
 	//output crystal internal coordinates
-    add_internal_coord(internal_coords, agent->l, 0);
+    add_internal_coord_message(internal_coord, agent->l, 0);
 
 	return 0;
 }
 
 
-__FLAME_GPU_FUNC__ int nucleate(xmachine_memory_crystal* agent, xmachine_message_internal_coords_list* internal_coords_messages){
+__FLAME_GPU_FUNC__ int nucleate(xmachine_memory_crystal* agent, xmachine_message_internal_coord_list* internal_coord_messages){
 
 // popnNo is constant, equal to the total number of crystals
 popnNo = d_xmachine_memory_crystal_count;
@@ -104,7 +108,7 @@ popnNo = d_xmachine_memory_crystal_count;
 //limit is to 1 thread
 while (<nuclNo )  // not done
 // new row is added with the size equal to zero
-add_internal_coord(internal_coords, 0);
+add_internal_coord(internal_coord, 0);
 
     return 0;
 }
@@ -112,10 +116,11 @@ add_internal_coord(internal_coords, 0);
 
 __FLAME_GPU_FUNC__ int growth(xmachine_memory_crystal* agent){
 
- int l_new = agent->l + (DELTA_T*G0*((1+y*agent->l)^b)); // equation 20, Lj = Lj + Gj*DELTA_T
+ 	int l_new = agent->l + ((*get_DELTA_T)*(*get_G0)*(powf((1+y*agent->l),(*get_b)))); // equation 20, Lj = Lj + Gj*DELTA_T
 
- agent->l = l_new
- return 0;
+ 	agent->l = l_new
+
+ 	return 0;
 }
 
 #endif //_FLAMEGPU_FUNCTIONS
