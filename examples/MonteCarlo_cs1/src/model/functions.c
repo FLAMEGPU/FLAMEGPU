@@ -27,9 +27,6 @@
 
 using namespace std;
 
-#define I_agg 0.875f // high index aggregation
-#define aggNo 1
-
 #define L_MAX 2.0
 #define NL_MAX 0.4
 #define BIN_WIDTH 0.1
@@ -74,37 +71,19 @@ __FLAME_GPU_STEP_FUNC__ void DELTA_T_func(){
 
 __FLAME_GPU_EXIT_FUNC__ void hist_func(){
 
-  static long iter = 0;
-  iter++;
+  //static long iter = 0;
+  //iter++;
 
-  char * filename = "hist";
-
-  //char *integer_string;
- // sprintf(integer_string, "%ld", iter);
-
-  //strcat (filename,integer_string);
-  //strcat (filename,".dat");
-
- // printf("%s\n", filename);
-
- stringstream sstm;
-
- sstm << filename << iter;
-
- string ans = sstm.str();
- char * ans2 = (char *) ans.c_str();
-
-
-	printf("FLAME GPU Exit function");
-  FILE *hist_output = fopen(ans2, "a"); // write only - append
+	printf("FLAME GPU Exit function\n");
+  FILE *hist_output = fopen("histogram.dat", "a"); // write only - append
 
 	for (int i=0; i<BIN_COUNT; i++){
 		int count = count_crystal_default_bin_variable(i);
-		printf("bin index=%d, count = %d", i, count);
+		printf("bin index=%d, count = %d\n", i, count);
     fprintf(hist_output,"%f %d\n", i*BIN_WIDTH, count);
     //output into same format as initial states
   }
-  fprintf(hist_output,"\n\n\n");
+  fprintf(hist_output,"\n\n");
   fclose(hist_output);
 }
 

@@ -3,7 +3,7 @@ This programs geneates the .xml input file.
 Author : Mozhgan K. Chimeh, Paul Richmond
 
 To Compile: g++ inpGen.cpp -o inpGen
-To Execute: ./inpGen iterations/1.xml 10
+To Execute: ./inpGen iterations/1.xml 1_.xml 10000
 */
 
 #include <stdio.h>
@@ -40,7 +40,7 @@ int main( int argc, char** argv)
 		exit(-1); // must include stdlib.h 
 	} 
 
-	fprintf(fp, "<state>\n");
+	fprintf(fp, "<states>\n");
 	fprintf(fp, "<itno>0</itno>\n");
 
 	while (n < n_c){
@@ -58,7 +58,7 @@ int main( int argc, char** argv)
 
 	}
 
-	fprintf(fp, "</state>");
+	fprintf(fp, "</states>");
 	fclose(fp);
 
 	for (int i=0; i<BIN_COUNT; i++){

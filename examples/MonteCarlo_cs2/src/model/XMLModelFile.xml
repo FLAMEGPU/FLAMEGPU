@@ -128,12 +128,10 @@
     <gpu:message>
       <name>internal_coord</name>
       <variables>
-
           <gpu:variable>
-          <type>int</type>
+          <type>float</type>
           <name>l</name>
         </gpu:variable>
-
       </variables>
       <gpu:partitioningNone></gpu:partitioningNone>
       <gpu:bufferSize>65536</gpu:bufferSize>
