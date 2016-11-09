@@ -32,7 +32,7 @@
 
 </gpu:constants>
 
-    <gpu:functionFiles> 
+    <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
 
@@ -41,13 +41,13 @@
        <gpu:name>initConstants</gpu:name>
    </gpu:initFunction>
    </gpu:initFunctions>
-   
+
     <gpu:exitFunctions>
       <gpu:exitFunction>
-        <gpu:name>exitFunction</gpu:name>
+        <gpu:name>hist_func</gpu:name>
       </gpu:exitFunction>
     </gpu:exitFunctions>
-    
+
     <gpu:stepFunctions>
       <gpu:stepFunction>
         <gpu:name>nuclNo_func</gpu:name>
@@ -57,18 +57,22 @@
 </gpu:initFunctions>
   </gpu:environment>
   <xagents>
-      
+
     <gpu:xagent>
       <name>crystal</name>
       <memory>
         <gpu:variable>
-          <type>int</type>
+          <type>float</type>
           <name>l</name> <!-- size -->
         </gpu:variable>
+          <gpu:variable>
+          <type>int</type>
+          <name>bin</name> <!-- for histogram -->
+        </gpu:variable>
       </memory>
-        
+
       <functions>
-                <gpu:function>
+         <gpu:function>
           <name>output_crystals</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
@@ -117,7 +121,7 @@
 
             <gpu:type>continuous</gpu:type>
             <gpu:bufferSize>65536</gpu:bufferSize>
-          
+
     </gpu:xagent>
       </xagents>
   <messages>
@@ -134,10 +138,10 @@
       <gpu:partitioningNone></gpu:partitioningNone>
       <gpu:bufferSize>65536</gpu:bufferSize>
     </gpu:message>
-      
+
   </messages>
   <layers>
-    <layer><gpu:layerFunction><name>create_crystals</name></gpu:layerFunction></layer>
+    <layer><gpu:layerFunction><name>output_crystals</name></gpu:layerFunction></layer>
     <layer><gpu:layerFunction><name>nucleate</name></gpu:layerFunction></layer>
     <layer><gpu:layerFunction><name>growth</name></gpu:layerFunction></layer>
   </layers>
