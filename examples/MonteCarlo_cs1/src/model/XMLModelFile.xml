@@ -15,7 +15,7 @@
     </gpu:variable>
 </gpu:constants>
 
-    <gpu:functionFiles> 
+    <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
 
@@ -24,13 +24,13 @@
        <gpu:name>initConstants</gpu:name>
    </gpu:initFunction>
    </gpu:initFunctions>
-   
+
     <gpu:exitFunctions>
       <gpu:exitFunction>
-        <gpu:name>exitFunction</gpu:name>
+        <gpu:name>hist_func</gpu:name>
       </gpu:exitFunction>
     </gpu:exitFunctions>
-    
+
     <gpu:stepFunctions>
       <gpu:stepFunction>
         <gpu:name>DELTA_T_func</gpu:name>
@@ -39,7 +39,7 @@
 
   </gpu:environment>
   <xagents>
-      
+
     <gpu:xagent>
       <name>crystal</name>
       <memory>
@@ -56,7 +56,7 @@
           <name>bin</name> <!-- for histogram -->
         </gpu:variable>
       </memory>
-        
+
       <functions>
         <gpu:function>
           <name>create_ranks</name>
@@ -69,9 +69,9 @@
                 </gpu:output>
             </outputs>
           <gpu:reallocate>false</gpu:reallocate>
-          <gpu:RNG>false</gpu:RNG>
+          <gpu:RNG>true</gpu:RNG>
         </gpu:function>
-     
+
         <gpu:function>
           <name>aggregate</name>
           <currentState>default</currentState>
@@ -95,7 +95,7 @@
 
             <gpu:type>continuous</gpu:type>
             <gpu:bufferSize>65536</gpu:bufferSize>
-          
+
     </gpu:xagent>
       </xagents>
   <messages>
@@ -103,18 +103,18 @@
       <name>internal_coord</name>
       <variables>
         <gpu:variable>
-          <type>int</type>
+          <type>float</type>
           <name>rank</name>
         </gpu:variable>
-                <gpu:variable>
-          <type>int</type>
+          <gpu:variable>
+          <type>float</type>
           <name>l</name>
         </gpu:variable>
       </variables>
       <gpu:partitioningNone></gpu:partitioningNone>
       <gpu:bufferSize>65536</gpu:bufferSize>
     </gpu:message>
-      
+
   </messages>
   <layers>
     <layer><gpu:layerFunction><name>create_ranks</name></gpu:layerFunction></layer>
