@@ -32,7 +32,7 @@ using namespace std;
 #define BIN_WIDTH 0.1
 #define BIN_COUNT L_MAX/BIN_WIDTH
 
-float *d_dt;
+__device__ float d_dt;
 void gpuAssert(cudaError_t code, const char *file, int line, bool abort);
 /* Error check function for safe CUDA API calling */
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__, true); }
@@ -46,7 +46,7 @@ __FLAME_GPU_INIT_FUNC__ void initConstants()
 	int aggno = 1;
 	set_aggNo(&aggno);
 
-	printf("FLAME GPU Init function. aggno=%f, I_agg=%d\n", aggno, I_agg);
+//	printf("FLAME GPU Init function. aggno=%f, I_agg=%d\n", aggno, i_agg);
 }
 
 
@@ -61,25 +61,21 @@ __FLAME_GPU_STEP_FUNC__ void DELTA_T_func(){
 
 	float dt = ((2*agg_No)/(beta0*popnNo*(1-beta0)*(popnNo-agg_No))); // equation 10 and 11
 
-	gpuErrchk(cudaMalloc((void**)&d_dt, sizeof(float)));
-	gpuErrchk(cudaMemcpy(d_dt, &dt, sizeof(float), cudaMemcpyHostToDevice));
+	gpuErrchk(cudaMemcpyToSymbol(d_dt, &dt, sizeof(float)));
 
-
-	printf("FLAME GPU Step function. Delta T is %f\n", dt);
+	//printf("FLAME GPU Step function. Delta T is %f\n", dt);
 }
 
 
 __FLAME_GPU_EXIT_FUNC__ void hist_func(){
 
-  //static long iter = 0;
-  //iter++;
 
 	printf("FLAME GPU Exit function\n");
-  FILE *hist_output = fopen("histogram.dat", "a"); // write only - append
+  FILE *hist_output = fopen("histogram_c1.dat", "w"); // write only - append
 
 	for (int i=0; i<BIN_COUNT; i++){
 		int count = count_crystal_default_bin_variable(i);
-		printf("bin index=%d, count = %d\n", i, count);
+	//	printf("bin index=%d, count = %d\n", i, count);
     fprintf(hist_output,"%f %d\n", i*BIN_WIDTH, count);
     //output into same format as initial states
   }

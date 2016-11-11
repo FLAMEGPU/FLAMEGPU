@@ -3,7 +3,7 @@ This programs geneates the .xml input file.
 Author : Mozhgan K. Chimeh, Paul Richmond
 
 To Compile: g++ inpGen.cpp -o inpGen
-To Execute: ./inpGen iterations/1.xml 1_.xml 10000
+To Execute: ./inpGen iterations/0.xml ~/Desktop/input.dat 10000
 */
 
 #include <stdio.h>
@@ -47,7 +47,7 @@ int main( int argc, char** argv)
 		double l_temp = drand48()*L_MAX;
 		double nl_temp = drand48()*NL_MAX; 
 		if (pow(l_temp, 2)*exp(-1*pow(l_temp, 3)) > nl_temp){ //n_c* -- we removed the n_c
-			fprintf(fp, "<xagent>\n<name>crystal</name>\n<l>%f</l>\n</xagent>\n",l_temp);
+			fprintf(fp, "<xagent><name>crystal</name><rank>0</rank><l>%f</l></xagent>\n",l_temp);
 			int bin = l_temp / BIN_WIDTH;
 			if (bin >= BIN_COUNT){
 				printf("Error, bin > BIN_COUNT!!!\n");

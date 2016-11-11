@@ -3,7 +3,7 @@ This programs geneates the .xml input file.
 Author : Mozhgan K. Chimeh, Paul Richmond
 
 To Compile: g++ inpGen.cpp -o inpGen
-To Execute: ./inpGen iterations/1.xml 1_.xml 10000
+To Execute: ./inpGen iterations/0.xml ~/Desktop/input.dat 10000
 */
 
 #include <stdio.h>
