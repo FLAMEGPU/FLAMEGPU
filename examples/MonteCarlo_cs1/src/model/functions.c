@@ -27,7 +27,7 @@
 
 using namespace std;
 
-#define L_MAX 2.0
+#define L_MAX 6.0
 #define NL_MAX 0.4
 #define BIN_WIDTH 0.1
 #define BIN_COUNT L_MAX/BIN_WIDTH
@@ -43,7 +43,7 @@ __FLAME_GPU_INIT_FUNC__ void initConstants()
 	float i_agg = 0.875f; // high index aggregation
 	set_I_agg(&i_agg);
 
-	int aggno = 1;
+	int aggno = 1000;
 	set_aggNo(&aggno);
 
 //	printf("FLAME GPU Init function. aggno=%f, I_agg=%d\n", aggno, i_agg);
@@ -135,7 +135,7 @@ __FLAME_GPU_FUNC__ int aggregate(xmachine_memory_crystal* agent, xmachine_messag
 		//odd numbered agents will be aggregated
 		else{
 			//apply the formular to find the aggregate length (equ 8)
-			agent->l = powf((powf(agent->l, 3)+ powf(closest_lower_length, 3)), (1/3)); //todo: needs to use powf()
+			agent->l = powf((powf(agent->l, 3)+ powf(closest_lower_length, 3)), (1.0/3.0)); //todo: needs to use powf()
 		}
 
 
