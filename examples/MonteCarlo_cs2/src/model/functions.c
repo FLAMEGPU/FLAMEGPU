@@ -1,4 +1,3 @@
-w
 /*
  * Copyright 2016 University of Sheffield.
  * Authors: Dr Paul Richmond , Dr Mozhgan Kabiri Chimeh
@@ -28,8 +27,8 @@ w
 // #define y 1f
 // #define m0 1 // real number of crystals per unit volume
 
-#define L_MAX 2.0
-#define NL_MAX 0.4
+#define L_MAX 8.0
+#define NL_MAX 10000
 #define BIN_WIDTH 0.1
 #define BIN_COUNT L_MAX/BIN_WIDTH
 
@@ -43,7 +42,7 @@ void gpuAssert(cudaError_t code, const char *file, int line, bool abort);
 
 __FLAME_GPU_INIT_FUNC__ void initConstants()
 {
-	float delta_t = 0.875f;
+	float delta_t = 100; //0.1f;
 	set_DELTA_T(&delta_t);
 
 	float b0 = 2*pow(10,8);
@@ -147,13 +146,9 @@ __FLAME_GPU_FUNC__ int nucleate(xmachine_memory_crystal* agent, xmachine_message
 	//calculate if the agent has a low enough rank to aggregate
 	if (lower_rank_count < (d_exitNo)){
 		//even numbered agents will be destroyed
-		if(lower_rank_count % 2 == 0){
 			agent->l = 0;
-		}
 	}
 
-	//calculate the bin
-	agent->bin = agent->l / BIN_WIDTH;
     return 0;
 }
 
@@ -161,11 +156,11 @@ __FLAME_GPU_FUNC__ int nucleate(xmachine_memory_crystal* agent, xmachine_message
 //__FLAME_GPU_FUNC__ int growth(xmachine_memory_crystal* agent, xmachine_message_internal_coord_list * ){
 __FLAME_GPU_FUNC__ int growth(xmachine_memory_crystal* agent ){
 
- 	int l_new = agent->l + (DELTA_T*G0*(powf((1+y*agent->l),b))); // equation 20, Lj = Lj + Gj*DELTA_T
+ 	float l_new = agent->l + (DELTA_T*G0*(powf(1+y*agent->l,b))); // equation 20, Lj = Lj + Gj*DELTA_T
 
  	agent->l = l_new;
 
- 		//calculate the bin
+ 	//calculate the bin
 	agent->bin = agent->l / BIN_WIDTH;
 
  	return 0;
