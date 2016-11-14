@@ -255,7 +255,7 @@ help:
  
 build: Console_mode 
 
-Console_mode:  Montecarlo_cs1_console
+Console_mode:  Montecarlo_BATCH_console
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -274,21 +274,21 @@ main.o: $(SRC_CUDA)main.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
 
 
-Montecarlo_cs1_console: BUILD_TYPE=$(Mode_TYPE)_Console
-Montecarlo_cs1_console: io.o simulation.o  main.o 
+Montecarlo_BATCH_console: BUILD_TYPE=$(Mode_TYPE)_Console
+Montecarlo_BATCH_console: io.o simulation.o  main.o 
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
 	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/Montecarlo_cs1_console ../../examples/Montecarlo_cs1/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)Montecarlo_cs1_console.sh
-	chmod +x $(BIN_DIR)Montecarlo_cs1_console.sh
+	@echo ./$(BUILD_TYPE)/Montecarlo_BATCH_console ../../examples/Montecarlo_BATCH/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)Montecarlo_BATCH_console.sh
+	chmod +x $(BIN_DIR)Montecarlo_BATCH_console.sh
 
 
-run_console: Montecarlo_cs1_console
-	cd $(BIN_DIR) && ./Montecarlo_cs1_console.sh $(iter)
+run_console: Montecarlo_BATCH_console
+	cd $(BIN_DIR) && ./Montecarlo_BATCH_console.sh $(iter)
 
 clean:
 	rm -f *.o
-	#rm -rf $(BIN_DIR)Montecarlo_cs1*.sh
+	#rm -rf $(BIN_DIR)Montecarlo_BATCH*.sh
 
 clobber: clean 
 

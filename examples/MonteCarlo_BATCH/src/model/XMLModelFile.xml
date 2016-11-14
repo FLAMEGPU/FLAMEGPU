@@ -10,6 +10,14 @@
         <name>I_agg</name>
     </gpu:variable>
     <gpu:variable>
+        <type>float</type>
+        <name>G0</name>
+    </gpu:variable>
+    <gpu:variable>
+        <type>float</type>
+        <name>dT</name>
+    </gpu:variable>
+    <gpu:variable>
         <type>int</type>
         <name>aggNo</name> <!-- if aggNo=1, then two crystals are gonna aggregate -->
     </gpu:variable>
@@ -45,7 +53,7 @@
       <memory>
         <gpu:variable>
           <type>float</type>
-          <name>rank</name>
+          <name>rank</name> <!-- rank -->
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
@@ -73,7 +81,7 @@
         </gpu:function>
 
         <gpu:function>
-          <name>aggregate</name>
+          <name>simulate</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
                    <inputs>
@@ -118,6 +126,6 @@
   </messages>
   <layers>
     <layer><gpu:layerFunction><name>create_ranks</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>aggregate</name></gpu:layerFunction></layer>
+    <layer><gpu:layerFunction><name>simulate</name></gpu:layerFunction></layer>
   </layers>
 </gpu:xmodel>

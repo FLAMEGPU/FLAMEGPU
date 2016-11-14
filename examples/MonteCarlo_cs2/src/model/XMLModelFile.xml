@@ -57,7 +57,7 @@
         <gpu:name>nuclNo_func</gpu:name>
       </gpu:stepFunction>
             <gpu:stepFunction>
-        <gpu:name>exit_func</gpu:name>
+        <gpu:name>exitNo_func</gpu:name>
       </gpu:stepFunction>
     </gpu:stepFunctions>
   </gpu:environment>
