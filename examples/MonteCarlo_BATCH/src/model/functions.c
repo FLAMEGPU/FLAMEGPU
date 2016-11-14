@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2016 University of Sheffield.
  * Authors: Dr Paul Richmond , Dr Mozhgan Kabiri Chimeh
@@ -20,13 +21,11 @@
 
 #include <header.h>
 
-#define L_MAX 8.0
-#define NL_MAX 10000
+#define L_MAX 6.0
+#define NL_MAX 0.4
 #define BIN_WIDTH 0.1
 #define BIN_COUNT L_MAX/BIN_WIDTH
 
-__device__ int d_nuclNo;
-__device__ int d_exitNo;
 
 void gpuAssert(cudaError_t code, const char *file, int line, bool abort);
 /* Error check function for safe CUDA API calling */
@@ -35,72 +34,56 @@ void gpuAssert(cudaError_t code, const char *file, int line, bool abort);
 
 __FLAME_GPU_INIT_FUNC__ void initConstants()
 {
-    float delta_t = 100; //0.1f;
-    set_DELTA_T(&delta_t);
+    float i_agg = 0.875f; // high index aggregation
+    set_I_agg(&i_agg);
 
-    float b0 = 2*pow(10,8);
-    set_B0(&b0);
+    float g0_temp = 0;
+    set_G0(&g0_temp);
 
-    float g0 = 0.00168f;
-    set_G0(&g0);
+    int aggno = 1000;     // aggregation number
+    set_aggNo(&aggno);
 
-    float b_temp = 0.22615f;
-    set_b(&b_temp);
-
-    float y_temp = 1;
-    set_y(&y_temp);
-
-    float m0_temp = 1;
-    set_m0(&m0_temp);
-
-    int t_temp = 320;
-    set_t(&t_temp);
-
-    printf("FLAME GPU Init function. DELTA_T=%f, B0=%f, G0=%f, b=%f, y=%f, m0= %f\n", delta_t, b0, g0, b_temp, y_temp, m0_temp);
-}
-
-// The function calculates the exit number
-__FLAME_GPU_STEP_FUNC__ void exitNo_func() {
-
-    float d = *get_DELTA_T();
-    int t = *get_t();
-
-    int exit_no = (get_agent_crystal_default_count() * d)/ t;
-
-    gpuErrchk(cudaMemcpyToSymbol(d_exitNo, &exit_no, sizeof(int)));
-
-    //printf("FLAME GPU Step function. exitNo is %d\n", exit_no);
+//printf("FLAME GPU Init function. aggno=%f, I_agg=%d\n", aggno, i_agg);
 }
 
 
-// The function calculates the nucleation number
-__FLAME_GPU_STEP_FUNC__ void nuclNo_func() {
+// The function calculates the time step (delta T)
+__FLAME_GPU_STEP_FUNC__ void DELTA_T_func() {
 
-    float d = *get_DELTA_T();
-    float b0 = *get_B0();
+    float beta0 = *get_I_agg(); // aggregation Index number
+    int agg_No = *get_aggNo();  // aggregation number
 
-    int nc_no = b0*d*(pow(10,-7)); // equation 13, nuclNo = (B0*DELTA_T*popnNo)/m0, m0/Nc is the order of 10^7
+    float popnNo = get_agent_crystal_default_count(); // Nc-aggNo
 
-    gpuErrchk(cudaMemcpyToSymbol(d_nuclNo, &nc_no, sizeof(int)));
-    //printf("FLAME GPU Step function. nuclNo is %d\n", nc_no);
+    float dt = ((2*agg_No)/(beta0*popnNo*(1-beta0)*(popnNo-agg_No))); // equation 10 and 11
+
+    set_dT(&dt);
+
+    //printf("FLAME GPU Step function. Delta T is %f\n", dt);
 }
+
 
 __FLAME_GPU_EXIT_FUNC__ void hist_func() {
 
+
     printf("FLAME GPU Exit function\n");
-    FILE *hist_output = fopen("histogram_c2.dat", "w"); // write only - append
+    FILE *hist_output = fopen("histogram_c1.dat", "w");
 
     for (int i=0; i<BIN_COUNT; i++) {
         int count = count_crystal_default_bin_variable(i);
+
         //printf("bin index=%d, count = %d\n", i, count);
+
         fprintf(hist_output,"%f %d\n", i*BIN_WIDTH, count);
     }
     fprintf(hist_output,"\n\n");
     fclose(hist_output);
 }
 
+
 // The function generates a new rank for each crystal and outputs crystal internal coordinates
 __FLAME_GPU_FUNC__ int create_ranks(xmachine_memory_crystal* agent, xmachine_message_internal_coord_list* internal_coord,RNG_rand48* rand48) {
+
     //generate a new rank for the iteration
     agent->rank = rnd<CONTINUOUS>(rand48);
 
@@ -110,12 +93,14 @@ __FLAME_GPU_FUNC__ int create_ranks(xmachine_memory_crystal* agent, xmachine_mes
     return 0;
 }
 
+//The function does Batch Simulation
+__FLAME_GPU_FUNC__ int simulate(xmachine_memory_crystal* agent, xmachine_message_internal_coord_list* internal_coord_messages) {
 
-// randomly select crystals and set the size to zero
-__FLAME_GPU_FUNC__ int nucleate(xmachine_memory_crystal* agent, xmachine_message_internal_coord_list* internal_coord_messages) {
 
     int lower_rank_count=0;	//count of agents that have a lower rank that the current agent
     float closest_lower_rank = 0;
+    float closest_lower_length = 0;
+    int destroy = 0;
 
     //iterate through messages
     xmachine_message_internal_coord* current_message = get_first_internal_coord_message(internal_coord_messages);
@@ -126,6 +111,7 @@ __FLAME_GPU_FUNC__ int nucleate(xmachine_memory_crystal* agent, xmachine_message
             lower_rank_count++;
             if (current_message->rank > closest_lower_rank) {
                 closest_lower_rank = current_message->rank;
+                closest_lower_length = current_message->l;
             }
 
         }
@@ -133,27 +119,29 @@ __FLAME_GPU_FUNC__ int nucleate(xmachine_memory_crystal* agent, xmachine_message
         current_message = get_next_internal_coord_message(current_message, internal_coord_messages);
     }
 
-    //calculate if the agent has a low enough rank to nucleate
-    if (lower_rank_count < (d_exitNo)) {
-        //ranks with low enough values will exit
-        //as it is a steady state simulation then seting l to 0 is the same as nucleation
-        agent->l = 0;
+    //calculate if the agent has a low enough rank to aggregate
+    if (lower_rank_count < 2*aggNo) {
+        //even numbered agents will be destroyed
+        if(lower_rank_count % 2 == 0) {
+            destroy = 1;
+        }
+        //odd numbered agents will be aggregated
+        else {
+            //apply the formula to find the aggregate length (equ 8)
+            agent->l = powf((powf(agent->l, 3)+ powf(closest_lower_length, 3)), (1.0/3.0));
+
+        }
+
     }
 
-    return 0;
-}
-
-
-__FLAME_GPU_FUNC__ int growth(xmachine_memory_crystal* agent ) {
-
-    float l_new = agent->l + (DELTA_T*G0*(powf(1+y*agent->l,b))); // equation 20, Lj = Lj + Gj*DELTA_T
-
-    agent->l = l_new;
+    //perform growth
+    agent->l += G0*dT;
 
     //calculate the bin
     agent->bin = agent->l / BIN_WIDTH;
 
-    return 0;
+    return destroy;
 }
+
 
 #endif //_FLAMEGPU_FUNCTIONS
