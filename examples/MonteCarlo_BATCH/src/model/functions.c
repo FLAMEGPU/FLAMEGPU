@@ -65,9 +65,12 @@ __FLAME_GPU_STEP_FUNC__ void DELTA_T_func() {
 
 __FLAME_GPU_EXIT_FUNC__ void hist_func() {
 
+	char output_file[1024];
 
     printf("FLAME GPU Exit function\n");
-    FILE *hist_output = fopen("histogram_c1.dat", "w");
+
+	sprintf(output_file, "%s%s", getOutputDir(), "histogram_c1.dat");
+	FILE *hist_output = fopen(output_file, "w");
 
     for (int i=0; i<BIN_COUNT; i++) {
         int count = count_crystal_default_bin_variable(i);

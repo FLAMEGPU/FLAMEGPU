@@ -41,6 +41,7 @@
 
 typedef unsigned int uint;
 
+
 	<xsl:if test="gpu:xmodel/xmml:messages/gpu:message/xmml:variables/gpu:variable/xmml:type='double' or gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable/xmml:type='double'">
 //if this is defined then the project must be built with sm_13 or later
 #define _DOUBLE_SUPPORT_REQUIRED_</xsl:if>
@@ -175,27 +176,33 @@ struct xmachine_message_<xsl:value-of select="xmml:name"/>_PBM
 </xsl:if></xsl:for-each>
 
 
-/* Random */
-/** struct RNG_rand48 
- *	structure used to hold list seeds
- */
-struct RNG_rand48
-{
+  /* Random */
+  /** struct RNG_rand48
+  *	structure used to hold list seeds
+  */
+  struct RNG_rand48
+  {
   glm::uvec2 A, C;
   glm::uvec2 seeds[buffer_size_MAX];
-};
+  };
 
 
-/* Random Functions (usable in agent functions) implemented in FLAMEGPU_Kernels */
+/** getOutputDir
+* Gets the output directory of the simulation. This is the same as the 0.xml input directory.
+* @return a const char pointer to string denoting the output directory
+*/
+const char* getOutputDir();
 
-/**
- * Templated random function using a DISCRETE_2D template calculates the agent index using a 2D block
- * which requires extra processing but will work for CONTINUOUS agents. Using a CONTINUOUS template will
- * not work for DISCRETE_2D agent.
- * @param	rand48	an RNG_rand48 struct which holds the seeds sued to generate a random number on the GPU
- * @return			returns a random float value
- */
-template &lt;int AGENT_TYPE&gt; __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
+  /* Random Functions (usable in agent functions) implemented in FLAMEGPU_Kernels */
+
+  /**
+  * Templated random function using a DISCRETE_2D template calculates the agent index using a 2D block
+  * which requires extra processing but will work for CONTINUOUS agents. Using a CONTINUOUS template will
+  * not work for DISCRETE_2D agent.
+  * @param	rand48	an RNG_rand48 struct which holds the seeds sued to generate a random number on the GPU
+  * @return			returns a random float value
+  */
+  template &lt;int AGENT_TYPE&gt; __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
 /**
  * Non templated random function calls the templated version with DISCRETE_2D which will work in either case
  * @param	rand48	an RNG_rand48 struct which holds the seeds sued to generate a random number on the GPU
