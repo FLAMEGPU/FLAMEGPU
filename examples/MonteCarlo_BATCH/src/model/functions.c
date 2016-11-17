@@ -55,7 +55,7 @@ __FLAME_GPU_STEP_FUNC__ void DELTA_T_func() {
 
     float popnNo = get_agent_crystal_default_count(); // Nc-aggNo
 
-    float dt = ((2*agg_No)/(beta0*popnNo*(1-beta0)*(popnNo-agg_No))); // equation 10 and 11
+    float dt = ((2*agg_No)/(beta0*popnNo*(popnNo-agg_No))); // equation 10 and 11
 
     set_dT(&dt);
 
@@ -106,7 +106,6 @@ __FLAME_GPU_FUNC__ int simulate(xmachine_memory_crystal* agent, xmachine_message
     xmachine_message_internal_coord* current_message = get_first_internal_coord_message(internal_coord_messages);
     while (current_message)
     {
-        //check the rank to be less than aggNo
         if (current_message->rank < agent->rank) {
             lower_rank_count++;
             if (current_message->rank > closest_lower_rank) {
@@ -129,7 +128,6 @@ __FLAME_GPU_FUNC__ int simulate(xmachine_memory_crystal* agent, xmachine_message
         else {
             //apply the formula to find the aggregate length (equ 8)
             agent->l = powf((powf(agent->l, 3)+ powf(closest_lower_length, 3)), (1.0/3.0));
-
         }
 
     }
