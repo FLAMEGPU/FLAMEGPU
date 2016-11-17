@@ -26,13 +26,31 @@
         <name>y</name>
     </gpu:variable>
     <gpu:variable>
-        <type>float</type>
-        <name>m0</name>
-    </gpu:variable>
-        <gpu:variable>
         <type>int</type>
         <name>t</name>
     </gpu:variable>
+    <gpu:variable>
+      <type>float</type>
+      <name>m0</name>
+    </gpu:variable>
+    <gpu:variable>
+      <type>float</type>
+      <name>delta_m0</name>
+    </gpu:variable>
+    <gpu:variable>
+      <type>int</type>
+      <name>nuc_no</name>
+    </gpu:variable>
+    <gpu:variable>
+      <type>int</type>
+      <name>exit_no</name>
+    </gpu:variable>
+    <gpu:variable>
+      <type>int</type>
+      <name>agg_no</name>
+    </gpu:variable>
+      
+      
 
 </gpu:constants>
 
@@ -52,14 +70,6 @@
       </gpu:exitFunction>
     </gpu:exitFunctions>
 
-    <gpu:stepFunctions>
-      <gpu:stepFunction>
-        <gpu:name>nuclNo_func</gpu:name>
-      </gpu:stepFunction>
-            <gpu:stepFunction>
-        <gpu:name>exitNo_func</gpu:name>
-      </gpu:stepFunction>
-    </gpu:stepFunctions>
   </gpu:environment>
 
   <xagents>

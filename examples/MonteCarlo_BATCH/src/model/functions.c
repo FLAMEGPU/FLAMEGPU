@@ -40,7 +40,7 @@ __FLAME_GPU_INIT_FUNC__ void initConstants()
     float g0_temp = 0;
     set_G0(&g0_temp);
 
-    int aggno = 1000;     // aggregation number
+    int aggno = 10;     // aggregation number
     set_aggNo(&aggno);
 
 //printf("FLAME GPU Init function. aggno=%f, I_agg=%d\n", aggno, i_agg);

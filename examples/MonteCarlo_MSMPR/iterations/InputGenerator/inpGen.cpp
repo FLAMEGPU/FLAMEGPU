@@ -18,9 +18,26 @@ To Execute: ./inpGen iterations/0.xml ~/Desktop/input.dat 10000
 
 int hist[int(BIN_COUNT)];
 
+
+#ifdef _WIN32
+#define srand48(x) srand(x)
+#define drand48() ((double)rand()/RAND_MAX)
+#endif
+
 int main( int argc, char** argv)
 {
-    srand48(time(NULL));
+    srand48((unsigned int)time(NULL));
+
+	//proper error checking
+	if (argc != 4){
+		printf("Incorrect use of program. Format should be.\n");
+		printf("InputGenerator.exe xml_out.xml hist_out.h n_c\n");
+		printf("\twhere\n");
+		printf("\txml_out.xml is the Flame simulation state xml file\n");
+		printf("\thost_out.xml is the initial state histogram\n");
+		printf("\tn_c is the initial population size\n");
+		return 1;
+	}
 
     int n_c = atoi(argv[3]);
     char * fileName1 = argv[1];
@@ -48,7 +65,7 @@ int main( int argc, char** argv)
         double nl_temp = drand48()*NL_MAX;
         if (pow(l_temp, 2)*exp(-1*pow(l_temp, 3)) > nl_temp) { //n_c* -- we removed the n_c
             fprintf(fp, "<xagent><name>crystal</name><rank>0</rank><l>%f</l></xagent>\n",l_temp);
-            int bin = l_temp / BIN_WIDTH;
+            int bin = (int)(l_temp / BIN_WIDTH);
             if (bin >= BIN_COUNT) {
                 printf("Error, bin > BIN_COUNT!!!\n");
             }
