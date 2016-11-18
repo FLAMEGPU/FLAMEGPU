@@ -62,6 +62,12 @@ XSLTPREP:
 	xsltproc $(TEMPLATE)main.xslt $(XML_MODEL) > $(SRC_CUDA)main.cu
 
 ################################################################################
+#Generating initial states
+
+input_Gen: 
+	cd iterations && chmod +x generate_charge.sh 
+	cd iterations && ./generate_charge.sh
+################################################################################
 
 # Location of the CUDA Toolkit
 CUDA_PATH ?= "/usr/local/cuda-7.5"
@@ -243,6 +249,10 @@ help:
 	@echo "make run_console iter='arg'                                            *"
 	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "                                                                       *"
+	@echo "           ------------------------------------------------            *" 
+	@echo "To run executables for charge generation, run below command:           *"
+	@echo "make input_Gen                                                         *"
+	@echo "                                                                       *"
 	@echo "           ------------------------------------------------            *"                
 	@echo "Alternatively, run the bash script stored in bin/x64. The iteration    *"
 	@echo "default value in console mode is 10. You can simple change it by       *"
@@ -255,7 +265,7 @@ help:
  
 build: Console_mode 
 
-Console_mode:  Montecarlo_cs2_console
+Console_mode:  Montecarlo_MSMPR_console
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -274,21 +284,21 @@ main.o: $(SRC_CUDA)main.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
 
 
-Montecarlo_cs2_console: BUILD_TYPE=$(Mode_TYPE)_Console
-Montecarlo_cs2_console: io.o simulation.o  main.o 
+Montecarlo_MSMPR_console: BUILD_TYPE=$(Mode_TYPE)_Console
+Montecarlo_MSMPR_console: io.o simulation.o  main.o 
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
 	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/Montecarlo_cs2_console ../../examples/Montecarlo_cs2/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)Montecarlo_cs2_console.sh
-	chmod +x $(BIN_DIR)Montecarlo_cs2_console.sh
+	@echo ./$(BUILD_TYPE)/Montecarlo_MSMPR_console ../../examples/Montecarlo_MSMPR/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)Montecarlo_MSMPR_console.sh
+	chmod +x $(BIN_DIR)Montecarlo_MSMPR_console.sh
 
 
-run_console: Montecarlo_cs2_console
-	cd $(BIN_DIR) && ./Montecarlo_cs2_console.sh $(iter)
+run_console: Montecarlo_MSMPR_console
+	cd $(BIN_DIR) && ./Montecarlo_MSMPR_console.sh $(iter)
 
 clean:
 	rm -f *.o
-	#rm -rf $(BIN_DIR)Montecarlo_cs2*.sh
+	#rm -rf $(BIN_DIR)Montecarlo_MSMPR*.sh
 
 clobber: clean 
 

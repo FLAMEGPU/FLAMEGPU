@@ -62,6 +62,12 @@ XSLTPREP:
 	xsltproc $(TEMPLATE)main.xslt $(XML_MODEL) > $(SRC_CUDA)main.cu
 
 ################################################################################
+#Generating initial states
+
+input_Gen: 
+	cd iterations && chmod +x generate_charge.sh 
+	cd iterations && ./generate_charge.sh
+################################################################################
 
 # Location of the CUDA Toolkit
 CUDA_PATH ?= "/usr/local/cuda-7.5"
@@ -243,7 +249,11 @@ help:
 	@echo "make run_console iter='arg'                                            *"
 	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"                
+	@echo "           ------------------------------------------------            *"    
+	@echo "To run executables for charge generation, run below command:           *"
+	@echo "make input_Gen                                                         *"
+	@echo "                                                                       *"
+	@echo "           ------------------------------------------------            *"             
 	@echo "Alternatively, run the bash script stored in bin/x64. The iteration    *"
 	@echo "default value in console mode is 10. You can simple change it by       *"
 	@echo "entering a new value while running the ./*.sh file.                    *"
