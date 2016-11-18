@@ -27,7 +27,7 @@
  * @param agent Pointer to an agent structre of type xmachine_memory_example_agent. This represents a single agent instance and can be modified directly.
  * @param example_message_messages Pointer to output message list of type xmachine_message_example_message_list. Must be passed as an argument to the add_example_message_message function ??.
  */
-__FLAME_GPU_FUNC__ int output_example(xmachine_memory_example_agent* agent, xmachine_message_example_message_list* example_message_messages){
+__FLAME_GPU_FUNC__ int output_properties(xmachine_memory_pedestrian* agent, xmachine_message_properties_message_list* example_message_messages){
 
     
     /* //Template for message output function use 
@@ -48,7 +48,7 @@ __FLAME_GPU_FUNC__ int output_example(xmachine_memory_example_agent* agent, xmac
  * @param agent Pointer to an agent structre of type xmachine_memory_example_agent. This represents a single agent instance and can be modified directly.
  * @param example_message_messages  example_message_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_example_message_message and get_next_example_message_message functions.
  */
-__FLAME_GPU_FUNC__ int input_example(xmachine_memory_example_agent* agent, xmachine_message_example_message_list* example_message_messages){
+__FLAME_GPU_FUNC__ int input_properties(xmachine_memory_pedestrian* agent, xmachine_message_properties_message_list* example_message_messages){
 
     
     /* //Template for input message itteration
