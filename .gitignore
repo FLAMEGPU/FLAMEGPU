@@ -7,7 +7,7 @@ bin_private/
 examples/**/x64
 cityModel.obj
 stadium.obj
-**/bin/**/
+**/bin/**/*.exe
 **/bin/**/cudart*.dll
 **/dynamic/*.cu
 **/dynamic/*.h

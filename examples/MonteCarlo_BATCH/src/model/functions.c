@@ -27,11 +27,6 @@
 #define BIN_COUNT L_MAX/BIN_WIDTH
 
 
-void gpuAssert(cudaError_t code, const char *file, int line, bool abort);
-/* Error check function for safe CUDA API calling */
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__, true); }
-
-
 __FLAME_GPU_INIT_FUNC__ void initConstants()
 {
     float i_agg = 0.875f; // high index aggregation
@@ -40,7 +35,7 @@ __FLAME_GPU_INIT_FUNC__ void initConstants()
     float g0_temp = 0;
     set_G0(&g0_temp);
 
-    int aggno = 10;     // aggregation number
+    int aggno = 1000;     // aggregation number
     set_aggNo(&aggno);
 
 //printf("FLAME GPU Init function. aggno=%f, I_agg=%d\n", aggno, i_agg);
