@@ -1,20 +1,21 @@
 #!/usr/bin/python
 # $Id$
 #
-# Author: Alcione de Paiva Oliveira
-# version: 0.9.3
-# Date : 21 Oct 2015
+# Authors: Mozhgan Kabiri Chimeh, Paul Richmond (based on Alcione de Paiva Oliveira existing version)
+#
+# This program is an extended/modified version written previously by Alcione de Paiva Oliveira.
+# Any questions, please contact m.kabiri-chimeh@sheffiled.ac.uk or p.richmond@sheffield.ac.uk
+#
+# Date : November 2016
 #
 # Description:
-# Create a dot direct graph from the Flame GPU model file. 
+# Create a dot direct graph from the Flame GPU model file.
 # By default the nodes are renamed to avoid direct cycles, so improving readability.
-# If the user wants cycles then should use de -c flag
-# Optionally, if the user sets the flag -f the script outputs a source code skeleton of the functions used on the Model
 #
 #---------------------------------------------------------------------
-# 
+#
 # input arguments
-# Example python3 model2dot.py -i XMLModelFile.xml -o out.gdot -f -c
+# Example python3 model2dot.py -i XMLModelFile.xml -o out.gdot
 
 
 import getopt, sys
@@ -100,7 +101,7 @@ def renameStates(agent):
              if (previousState[i] == afterState[j]):
                 afterState[j] = afterState[j]+"\'"
              j = j+ 1
- 
+
 
 # input arguments
 # Example python3 model2dot.py -i XMLModelFile.xml -o out.gdot -f -c
@@ -129,17 +130,104 @@ if (len(sys.argv)==4 and sys.argv[3]=="-f" ):
    genFunc = True
    ffunc = open("functions.cc", "w")
    ffunc.write("#ifndef _FUNCTIONS_H_\n#define _FUNCTIONS_H_\n\n#include \"header.h\"\n\n")
-   
+
 # Open XML document using minidom parser
 DOMTree = xml.dom.minidom.parse(entrada)
 collection = DOMTree.documentElement
+
+file = open(saida, "w")
+file.write("digraph model {\n")
+
+####################
+
+init_flag = False
+step_flag = False
+exit_flag = False
+
+file.write("  newrank=true;\ncompound=true; \n ")
+
+file.write("  START [style=invisible];\n");
+file.write("  MID [style=invisible];\n");
+file.write("  END [style=invisible];\n");
+
+initFunc = collection.getElementsByTagName("gpu:initFunction")
+stepFunc = collection.getElementsByTagName("gpu:stepFunction")
+exitFunc = collection.getElementsByTagName("gpu:exitFunction")
+
+
+# init functions
+file.write("subgraph cluster_%d{\n color=blue; label=initFunctions;penwidth=3;  \n\n" % (clusterNumber))
+clusterNumber = clusterNumber +1
+
+for fi in initFunc:
+  name = (fi.getElementsByTagName('gpu:name')[0]).childNodes[0].data
+  file.write("   %s [shape=box,penwidth=3];\n" %  name )
+  print ("init function: %s" % name)
+  init_flag=True
+file.write("}\n\n")
+
+init_name_tmp = name
+init_temp=clusterNumber-1
+#file.write("%s -> START[style=invis];\n"% name)
+
+
+# step functions
+file.write("subgraph cluster_%d{\n color=blue;label=stepFunctions;penwidth=3; \n\n" % (clusterNumber))
+clusterNumber = clusterNumber +1
+
+for fs in stepFunc:
+   name = (fs.getElementsByTagName('gpu:name')[0]).childNodes[0].data
+   file.write("   %s [shape=box,penwidth=3];\n" %  name )
+   print ("step function: %s" % name)
+   step_flag=True
+file.write("}\n\n")
+step_name_tmp = name
+step_temp=clusterNumber-1
+
+# exit functions
+file.write("subgraph cluster_%d{\n color=blue; label=exitFunctions;penwidth=3; \n\n" % (clusterNumber))
+clusterNumber = clusterNumber +1
+
+for fe in exitFunc:
+   name = (fe.getElementsByTagName('gpu:name')[0]).childNodes[0].data
+   file.write("   %s [shape=box,penwidth=3];\n" %  name )
+   print ("exit function: %s" % name)
+   exit_flag=True
+file.write("}\n\n")
+exit_name_tmp = name
+exit_temp=clusterNumber-1
+
+# fix, it should replace if not exists , get rid of if conditions
+if (init_flag):
+  if (step_flag):
+    file.write("%s -> %s [ltail=cluster_%d,lhead=cluster_%d];\n\n"% (init_name_tmp,step_name_tmp,init_temp,step_temp))
+  elif (exit_flag):
+    file.write("%s -> %s [ltail=cluster_%d,lhead=cluster_%d];\n\n"% (init_name_tmp,exit_name_tmp,init_temp,exit_temp))
+elif (step_flag & exit_flag):
+  file.write("%s -> %s [ltail=cluster_%d,lhead=cluster_%d];\n\n"% (step_name_tmp,exit_name_tmp,step_temp,exit_temp))
+
+
+#################### Rank function acc to layers
+
+f_Layers = collection.getElementsByTagName("layers")[0]
+funcSynch = f_Layers.getElementsByTagName("layer")
+for f in funcSynch:
+  fl = f.getElementsByTagName("gpu:layerFunction")
+  file.write("{rank = same ;")
+  for g in fl:
+      nameFunc = (g.getElementsByTagName('name')[0]).childNodes[0].data
+      file.write("%s ;"% nameFunc)
+  file.write("}\n\n")
+
+####################
+
 
 # Get all the agents in the collection
 agents = collection.getElementsByTagName("gpu:xagent")
 layers = collection.getElementsByTagName("gpu:layerFunction")
 
 # Get a list of the function execution in the correct order
-for layer in layers: 
+for layer in layers:
    nomeFuncLayer = (layer.getElementsByTagName('name')[0]).childNodes[0].data
    funcOrder.append(nomeFuncLayer)
    previousState.append("")
@@ -147,30 +235,18 @@ for layer in layers:
    conditions.append("")
    #print ("Function:%s\n" % (nomeFuncLayer))
 
-file = open(saida, "w")
-file.write("digraph model {\n")
 
 # Print detail of each agent.
 for agent in agents:
    nome = (agent.getElementsByTagName('name')[0]).childNodes[0].data
    print ("agent: %s" % nome)
-   
-   if (genFunc):
-      ffunc.write("/**************************************\n")
-      ffunc.write("     %s functions\n" % (nome))
-      ffunc.write("**************************************/\n")
 
    if not primeiro:
       file.write("}\n\n")
 
-   primeiro = False  
-   file.write("subgraph cluster_%d{\n label=\"%s\";color=blue; \n\n" % (clusterNumber,nome))
+   primeiro = False
+   file.write("subgraph cluster_%d{\n label=\"%s\";color=blue; penwidth=3; \n\n" % (clusterNumber,nome))
    clusterNumber = clusterNumber +1
-#   memory = agent.getElementsByTagName('memory')[0]
-#   variables = memory.getElementsByTagName("gpu:variable")
-#   for v in variables:
-#      n = v.getElementsByTagName('name')[0]
-#      print ("variavel: %s" % n.childNodes[0].data)
 
    funcs = agent.getElementsByTagName('functions')[0]
    funs = funcs.getElementsByTagName("gpu:function")
@@ -190,6 +266,7 @@ for agent in agents:
 #      description = f.getElementsByTagName('description')[0]
       ist = (f.getElementsByTagName('currentState')[0]).childNodes[0].data
       fst = (f.getElementsByTagName('nextState')[0]).childNodes[0].data
+
 #      print ("Funcao: %s" % nameFunc)
 
       # Store the states of each function
@@ -198,60 +275,35 @@ for agent in agents:
 
       conditions[funcOrder.index(nameFunc)]= condition
 
-      file.write("   %s [shape=box];\n" %  nameFunc )
+      file.write("   %s [shape=box,penwidth=3];\n" %  nameFunc )
 
       if (cycle):
-          file.write("   %s -> %s %s;\n" % (ist, nameFunc, condition ))
-          file.write("   %s -> %s;\n" %  (nameFunc,  fst))
+          file.write("   %s -> %s %s [penwidth=3];\n" % (ist, nameFunc, condition ))
+          file.write("   %s -> %s[penwidth=3];\n" %  (nameFunc,  fst))
 
       outputs = f.getElementsByTagName('outputs')
       if (outputs.length>0):
           gpuOut = outputs[0].getElementsByTagName("gpu:output")[0]
           menName = getNodeText(gpuOut.getElementsByTagName("messageName")[0])
-          
-          file.write("   %s -> %s [color=green];\n" %  (nameFunc,  menName))
+
+          file.write("   %s -> %s [color=green,penwidth=3];\n" %  (nameFunc,  menName))
 
           if (menName not in mes):
               mes.append(menName)
 
-          if (genFunc):
-             noIO = False
-             if (rng == "false"):
-                 ffunc.write("__FLAME_GPU_FUNC__ int %s(xmachine_memory_%s* agent, xmachine_message_%s_list* %s_messages){\n" %(nameFunc,nome,menName,menName))
-             else:
-                 ffunc.write("__FLAME_GPU_FUNC__ int %s(xmachine_memory_%s* agent, xmachine_message_%s_list* %s_messages, RNG_rand48* rand48){\n" %(nameFunc,nome,menName,menName))
-             ffunc.write("//                 add_%s_message(%s_messages, agent->x, agent->y, 0.0,...);\n\n" % (menName, menName))
-             ffunc.write("    return 0;\n}\n\n")
+
 
       inputs = f.getElementsByTagName('inputs')
       if (inputs.length>0):
           gpuIN = inputs[0].getElementsByTagName("gpu:input")[0]
           menName = getNodeText(gpuIN.getElementsByTagName("messageName")[0])
-          
-          file.write("   %s -> %s [color=green];\n" %  ( menName, nameFunc))
+
+          file.write("   %s -> %s [color=green,penwidth=3];\n" %  ( menName, nameFunc))
 
           if (menName not in mes):
               mes.append(menName)
-              
-          if (genFunc):
-              noIO = False
-              if (rng == "false"):
-                 ffunc.write("__FLAME_GPU_FUNC__ int %s(xmachine_memory_%s* agent, xmachine_message_%s_list* %s_messages, xmachine_message_%s_PBM* pm){\n" %(nameFunc,nome,menName,menName,menName))
-              else:
-                 ffunc.write("__FLAME_GPU_FUNC__ int %s(xmachine_memory_%s* agent, xmachine_message_%s_list* %s_messages, xmachine_message_%s_PBM* pm, RNG_rand48* rand48){\n" %(nameFunc,nome,menName,menName,menName))
-              ffunc.write("    xmachine_message_%s* current_message = get_first_%s_message(%s_messages, pm, agent->x, agent->y, 0.0);\n" % (menName,menName,menName))
-              ffunc.write("    while (current_message)\n")
-              ffunc.write("    {\n")
-              ffunc.write("       current_message = get_next_%s_message(current_message, %s_messages, pm);\n" % (menName,menName))
-              ffunc.write("    }\n")
-              ffunc.write("    return 0;\n}\n\n")
 
-      if (genFunc and noIO == True):
-          if (rng == "false"):
-             ffunc.write("__FLAME_GPU_FUNC__ int %s(xmachine_memory_%s* agent){\n" %(nameFunc,nome))
-          else:
-             ffunc.write("__FLAME_GPU_FUNC__ int %s(xmachine_memory_%s* agent, RNG_rand48* rand48){\n" %(nameFunc,nome))          
-          ffunc.write("    return 0;\n}\n\n")
+
 
     #----------------------------------------------------------------------------------
     #  If is not to produce cycles on the same state then the states will be renamed
@@ -261,17 +313,29 @@ for agent in agents:
       for k in range(len(funcOrder)):
           if(previousState[k].find(nome+":")==0 ):
              file.write("   \"%s\" -> %s %s;\n" % (previousState[k][previousState[k].find(":")+1:], funcOrder[k], conditions[k] ))
+             print("   \"%s\" -> %s %s;\n" % (previousState[k][previousState[k].find(":")+1:], funcOrder[k], conditions[k] ))
              file.write("   %s -> \"%s\";\n" %  (funcOrder[k],  afterState[k][afterState[k].find(":")+1:]))
+             print ("   %s -> \"%s\";\n" %  (funcOrder[k],  afterState[k][afterState[k].find(":")+1:]))
+      file.write("  \"%s\"-> MID [style=invis];\n" %  (afterState[k][afterState[k].find(":")+1:]))
+      file.write(" START-> \"%s\"[style=invis] ;\n"% previousState[0][previousState[0].find(":")+1:])
 
-        
 #----------------------------------------------------------------------------------
 #  Writes the shape of messages
-#----------------------------------------------------------------------------------           
+#----------------------------------------------------------------------------------
 file.write("}\n\n")
+
+file.write("MID -> END [style=invis];\n\n")
+
+if (init_flag):
+  file.write("%s -> START [style=invis];\n"% (init_name_tmp))
+  file.write("{rank = same ; START ; %s;}\n"% (init_name_tmp))
+if (step_flag):
+  file.write("{rank = same ; MID ; %s;}\n"% (step_name_tmp))
+if (exit_flag):
+  file.write("{rank = same ; END ; %s;}\n\n"% (exit_name_tmp))
+
 for m in mes:
-    file.write("   %s [shape=box][shape=diamond, label=%s, fontcolor=green, color=green];\n" % (m,m))
+    file.write("   %s [shape=box][shape=diamond, label=%s, fontcolor=green, color=green,penwidth=3];\n" % (m,m))
 
 file.write("}")
 
-if (genFunc):
-   ffunc.write("#endif // #ifndef _FUNCTIONS_H_")
