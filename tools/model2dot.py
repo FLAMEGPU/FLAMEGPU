@@ -12,6 +12,7 @@
 # Create a dot direct graph from the Flame GPU model file.
 # By default the nodes are renamed to avoid direct cycles, so improving readability.
 #
+# WARNING : Current version of the diagram-gen does not generate the correct diagram for models where there are multiple functions from the same agent in the same simulation # layer. For those specific models, where each function is applied on certain agents, the diagram-gen cannot distinguish the correct state for each of these functions.
 #---------------------------------------------------------------------
 #
 # input arguments
@@ -154,7 +155,7 @@ initFunc = collection.getElementsByTagName("gpu:initFunction")
 stepFunc = collection.getElementsByTagName("gpu:stepFunction")
 exitFunc = collection.getElementsByTagName("gpu:exitFunction")
 
-
+name = ""
 # init functions
 file.write("subgraph cluster_%d{\n color=blue; label=initFunctions;penwidth=3;  \n\n" % (clusterNumber))
 clusterNumber = clusterNumber +1
@@ -286,7 +287,7 @@ for agent in agents:
           gpuOut = outputs[0].getElementsByTagName("gpu:output")[0]
           menName = getNodeText(gpuOut.getElementsByTagName("messageName")[0])
 
-          file.write("   %s -> %s [color=green,penwidth=3];\n" %  (nameFunc,  menName))
+          file.write("   %s -> %s [color=green4,penwidth=3];\n" %  (nameFunc,  menName))
 
           if (menName not in mes):
               mes.append(menName)
@@ -298,7 +299,7 @@ for agent in agents:
           gpuIN = inputs[0].getElementsByTagName("gpu:input")[0]
           menName = getNodeText(gpuIN.getElementsByTagName("messageName")[0])
 
-          file.write("   %s -> %s [color=green,penwidth=3];\n" %  ( menName, nameFunc))
+          file.write("   %s -> %s [color=green4,penwidth=3];\n" %  ( menName, nameFunc))
 
           if (menName not in mes):
               mes.append(menName)
@@ -317,12 +318,14 @@ for agent in agents:
              file.write("   %s -> \"%s\";\n" %  (funcOrder[k],  afterState[k][afterState[k].find(":")+1:]))
              print ("   %s -> \"%s\";\n" %  (funcOrder[k],  afterState[k][afterState[k].find(":")+1:]))
       file.write("  \"%s\"-> MID [style=invis];\n" %  (afterState[k][afterState[k].find(":")+1:]))
-      file.write(" START-> \"%s\"[style=invis] ;\n"% previousState[0][previousState[0].find(":")+1:])
+    #  file.write(" START-> \"%s\"[style=invis] ;\n"% previousState[0][previousState[0].find(":")+1:])
 
 #----------------------------------------------------------------------------------
 #  Writes the shape of messages
 #----------------------------------------------------------------------------------
 file.write("}\n\n")
+
+file.write(" START-> \"%s\"[style=invis] ;\n"% previousState[0][previousState[0].find(":")+1:])
 
 file.write("MID -> END [style=invis];\n\n")
 
@@ -335,7 +338,7 @@ if (exit_flag):
   file.write("{rank = same ; END ; %s;}\n\n"% (exit_name_tmp))
 
 for m in mes:
-    file.write("   %s [shape=box][shape=diamond, label=%s, fontcolor=green, color=green,penwidth=3];\n" % (m,m))
+    file.write("   %s [shape=box][shape=diamond, label=%s, fontcolor=green4, color=green4,penwidth=3];\n" % (m,m))
 
 file.write("}")
 
