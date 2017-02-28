@@ -46,7 +46,7 @@ typedef unsigned int uint;
 //if this is defined then the project must be built with sm_13 or later
 #define _DOUBLE_SUPPORT_REQUIRED_</xsl:if>
 
-/* Agent population size definifions must be a multiple of THREADS_PER_TILE (defualt 64) */
+/* Agent population size definitions must be a multiple of THREADS_PER_TILE (default 64) */
 //Maximum buffer size (largest agent buffer size)
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
       <xsl:sort select="gpu:bufferSize" data-type="number" order="descending" />
@@ -60,7 +60,7 @@ typedef unsigned int uint;
 </xsl:for-each>
   
   
-/* Message poulation size definitions */<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message">
+/* Message population size definitions */<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message">
 //Maximum population size of xmachine_mmessage_<xsl:value-of select="xmml:name"/>
 #define xmachine_message_<xsl:value-of select="xmml:name"/>_MAX <xsl:value-of select="gpu:bufferSize" /><xsl:text>
 </xsl:text></xsl:for-each>
@@ -118,7 +118,7 @@ struct __align__(16) xmachine_message_<xsl:value-of select="xmml:name"/>
     glm::ivec2 _position;         /**&lt; 2D position of message*/
     glm::ivec2 _relative;         /**&lt; 2D position of message relative to the agent (range +- radius) */</xsl:if><xsl:if test="gpu:partitioningNone">/* Brute force Partitioning Variables */
     int _position;          /**&lt; 1D position of message in linear message list */ </xsl:if><xsl:if test="gpu:partitioningSpatial">/* Spatial Partitioning Variables */
-    glm::ivec3 _relative_cell;    /**&lt; Relative cell position from agent grid cell poistion range -1 to 1 */
+    glm::ivec3 _relative_cell;    /**&lt; Relative cell position from agent grid cell position range -1 to 1 */
     int _cell_index_max;    /**&lt; Max boundary value of current cell */
     glm::ivec3 _agent_grid_cell;  /**&lt; Agents partition cell position */
     int _cell_index;        /**&lt; Index of position in current cell */</xsl:if><xsl:text>  
@@ -163,7 +163,7 @@ struct xmachine_message_<xsl:value-of select="xmml:name"/>_list
 </xsl:for-each>
 
 
-/* Spatialy Partitioned Message boundary Matrices */
+/* Spatially Partitioned Message boundary Matrices */
 <xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:if test="gpu:partitioningSpatial">
 /** struct xmachine_message_<xsl:value-of select="xmml:name"/>_PBM
  * Partition Boundary Matrix (PBM) for xmachine_message_<xsl:value-of select="xmml:name"/> 
@@ -214,12 +214,12 @@ __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function">
 /**
  * <xsl:value-of select="xmml:name"/> FLAMEGPU Agent Function
- * @param agent Pointer to an agent structre of type xmachine_memory_<xsl:value-of select="../../xmml:name"/>. This represents a single agent instance and can be modified directly.
+ * @param agent Pointer to an agent structure of type xmachine_memory_<xsl:value-of select="../../xmml:name"/>. This represents a single agent instance and can be modified directly.
  <xsl:if test="xmml:xagentOutputs/gpu:xagentOutput">* @param <xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_agents Pointer to agent list of type xmachine_memory_<xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_list. This must be passed as an argument to the add_<xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_agent function to add a new agent.</xsl:if>
  <xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messagename" select="xmml:inputs/gpu:input/xmml:messageName"/>* @param <xsl:value-of select="$messagename"/>_messages  <xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_messages Pointer to input message list of type xmachine_message_<xsl:value-of select="xmml:inputs/gpu:inputs/xmml:messageName"/>_list. Must be passed as an argument to the get_first_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_message and get_next_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_message functions.<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messagename]">
  <xsl:if test="gpu:partitioningSpatial">* @param partition_matrix Pointer to the partition matrix of type xmachine_message_<xsl:value-of select="xmml:name"/>_PBM. Used within the get_first_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_message and get_next_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_message functions for spatially partitioned message access.</xsl:if></xsl:for-each></xsl:if>
  <xsl:if test="xmml:outputs/gpu:output">* @param <xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_messages Pointer to output message list of type xmachine_message_<xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_list. Must be passed as an argument to the add_<xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_message function ??.</xsl:if>
- <xsl:if test="gpu:RNG='true'">* @param rand48 Pointer to the seed list of type RNG_rand48. Must be passed as an arument to the rand48 function for genertaing random numbers on the GPU.</xsl:if>
+ <xsl:if test="gpu:RNG='true'">* @param rand48 Pointer to the seed list of type RNG_rand48. Must be passed as an argument to the rand48 function for generating random numbers on the GPU.</xsl:if>
  */
 __FLAME_GPU_FUNC__ int <xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:value-of select="../../xmml:name"/>* agent<xsl:if test="xmml:xagentOutputs/gpu:xagentOutput">, xmachine_memory_<xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_list* <xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_agents</xsl:if>
 <xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messagename" select="xmml:inputs/gpu:input/xmml:messageName"/>, xmachine_message_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_list* <xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_messages<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messagename]"><xsl:if test="gpu:partitioningSpatial">, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix</xsl:if></xsl:for-each></xsl:if>
@@ -255,7 +255,7 @@ __FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_fir
  */
 __FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>* current, xmachine_message_<xsl:value-of select="xmml:name"/>_list* <xsl:value-of select="xmml:name"/>_messages);
 </xsl:if><xsl:if test="gpu:partitioningDiscrete">/** get_first_<xsl:value-of select="xmml:name"/>_message
- * Get first message function for discrete partitioned messages. Template function will call either shared memeory or texture cache implementation depending on AGENT_TYPE
+ * Get first message function for discrete partitioned messages. Template function will call either shared memory or texture cache implementation depending on AGENT_TYPE
  * @param <xsl:value-of select="xmml:name"/>_messages message list
  * @param agentx x position of the agent
  * @param agenty y position of the agent
@@ -264,7 +264,7 @@ __FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_nex
 template &lt;int AGENT_TYPE&gt; __FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_first_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* <xsl:value-of select="xmml:name"/>_messages, int agentx, int agent_y);
 
 /** get_next_<xsl:value-of select="xmml:name"/>_message
- * Get first message function for discrete partitioned messages. Template function will call either shared memeory or texture cache implementation depending on AGENT_TYPE
+ * Get first message function for discrete partitioned messages. Template function will call either shared memory or texture cache implementation depending on AGENT_TYPE
  * @param current the current message struct
  * @param <xsl:value-of select="xmml:name"/>_messages message list
  * @return        returns the first message from the message list (offset depending on agent block)
@@ -282,7 +282,7 @@ template &lt;int AGENT_TYPE&gt; __FLAME_GPU_FUNC__ xmachine_message_<xsl:value-o
 __FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_first_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* <xsl:value-of select="xmml:name"/>_messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix, float x, float y, float z);
 
 /** get_next_<xsl:value-of select="xmml:name"/>_message
- * Get first message function for discrete partitioned messages. Template function will call either shared memeory or texture cache implementation depending on AGENT_TYPE
+ * Get first message function for discrete partitioned messages. Template function will call either shared memory or texture cache implementation depending on AGENT_TYPE
  * @param current the current message struct
  * @param <xsl:value-of select="xmml:name"/>_messages message list
  * @param partition_matrix the boundary partition matrix for the spatially partitioned message list
@@ -343,14 +343,14 @@ extern void initialise(char * input);
 extern void cleanup();
 
 /** singleIteration
- *	Performs a single itteration of the simulation. I.e. performs each agent function on each function layer in the correct order.
+ *	Performs a single iteration of the simulation. I.e. performs each agent function on each function layer in the correct order.
  */
 extern void singleIteration();
 
 /** saveIterationData
  * Reads the current agent data fromt he device and saves it to XML
  * @param	outputpath	file path to XML file used for output of agent data
- * @param	itteration_number
+ * @param	iteration_number
  <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">* @param h_<xsl:value-of select="xmml:name"/>s Pointer to agent list on the host
  * @param d_<xsl:value-of select="xmml:name"/>s Pointer to agent list on the GPU device
  * @param h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count Pointer to agent counter
@@ -359,7 +359,7 @@ extern void saveIterationData(char* outputpath, int iteration_number, <xsl:for-e
 
 
 /** readInitialStates
- * Reads the current agent data fromt he device and saves it to XML
+ * Reads the current agent data from the device and saves it to XML
  * @param	inputpath	file path to XML file used for input of agent data
  <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">* @param h_<xsl:value-of select="xmml:name"/>s Pointer to agent list on the host
  * @param h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count Pointer to agent counter
@@ -385,7 +385,7 @@ extern int get_agent_<xsl:value-of select="xmml:name"/>_MAX_count();
 extern int get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count();
 
 /** reset_<xsl:value-of select="xmml:name"/>_count
- * Resets the agent count of the <xsl:value-of select="../../xmml:name"/> in state <xsl:value-of select="xmml:name"/> to 0. This is usefull for interacting with some visualisations.
+ * Resets the agent count of the <xsl:value-of select="../../xmml:name"/> in state <xsl:value-of select="xmml:name"/> to 0. This is useful for interacting with some visualisations.
  */
 extern void reset_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count();
 
@@ -485,9 +485,9 @@ glm::vec3 getMinimumBounds();
     
 #ifdef VISUALISATION
 /** initVisualisation
- * Prototype for method which initialises the visualisation. Must be implemented in seperate file
+ * Prototype for method which initialises the visualisation. Must be implemented in separate file
  * @param argc	the argument count from the main function used with GLUT
- * @param argv	the argument values fromt the main function used with GLUT
+ * @param argv	the argument values from the main function used with GLUT
  */
 extern void initVisualisation();
 

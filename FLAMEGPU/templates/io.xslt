@@ -43,7 +43,7 @@ void readIntArrayInput(char* buffer, int *array, unsigned int expected_items){
     token = strtok(buffer, s);
     while (token != NULL){
         if (i>=expected_items){
-            printf("Error: Agent Memeory array has too many items, expected %d!\n", expected_items);
+            printf("Error: Agent memory array has too many items, expected %d!\n", expected_items);
             exit(0);
         }
         
@@ -52,7 +52,7 @@ void readIntArrayInput(char* buffer, int *array, unsigned int expected_items){
         token = strtok(NULL, s);
     }
     if (i != expected_items){
-        printf("Error: Agent Memeory array has %d items, expected %d!\n", i, expected_items);
+        printf("Error: Agent memory array has %d items, expected %d!\n", i, expected_items);
         exit(0);
     }
 }
@@ -65,7 +65,7 @@ void readFloatArrayInput(char* buffer, float *array, unsigned int expected_items
     token = strtok(buffer, s);
     while (token != NULL){
         if (i>=expected_items){
-            printf("Error: Agent Memeory array has too many items, expected %d!\n", expected_items);
+            printf("Error: Agent memory array has too many items, expected %d!\n", expected_items);
             exit(0);
         }
         
@@ -74,7 +74,7 @@ void readFloatArrayInput(char* buffer, float *array, unsigned int expected_items
         token = strtok(NULL, s);
     }
     if (i != expected_items){
-        printf("Error: Agent Memeory array has %d items, expected %d!\n", i, expected_items);
+        printf("Error: Agent memory array has %d items, expected %d!\n", i, expected_items);
         exit(0);
     }
 }
@@ -97,7 +97,7 @@ void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each sel
 	char data[100];
 
 	sprintf(data, "%s%i.xml", outputpath, iteration_number);
-	//printf("Writing itteration %i data to %s\n", iteration_number, data);
+	//printf("Writing iteration %i data to %s\n", iteration_number, data);
 	file = fopen(data, "w");
 	fputs("&lt;states&gt;\n&lt;itno&gt;", file);
 	sprintf(data, "%i", iteration_number);
@@ -161,7 +161,7 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 	/* Open config file to read-only */
 	if((file = fopen(inputpath, "r"))==NULL)
 	{
-		printf("error opening initial states\n");
+		printf("Error opening initial states\n");
 		exit(0);
 	}
 	
