@@ -30,7 +30,7 @@
 
 /* IO Variables*/
 char inputfile[100];          /**&lt; Input path char buffer*/
-char outputpath[100];         /**&lt; Output path char buffer*/
+char outputpath[1000];         /**&lt; Output path char buffer*/
 
 #define OUTPUT_TO_XML 1
 
@@ -59,6 +59,10 @@ int checkUsage( int argc, char** argv){
 	}
 #endif
 	return true;
+}
+
+const char* getOutputDir(){
+  return outputpath;
 }
 
 

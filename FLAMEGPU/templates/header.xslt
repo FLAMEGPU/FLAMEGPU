@@ -33,11 +33,14 @@
 #define __FLAME_GPU_FUNC__ __device__
 //Definition for a function used to initialise environment variables
 #define __FLAME_GPU_INIT_FUNC__
+#define __FLAME_GPU_STEP_FUNC__
+#define __FLAME_GPU_EXIT_FUNC__
 
 #define USE_CUDA_STREAMS
 #define FAST_ATOMIC_SORTING
 
 typedef unsigned int uint;
+
 
 	<xsl:if test="gpu:xmodel/xmml:messages/gpu:message/xmml:variables/gpu:variable/xmml:type='double' or gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable/xmml:type='double'">
 //if this is defined then the project must be built with sm_13 or later
@@ -173,27 +176,33 @@ struct xmachine_message_<xsl:value-of select="xmml:name"/>_PBM
 </xsl:if></xsl:for-each>
 
 
-/* Random */
-/** struct RNG_rand48 
- *	structure used to hold list seeds
- */
-struct RNG_rand48
-{
+  /* Random */
+  /** struct RNG_rand48
+  *	structure used to hold list seeds
+  */
+  struct RNG_rand48
+  {
   glm::uvec2 A, C;
   glm::uvec2 seeds[buffer_size_MAX];
-};
+  };
 
 
-/* Random Functions (usable in agent functions) implemented in FLAMEGPU_Kernels */
+/** getOutputDir
+* Gets the output directory of the simulation. This is the same as the 0.xml input directory.
+* @return a const char pointer to string denoting the output directory
+*/
+const char* getOutputDir();
 
-/**
- * Templated random function using a DISCRETE_2D template calculates the agent index using a 2D block
- * which requires extra processing but will work for CONTINUOUS agents. Using a CONTINUOUS template will
- * not work for DISCRETE_2D agent.
- * @param	rand48	an RNG_rand48 struct which holds the seeds sued to generate a random number on the GPU
- * @return			returns a random float value
- */
-template &lt;int AGENT_TYPE&gt; __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
+  /* Random Functions (usable in agent functions) implemented in FLAMEGPU_Kernels */
+
+  /**
+  * Templated random function using a DISCRETE_2D template calculates the agent index using a 2D block
+  * which requires extra processing but will work for CONTINUOUS agents. Using a CONTINUOUS template will
+  * not work for DISCRETE_2D agent.
+  * @param	rand48	an RNG_rand48 struct which holds the seeds sued to generate a random number on the GPU
+  * @return			returns a random float value
+  */
+  template &lt;int AGENT_TYPE&gt; __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
 /**
  * Non templated random function calls the templated version with DISCRETE_2D which will work in either case
  * @param	rand48	an RNG_rand48 struct which holds the seeds sued to generate a random number on the GPU
@@ -411,6 +420,39 @@ extern int get_<xsl:value-of select="xmml:name"/>_population_width();
 </xsl:for-each>
   
   
+/* Analytics functions for each varible in each state*/
+typedef enum {
+  REDUCTION_MAX,
+  REDUCTION_MIN,
+  REDUCTION_SUM
+}reduction_operator;
+
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+  <xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:for-each select="xmml:states/gpu:state">
+  <xsl:variable name="state" select="xmml:name"/>
+<xsl:for-each select="../../xmml:memory/gpu:variable">
+/** <xsl:value-of select="xmml:type"/> reduce_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+<xsl:value-of select="xmml:type"/> reduce_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable();
+
+
+<xsl:if test="xmml:type='int'">
+/** <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state varaible list
+ */
+<xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value);
+</xsl:if>
+
+</xsl:for-each>
+</xsl:for-each>
+</xsl:for-each>
+
+  
 /* global constant variables */
 <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
 __constant__ <xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/><xsl:if test="xmml:arrayLength">[<xsl:value-of select="xmml:arrayLength"/>]</xsl:if>;
@@ -422,6 +464,10 @@ __constant__ <xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-
  * @param h_<xsl:value-of select="xmml:name"/> value to set the variable
  */
 extern void set_<xsl:value-of select="xmml:name"/>(<xsl:value-of select="xmml:type"/>* h_<xsl:value-of select="xmml:name"/>);
+
+extern const <xsl:value-of select="xmml:type"/>* get_<xsl:value-of select="xmml:name"/>();
+
+extern <xsl:value-of select="xmml:type"/><xsl:text> h_env_</xsl:text><xsl:value-of select="xmml:name"/><xsl:if test="xmml:arrayLength">[<xsl:value-of select="xmml:arrayLength"/>]</xsl:if>;
 </xsl:for-each>
 
 /** getMaximumBound
