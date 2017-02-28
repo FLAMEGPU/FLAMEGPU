@@ -244,7 +244,7 @@ help:
 	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
 	@echo "           ------------------------------------------------            *"                
 	@echo "Alternatively, run the bash script stored in bin/x64. The iteration    *"
-	@echo "default value in console mode is 10. You can simple change it by       *"
+	@echo "default value in console mode is 1. You can simple change it by       *"
 	@echo "entering a new value while running the ./*.sh file.                    *"
 	@echo "                                                                       *"
 	@echo "           ------------------------------------------------            *"
@@ -287,7 +287,7 @@ run_console: CirclesBruteForce_double_console
 
 clean:
 	rm -f *.o
-	#rm -rf $(BIN_DIR)CirclesBruteForce_double*.sh
+	rm -rf $(SRC_CUDA)*
 
 clobber: clean 
 
