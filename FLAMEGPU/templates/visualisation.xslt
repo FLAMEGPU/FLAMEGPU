@@ -646,7 +646,7 @@ void motion(int x, int y)
 		rotate_x += dy * 0.2;
 		rotate_y += dx * 0.2;
 	} else if (mouse_buttons &amp; 4) {
-		translate_z += dy * VIEW_DISTANCE* 0.01;
+		translate_z += dy * VIEW_DISTANCE * 0.001;
 	}
 
   mouse_old_x = x;
