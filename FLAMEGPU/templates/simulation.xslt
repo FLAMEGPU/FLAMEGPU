@@ -146,6 +146,16 @@ int h_<xsl:value-of select="../xmml:name"/>_condition_count;
 RNG_rand48* h_rand48;    /**&lt; Pointer to RNG_rand48 seed list on host*/
 RNG_rand48* d_rand48;    /**&lt; Pointer to RNG_rand48 seed list on device*/
 
+/* Cuda Event Timers for Instrumentation */
+#if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
+	cudaEvent_t instrument_iteration_start, instrument_iteration_stop;
+	float instrument_iteration_milliseconds = 0.0f;
+#endif
+#if (defined(INSTRUMENT_AGENT_FUNCTIONS) &amp;&amp; INSTRUMENT_AGENT_FUNCTIONS) || (defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS) || (defined(INSTRUMENT_STEP_FUNCTIONS) &amp;&amp; INSTRUMENT_STEP_FUNCTIONS) || (defined(INSTRUMENT_EXIT_FUNCTIONS) &amp;&amp; INSTRUMENT_EXIT_FUNCTIONS)
+	cudaEvent_t instrument_start, instrument_stop;
+	float instrument_milliseconds = 0.0f;
+#endif
+
 /* CUDA Parallel Primatives variables */
 int scan_last_sum;           /**&lt; Indicates if the position (in message list) of last message*/
 int scan_last_included;      /**&lt; Indicates if last sum value is included in the total sum count*/
@@ -355,9 +365,28 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMemcpy( d_rand48, h_rand48, h_rand48_SoA_size, cudaMemcpyHostToDevice));
 
 	/* Call all init functions */
+	/* Prepare cuda event timers for instrumentation */
+#if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
+	cudaEventCreate(&amp;instrument_iteration_start);
+	cudaEventCreate(&amp;instrument_iteration_stop);
+#endif
+#if (defined(INSTRUMENT_AGENT_FUNCTIONS) &amp;&amp; INSTRUMENT_AGENT_FUNCTIONS) || (defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS) || (defined(INSTRUMENT_STEP_FUNCTIONS) &amp;&amp; INSTRUMENT_STEP_FUNCTIONS) || (defined(INSTRUMENT_EXIT_FUNCTIONS) &amp;&amp; INSTRUMENT_EXIT_FUNCTIONS)
+	cudaEventCreate(&amp;instrument_start);
+	cudaEventCreate(&amp;instrument_stop);
+#endif
+
 	<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:initFunctions/gpu:initFunction">
-	<xsl:value-of select="gpu:name"/>();<xsl:text>
-	</xsl:text></xsl:for-each>
+#if defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	<xsl:value-of select="gpu:name"/>();
+#if defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&amp;instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: <xsl:value-of select="gpu:name"/> = %f (ms)\n", instrument_milliseconds);
+#endif
+	</xsl:for-each>
   
   /* Init CUDA Streams for function layers */
   <xsl:for-each select="gpu:xmodel/xmml:layers/xmml:layer">
@@ -403,8 +432,19 @@ void cleanup(){
 
     /* Call all exit functions */
 	<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:exitFunctions/gpu:exitFunction">
-	<xsl:value-of select="gpu:name"/>();<xsl:text>
-	</xsl:text></xsl:for-each>
+#if defined(INSTRUMENT_EXIT_FUNCTIONS) &amp;&amp; INSTRUMENT_EXIT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+
+	<xsl:value-of select="gpu:name"/>();
+	
+#if defined(INSTRUMENT_EXIT_FUNCTIONS) &amp;&amp; INSTRUMENT_EXIT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&amp;instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: <xsl:value-of select="gpu:name"/> = %f (ms)\n", instrument_milliseconds);
+#endif
+	</xsl:for-each>
 
 	/* Agent data free*/
 	<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
@@ -442,9 +482,23 @@ void cleanup(){
   gpuErrchk(cudaStreamDestroy(stream<xsl:value-of select="position()"/>));</xsl:for-each>
   </xsl:if>
   </xsl:for-each>
+
+  /* CUDA Event Timers for Instrumentation */
+#if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
+	cudaEventDestroy(instrument_iteration_start);
+	cudaEventDestroy(instrument_iteration_stop);
+#endif
+#if (defined(INSTRUMENT_AGENT_FUNCTIONS) &amp;&amp; INSTRUMENT_AGENT_FUNCTIONS) || (defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS) || (defined(INSTRUMENT_STEP_FUNCTIONS) &amp;&amp; INSTRUMENT_STEP_FUNCTIONS) || (defined(INSTRUMENT_EXIT_FUNCTIONS) &amp;&amp; INSTRUMENT_EXIT_FUNCTIONS)
+	cudaEventDestroy(instrument_start);
+	cudaEventDestroy(instrument_stop);
+#endif
 }
 
 void singleIteration(){
+
+#if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
+	cudaEventRecord(instrument_iteration_start);
+#endif
 
 	/* set all non partitioned and spatial partitioned message counts to 0*/<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:if test="gpu:partitioningNone or gpu:partitioningSpatial">
 	h_message_<xsl:value-of select="xmml:name"/>_count = 0;
@@ -456,15 +510,47 @@ void singleIteration(){
 	<xsl:for-each select="gpu:xmodel/xmml:layers/xmml:layer">
 	/* Layer <xsl:value-of select="position()"/>*/
 	<xsl:for-each select="gpu:layerFunction">
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) &amp;&amp; INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
 	<xsl:variable name="function" select="xmml:name"/><xsl:variable name="stream_num" select="position()"/><xsl:for-each select="../../../xmml:xagents/gpu:xagent/xmml:functions/gpu:function[xmml:name=$function]">
 	<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>(stream<xsl:value-of select="$stream_num"/>);
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) &amp;&amp; INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&amp;instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/> = %f (ms)\n", instrument_milliseconds);
+#endif
 	</xsl:for-each></xsl:for-each>cudaDeviceSynchronize();
   </xsl:for-each>
     
     /* Call all step functions */
 	<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:stepFunctions/gpu:stepFunction">
+#if defined(INSTRUMENT_STEP_FUNCTIONS) &amp;&amp; INSTRUMENT_STEP_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
 	<xsl:value-of select="gpu:name"/>();<xsl:text>
-	</xsl:text></xsl:for-each>
+	</xsl:text>
+#if defined(INSTRUMENT_STEP_FUNCTIONS) &amp;&amp; INSTRUMENT_STEP_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&amp;instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: <xsl:value-of select="gpu:name"/> = %f (ms)\n", instrument_milliseconds);
+#endif</xsl:for-each>
+
+#if defined(OUTPUT_POPULATION_PER_ITERATION) &amp;&amp; OUTPUT_POPULATION_PER_ITERATION
+	// Print the agent population size of all agents in all states
+	<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
+		printf("agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count: %u\n",get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count());
+	</xsl:for-each>
+#endif
+
+#if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
+	cudaEventRecord(instrument_iteration_stop);
+	cudaEventSynchronize(instrument_iteration_stop);
+	cudaEventElapsedTime(&amp;instrument_iteration_milliseconds, instrument_iteration_start, instrument_iteration_stop);
+	printf("Instrumentation: Iteration Time = %f (ms)\n", instrument_iteration_milliseconds);
+#endif
 }
 
 /* Environment functions */
