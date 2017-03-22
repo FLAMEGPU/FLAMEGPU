@@ -62,8 +62,9 @@ GLuint vs_mapIndex;
 
 //timer
 cudaEvent_t start, stop;
-const int average = 50;
+const int display_rate = 50;
 int frame_count;
+float frame_time = 0.0;
 
 #ifdef SIMULATION_DELAY
 //delay
@@ -581,14 +582,16 @@ void display()
 	glFlush();
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&amp;millis, start, stop);
+  frame_time += millis;
 
-	if(frame_count == average){
+	if(frame_count == display_rate){
 		char title [100];
-		sprintf(title, "Execution &amp; Rendering Total: %f (FPS)", average/(millis/1000.0f));
+		sprintf(title, "Execution &amp; Rendering Total: %f (FPS), %f milliseconds per frame", display_rate/(frame_time/1000.0f), frame_time/display_rate);
 		glutSetWindowTitle(title);
 
 		//reset
 		frame_count = 0;
+    frame_time = 0.0;
 	}else{
 		frame_count++;
 	}
@@ -643,7 +646,7 @@ void motion(int x, int y)
 		rotate_x += dy * 0.2;
 		rotate_y += dx * 0.2;
 	} else if (mouse_buttons &amp; 4) {
-		translate_z += dy * VIEW_DISTANCE* 0.001;
+		translate_z += dy * VIEW_DISTANCE * 0.001;
 	}
 
   mouse_old_x = x;
