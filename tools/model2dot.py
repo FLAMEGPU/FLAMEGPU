@@ -213,11 +213,25 @@ elif (step_flag & exit_flag):
 
 #################### Rank function acc to layers
 
+
+
 f_Layers = collection.getElementsByTagName("layers")[0]
 funcSynch = f_Layers.getElementsByTagName("layer")
+
+file.write("{node [shape=plaintext, fontsize=16];")
+file.write("/* the time-line graph */\n Layer")
+
+layer=0
 for f in funcSynch:
+  layer+=1
+  file.write("->%d" % layer)
+file.write(";}\n\n")
+
+layer=0  
+for f in funcSynch:
+  layer+=1
   fl = f.getElementsByTagName("gpu:layerFunction")
-  file.write("{rank = same ;")
+  file.write("{rank = same ;%d;"%layer)
   for g in fl:
       nameFunc = (g.getElementsByTagName('name')[0]).childNodes[0].data
       file.write("%s ;"% nameFunc)
