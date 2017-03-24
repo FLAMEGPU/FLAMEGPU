@@ -465,7 +465,10 @@ __constant__ <xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-
  */
 extern void set_<xsl:value-of select="xmml:name"/>(<xsl:value-of select="xmml:type"/>* h_<xsl:value-of select="xmml:name"/>);
 
+<!-- Getter disabled for array environmental constants.-->
+<xsl:if test="not(xmml:arrayLength)">
 extern const <xsl:value-of select="xmml:type"/>* get_<xsl:value-of select="xmml:name"/>();
+</xsl:if>
 
 extern <xsl:value-of select="xmml:type"/><xsl:text> h_env_</xsl:text><xsl:value-of select="xmml:name"/><xsl:if test="xmml:arrayLength">[<xsl:value-of select="xmml:arrayLength"/>]</xsl:if>;
 </xsl:for-each>
