@@ -11,7 +11,7 @@
 
   <xagents>
     <gpu:xagent>
-      <name>example_agent</name>
+      <name>pedestrian</name>
       <memory>
         <gpu:variable>
           <type>float</type>
@@ -21,15 +21,23 @@
           <type>float</type>
           <name>y</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>vx</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>vy</name>
+        </gpu:variable>
       </memory>
       <functions>
         <gpu:function>
-          <name>output_example</name>
+          <name>output_properties</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
           <outputs>
             <gpu:output>
-              <messageName>example_message</messageName>
+              <messageName>properties_message</messageName>
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
@@ -37,12 +45,12 @@
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
         <gpu:function>
-          <name>input_example</name>
+          <name>input_properties</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
           <inputs>
             <gpu:input>
-              <messageName>example_message</messageName>
+              <messageName>properties_message</messageName>
             </gpu:input>
           </inputs>
           <gpu:reallocate>false</gpu:reallocate>
@@ -62,7 +70,7 @@
   
   <messages>
     <gpu:message>
-      <name>example_message</name>
+      <name>properties_message</name>
       <variables>
         <gpu:variable>
           <type>float</type>
@@ -72,6 +80,14 @@
           <type>float</type>
           <name>y</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>vx</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>vy</name>
+        </gpu:variable>
       </variables>
       <gpu:partitioningNone></gpu:partitioningNone>
       <gpu:bufferSize>1024</gpu:bufferSize>
@@ -80,10 +96,10 @@
   
   <layers>
     <layer>
-      <gpu:layerFunction><name>output_example</name></gpu:layerFunction>
+      <gpu:layerFunction><name>output_properties</name></gpu:layerFunction>
     </layer>
     <layer>
-      <gpu:layerFunction><name>input_example</name></gpu:layerFunction>
+      <gpu:layerFunction><name>input_properties</name></gpu:layerFunction>
     </layer>
   </layers>
 
