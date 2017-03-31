@@ -73,6 +73,9 @@ typedef unsigned int uint;
 #define xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size <xsl:value-of select="$x_dim * $y_dim * $z_dim"/>
 </xsl:if></xsl:for-each>
   
+/* IO Variables*/
+extern char inputfile[100];          /**&lt; Input path char buffer*/
+extern char outputpath[100];         /**&lt; Output path char buffer*/
   
 /* enum types */
 
