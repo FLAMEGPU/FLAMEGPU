@@ -7,24 +7,122 @@
 <xsl:template match="/">
 /*
  * Copyright 2011 University of Sheffield.
- * Author: Dr Paul Richmond 
+ * Author: Dr Paul Richmond
  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
  *
- * University of Sheffield retain all intellectual property and 
- * proprietary rights in and to this software and related documentation. 
- * Any use, reproduction, disclosure, or distribution of this software 
+ * University of Sheffield retain all intellectual property and
+ * proprietary rights in and to this software and related documentation.
+ * Any use, reproduction, disclosure, or distribution of this software
  * and related documentation without an express license agreement from
  * University of Sheffield is strictly prohibited.
  *
- * For terms of licence agreement please attached licence or view licence 
+ * For terms of licence agreement please attached licence or view licence
  * on www.flamegpu.com website.
- * 
+ *
  */
 
 #ifndef _FLAMEGPU_FUNCTIONS
 #define _FLAMEGPU_FUNCTIONS
 
 #include &lt;header.h&gt;
+
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:initFunctions/gpu:initFunction">
+<xsl:choose>
+<xsl:when test="xmml:xagentOutputs/gpu:xagentOutput">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Init Function
+ * Automatically generated using functions.xslt
+<xsl:for-each select="xmml:xagentOutputs/gpu:xagentOutput"> * @param h_<xsl:value-of select="xmml:xagentName"/>s_<xsl:value-of select="xmml:state"/> pointer to host array for newly created <xsl:value-of select="xmml:xagentName"/> agents in state <xsl:value-of select="xmml:state"/>
+ * @param new_<xsl:value-of select="xmml:xagentName"/>_<xsl:value-of select="xmml:state"/>_count pointer to the number of newly created agents (pass by reference)
+ * @param agent pre-allocated host agent struct
+</xsl:for-each> */
+__FLAME_GPU_INIT_FUNC__ void <xsl:value-of select="gpu:name"/>(<xsl:for-each select="xmml:xagentOutputs/gpu:xagentOutput">xmachine_memory_<xsl:value-of select="xmml:xagentName"/>_list * h_<xsl:value-of select="xmml:xagentName"/>s_<xsl:value-of select="xmml:state"/>, unsigned int * new_<xsl:value-of select="xmml:xagentName"/>_<xsl:value-of select="xmml:state"/>_count, xmachine_memory_<xsl:value-of select="xmml:xagentName"/> * agent<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>){
+    /*
+    // Template for agent output within an init function
+    unsigned int number_of_new_agents = 1;
+<xsl:for-each select="xmml:xagentOutputs/gpu:xagentOutput">    for (unsigned int count = 0; count &lt; number_of_new_agents; count++){
+        // Generate agent data and insert into host array <xsl:variable name="xagentname" select="xmml:xagentName"/>
+<xsl:for-each select="../../../../../xmml:xagents/gpu:xagent[xmml:name=$xagentname]/xmml:memory/gpu:variable">
+<xsl:choose>
+<xsl:when test="not(xmml:arrayLength)">
+        agent-&gt;<xsl:value-of select="xmml:name"/> = 0;</xsl:when>
+<xsl:otherwise>
+        for(unsigned int i = 0; i &lt; <xsl:value-of select="xmml:arrayLength"/>; i++){
+            agent-&gt;<xsl:value-of select="xmml:name"/>[i] = 0;
+        }</xsl:otherwise>
+</xsl:choose>
+</xsl:for-each>
+        h_generateAgent<xsl:value-of select="xmml:xagentName"/>(h_<xsl:value-of select="xmml:xagentName"/>s_<xsl:value-of select="xmml:state"/>, agent, count);
+        (*new_<xsl:value-of select="xmml:xagentName"/>_<xsl:value-of select="xmml:state"/>_count)++;
+    }
+</xsl:for-each>    */
+}
+</xsl:when>
+<xsl:otherwise>
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Init Function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_INIT_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+  // Init Function Content
+}
+</xsl:otherwise>
+</xsl:choose>
+</xsl:for-each>
+
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:stepFunctions/gpu:stepFunction">
+<xsl:choose>
+<xsl:when test="xmml:xagentOutputs/gpu:xagentOutput">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Step Function
+ * Automatically generated using functions.xslt
+<xsl:for-each select="xmml:xagentOutputs/gpu:xagentOutput"> * @param h_<xsl:value-of select="xmml:xagentName"/>s_<xsl:value-of select="xmml:state"/> pointer to host array for newly created <xsl:value-of select="xmml:xagentName"/> agents in state <xsl:value-of select="xmml:state"/>
+ * @param new_<xsl:value-of select="xmml:xagentName"/>_<xsl:value-of select="xmml:state"/>_count pointer to the number of newly created agents (pass by reference)
+ * @param agent pre-allocated host agent struct
+</xsl:for-each> */
+__FLAME_GPU_STEP_FUNC__ void <xsl:value-of select="gpu:name"/>(<xsl:for-each select="xmml:xagentOutputs/gpu:xagentOutput">xmachine_memory_<xsl:value-of select="xmml:xagentName"/>_list * h_<xsl:value-of select="xmml:xagentName"/>s_<xsl:value-of select="xmml:state"/>, unsigned int * new_<xsl:value-of select="xmml:xagentName"/>_<xsl:value-of select="xmml:state"/>_count, xmachine_memory_<xsl:value-of select="xmml:xagentName"/> * agent<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>){
+    /*
+    // Template for agent output within a step function
+    unsigned int number_of_new_agents = 1;
+<xsl:for-each select="xmml:xagentOutputs/gpu:xagentOutput">    for (unsigned int count = 0; count &lt; number_of_new_agents; count++){
+        // Generate agent data and insert into host array <xsl:variable name="xagentname" select="xmml:xagentName"/>
+<xsl:for-each select="../../../../../xmml:xagents/gpu:xagent[xmml:name=$xagentname]/xmml:memory/gpu:variable">
+<xsl:choose>
+<xsl:when test="not(xmml:arrayLength)">
+        agent-&gt;<xsl:value-of select="xmml:name"/> = 0;</xsl:when>
+<xsl:otherwise>
+        for(unsigned int i = 0; i &lt; <xsl:value-of select="xmml:arrayLength"/>; i++){
+            agent-&gt;<xsl:value-of select="xmml:name"/>[i] = 0;
+        }</xsl:otherwise>
+</xsl:choose>
+</xsl:for-each>
+        h_generateAgent<xsl:value-of select="xmml:xagentName"/>(h_<xsl:value-of select="xmml:xagentName"/>s_<xsl:value-of select="xmml:state"/>, agent, count);
+        (*new_<xsl:value-of select="xmml:xagentName"/>_<xsl:value-of select="xmml:state"/>_count)++;
+    }
+</xsl:for-each>    */
+}
+</xsl:when>
+<xsl:otherwise>
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Step Function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_STEP_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+    // Step Function Content
+}
+</xsl:otherwise>
+</xsl:choose>
+</xsl:for-each>
+
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:exitFunctions/gpu:exitFunction">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Exit Function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_EXIT_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+    // Exit Function Content
+}
+</xsl:for-each>
 
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function">
 /**
@@ -49,18 +147,18 @@ __FLAME_GPU_FUNC__ int <xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:v
      * while (current_message)
      * {
      *     //INSERT MESSAGE PROCESSING CODE HERE
-     *     
+     *
      *     current_message = get_next_<xsl:value-of select="$messagename"/>_message(current_message, <xsl:value-of select="$messagename"/>_messages<xsl:if test="gpu:partitioningSpatial">, partition_matrix</xsl:if>);
      * }
      */
-     
+
     </xsl:if><xsl:if test="xmml:outputs/gpu:output">
     /* //Template for message output function use <xsl:variable name="messagename" select="xmml:outputs/gpu:output/xmml:messageName"/>
      * <xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messagename]/xmml:variables/gpu:variable">
      * <xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/> = 0;</xsl:for-each>
      * add_<xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_message(<xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_messages, <xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messagename]/xmml:variables/gpu:variable"><xsl:value-of select="xmml:name"/><xsl:if test="position()!=last()">, </xsl:if></xsl:for-each>);
      */
-     
+
      </xsl:if><xsl:if test="xmml:xagentOutputs/gpu:xagentOutput">
      /* //Template for agent output functions <xsl:variable name="xagentname" select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>
       * <xsl:for-each select="../../../../xmml:xagents/gpu:xagent[xmml:name=$xagentname]/xmml:memory/gpu:variable">
@@ -68,11 +166,11 @@ __FLAME_GPU_FUNC__ int <xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:v
       * add_<xsl:value-of select="$xagentname"/>_agent(<xsl:value-of select="$xagentname"/>_agents, <xsl:for-each select="../../../../xmml:xagents/gpu:xagent[xmml:name=$xagentname]/xmml:memory/gpu:variable"><xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/><xsl:if test="position()!=last()">, </xsl:if></xsl:for-each>);
       */
      </xsl:if>
-  
+
     return 0;
 }
 </xsl:for-each>
-  
+
 
 
 #endif //_FLAMEGPU_FUNCTIONS

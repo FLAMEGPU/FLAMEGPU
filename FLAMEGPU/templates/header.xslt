@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML"
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
@@ -58,8 +58,8 @@ typedef unsigned int uint;
 //Maximum population size of xmachine_memory_<xsl:value-of select="xmml:name"/>
 #define xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX <xsl:value-of select="gpu:bufferSize" />
 </xsl:for-each>
-  
-  
+
+
 /* Message population size definitions */<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message">
 //Maximum population size of xmachine_mmessage_<xsl:value-of select="xmml:name"/>
 #define xmachine_message_<xsl:value-of select="xmml:name"/>_MAX <xsl:value-of select="gpu:bufferSize" /><xsl:text>
@@ -72,8 +72,8 @@ typedef unsigned int uint;
 <xsl:variable name="z_dim"><xsl:value-of select="ceiling ((gpu:partitioningSpatial/gpu:zmax - gpu:partitioningSpatial/gpu:zmin) div gpu:partitioningSpatial/gpu:radius)"/></xsl:variable>
 #define xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size <xsl:value-of select="$x_dim * $y_dim * $z_dim"/>
 </xsl:if></xsl:for-each>
-  
-  
+
+
 /* enum types */
 
 /**
@@ -113,7 +113,7 @@ struct __align__(16) xmachine_memory_<xsl:value-of select="xmml:name"/>
  * Holds all message variables and is aligned to help with coalesced reads on the GPU
  */
 struct __align__(16) xmachine_message_<xsl:value-of select="xmml:name"/>
-{	
+{
     <xsl:if test="gpu:partitioningDiscrete">/* Discrete Partitioning Variables */
     glm::ivec2 _position;         /**&lt; 2D position of message*/
     glm::ivec2 _relative;         /**&lt; 2D position of message relative to the agent (range +- radius) */</xsl:if><xsl:if test="gpu:partitioningNone">/* Brute force Partitioning Variables */
@@ -121,8 +121,8 @@ struct __align__(16) xmachine_message_<xsl:value-of select="xmml:name"/>
     glm::ivec3 _relative_cell;    /**&lt; Relative cell position from agent grid cell position range -1 to 1 */
     int _cell_index_max;    /**&lt; Max boundary value of current cell */
     glm::ivec3 _agent_grid_cell;  /**&lt; Agents partition cell position */
-    int _cell_index;        /**&lt; Index of position in current cell */</xsl:if><xsl:text>  
-    </xsl:text><xsl:for-each select="xmml:variables/gpu:variable"><xsl:text>  
+    int _cell_index;        /**&lt; Index of position in current cell */</xsl:if><xsl:text>
+    </xsl:text><xsl:for-each select="xmml:variables/gpu:variable"><xsl:text>
     </xsl:text><xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/>;        /**&lt; Message variable <xsl:value-of select="xmml:name"/> of type <xsl:value-of select="xmml:type"/>.*/</xsl:for-each>
 };
 </xsl:for-each>
@@ -135,7 +135,7 @@ struct __align__(16) xmachine_message_<xsl:value-of select="xmml:name"/>
  * Variables lists for all agent variables
  */
 struct xmachine_memory_<xsl:value-of select="xmml:name"/>_list
-{	
+{
     /* Temp variables for agents. Used for parallel operations such as prefix sum */
     int _position [xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX];    /**&lt; Holds agents position in the 1D agent list */
     int _scan_input [xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX];  /**&lt; Used during parallel prefix sum */
@@ -149,14 +149,14 @@ struct xmachine_memory_<xsl:value-of select="xmml:name"/>_list
 <xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message">
 /** struct xmachine_message_<xsl:value-of select="xmml:name"/>_list
  * <xsl:if test="gpu:partitioningNone">Brute force: No Partitioning</xsl:if><xsl:if test="gpu:partitioningDiscrete">Discrete Partitioning</xsl:if><xsl:if test="gpu:partitioningSpatial">Spatial Partitioning</xsl:if>
- * Structure of Array for memory coalescing 
+ * Structure of Array for memory coalescing
  */
 struct xmachine_message_<xsl:value-of select="xmml:name"/>_list
 {
     <xsl:if test="not(gpu:partitioningDiscrete)">/* Non discrete messages have temp variables used for reductions with optional message outputs */
     int _position [xmachine_message_<xsl:value-of select="xmml:name"/>_MAX];    /**&lt; Holds agents position in the 1D agent list */
     int _scan_input [xmachine_message_<xsl:value-of select="xmml:name"/>_MAX];  /**&lt; Used during parallel prefix sum */<xsl:text>
-    
+
     </xsl:text></xsl:if><xsl:for-each select="xmml:variables/gpu:variable"><xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/> [xmachine_message_<xsl:value-of select="../../xmml:name"/>_MAX];    /**&lt; Message memory variable list <xsl:value-of select="xmml:name"/> of type <xsl:value-of select="xmml:type"/>.*/
     </xsl:for-each>
 };
@@ -166,7 +166,7 @@ struct xmachine_message_<xsl:value-of select="xmml:name"/>_list
 /* Spatially Partitioned Message boundary Matrices */
 <xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:if test="gpu:partitioningSpatial">
 /** struct xmachine_message_<xsl:value-of select="xmml:name"/>_PBM
- * Partition Boundary Matrix (PBM) for xmachine_message_<xsl:value-of select="xmml:name"/> 
+ * Partition Boundary Matrix (PBM) for xmachine_message_<xsl:value-of select="xmml:name"/>
  */
 struct xmachine_message_<xsl:value-of select="xmml:name"/>_PBM
 {
@@ -228,7 +228,7 @@ __FLAME_GPU_FUNC__ int <xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:v
 </xsl:for-each>
 
 <xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message">
-  
+
 /* Message Function Prototypes for <xsl:if test="gpu:partitioningNone">Brute force (No Partitioning) </xsl:if><xsl:if test="gpu:partitioningDiscrete">Discrete Partitioned </xsl:if><xsl:if test="gpu:partitioningSpatial">Spatially Partitioned </xsl:if> <xsl:value-of select="xmml:name"/> message implemented in FLAMEGPU_Kernels */
 
 /** add_<xsl:value-of select="xmml:name"/>_message
@@ -239,7 +239,7 @@ __FLAME_GPU_FUNC__ int <xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:v
  </xsl:text></xsl:for-each>*/
  <xsl:if test="gpu:partitioningDiscrete">template &lt;int AGENT_TYPE&gt;</xsl:if>
  __FLAME_GPU_FUNC__ void add_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* <xsl:value-of select="xmml:name"/>_messages, <xsl:for-each select="xmml:variables/gpu:variable"><xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/><xsl:if test="position()!=last()">, </xsl:if></xsl:for-each>);
- 
+
 <xsl:if test="gpu:partitioningNone">/** get_first_<xsl:value-of select="xmml:name"/>_message
  * Get first message function for non partitioned (brute force) messages
  * @param <xsl:value-of select="xmml:name"/>_messages message list
@@ -290,9 +290,9 @@ __FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_fir
  */
 __FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>* current, xmachine_message_<xsl:value-of select="xmml:name"/>_list* <xsl:value-of select="xmml:name"/>_messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix);
 </xsl:if>
-</xsl:for-each>  
-  
-  
+</xsl:for-each>
+
+
 /* Agent Function Prototypes implemented in FLAMEGPU_Kernels */
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:if test="gpu:type='continuous'">
 /** add_<xsl:value-of select="xmml:name"/>_agent
@@ -323,12 +323,12 @@ template&lt;typename T&gt;
 __FLAME_GPU_FUNC__ void set_<xsl:value-of select="xmml:name"/>_agent_array_value(T *array, unsigned int index, T value);
 
 
-  
+
 </xsl:if>
-    
+
 </xsl:for-each>
 
-  
+
 /* Simulation function prototypes implemented in simulation.cu */
 
 /** initialise
@@ -369,9 +369,9 @@ extern void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/
 
 /* Return functions used by external code to get agent data from device */
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
-    
+
 /** get_agent_<xsl:value-of select="xmml:name"/>_MAX_count
- * Gets the max agent count for the <xsl:value-of select="xmml:name"/> agent type 
+ * Gets the max agent count for the <xsl:value-of select="xmml:name"/> agent type
  * @return		the maximum <xsl:value-of select="xmml:name"/> agent count
  */
 extern int get_agent_<xsl:value-of select="xmml:name"/>_MAX_count();
@@ -418,8 +418,8 @@ void sort_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:n
 extern int get_<xsl:value-of select="xmml:name"/>_population_width();
 </xsl:if>
 </xsl:for-each>
-  
-  
+
+
 /* Analytics functions for each varible in each state*/
 typedef enum {
   REDUCTION_MAX,
@@ -452,12 +452,12 @@ typedef enum {
 </xsl:for-each>
 </xsl:for-each>
 
-  
+
 /* global constant variables */
 <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
 __constant__ <xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="xmml:name"/><xsl:if test="xmml:arrayLength">[<xsl:value-of select="xmml:arrayLength"/>]</xsl:if>;
 </xsl:for-each>
-    
+
 <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
 /** set_<xsl:value-of select="xmml:name"/>
  * Sets the constant variable <xsl:value-of select="xmml:name"/> on the device which can then be used in the agent functions.
@@ -484,22 +484,43 @@ glm::vec3 getMaximumBounds();
  * @return 	a three component float indicating the minimum x, y and z positions of all agents
  */
 glm::vec3 getMinimumBounds();
-    
-    
-#ifdef VISUALISATION
-/** initVisualisation
- * Prototype for method which initialises the visualisation. Must be implemented in separate file
- * @param argc	the argument count from the main function used with GLUT
- * @param argv	the argument values from the main function used with GLUT
+
+<!-- Host agent append functions for host-based agent generation -->
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+/** h_generateAgent<xsl:value-of select="xmml:name"/>
+ * Function to store a user created agent struct into a host struct of arrays, for transfer to the device.
+ * @param h_<xsl:value-of select="xmml:name"/>s pointer to host array of agents for insertion
+ * @param agent pointer to agent struct containing data for transfer
+ * @param index the index into which the agent will be inserted
  */
-extern void initVisualisation();
+void h_generateAgent<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:value-of select="xmml:name"/>_list * h_<xsl:value-of select="xmml:name"/>s, xmachine_memory_<xsl:value-of select="xmml:name"/> * agent, unsigned int index);
+</xsl:for-each>
 
-extern void runVisualisation();
+<!-- Host agent partial copy functions for host-based agent generation-->
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+  /** copy_partial_xmachine_memory_<xsl:value-of select="xmml:name"/>
+  * Copy part of a Host SoA agent list to the device, minimising the total data transferred by using a copy per array of count elements.
+  * @param d_dst destination device pointer
+  * @param h_src source host device pointer
+  * @param count the number of agents to transfer (must be stored sequentially in the first count elements of the SoA)
+  */
+  void copy_partial_xmachine_memory_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:value-of select="xmml:name"/>_list * d_dst, xmachine_memory_<xsl:value-of select="xmml:name"/>_list * h_src, unsigned int count);
+</xsl:for-each>
+
+  #ifdef VISUALISATION
+  /** initVisualisation
+  * Prototype for method which initialises the visualisation. Must be implemented in separate file
+  * @param argc	the argument count from the main function used with GLUT
+  * @param argv	the argument values from the main function used with GLUT
+  */
+  extern void initVisualisation();
+
+  extern void runVisualisation();
 
 
-#endif
+  #endif
 
-#endif //__HEADER
+  #endif //__HEADER
 
 </xsl:template>
 </xsl:stylesheet>

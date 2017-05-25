@@ -2,18 +2,18 @@
 <!--
 /*
  * Copyright 2011 University of Sheffield.
- * Author: Dr Paul Richmond 
+ * Author: Dr Paul Richmond
  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
  *
- * University of Sheffield retain all intellectual property and 
- * proprietary rights in and to this software and related documentation. 
- * Any use, reproduction, disclosure, or distribution of this software 
+ * University of Sheffield retain all intellectual property and
+ * proprietary rights in and to this software and related documentation.
+ * Any use, reproduction, disclosure, or distribution of this software
  * and related documentation without an express license agreement from
  * University of Sheffield is strictly prohibited.
  *
- * For terms of licence agreement please attached licence or view licence 
+ * For terms of licence agreement please attached licence or view licence
  * on www.flamegpu.com website.
- * 
+ *
  */
 
 -->
@@ -239,6 +239,7 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="name" type="xs:string" />
+				<xs:element minOccurs="0" maxOccurs="1" ref="xmml:xagentOutputs" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -263,13 +264,14 @@
   </xs:complexType>
   <xs:element name="exitFunctions" type="exitFunctions_type">
   </xs:element>
-  <xs:element name="stepFunction">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="name" type="xs:string" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
+	<xs:element name="stepFunction">
+	  <xs:complexType>
+	    <xs:sequence>
+	      <xs:element name="name" type="xs:string" />
+	      <xs:element minOccurs="0" maxOccurs="1" ref="xmml:xagentOutputs" />
+	    </xs:sequence>
+	  </xs:complexType>
+	</xs:element>
   <xs:complexType name="stepFunctions_type">
     <xs:sequence>
       <xs:element ref="stepFunction" minOccurs="1" maxOccurs="unbounded" />
