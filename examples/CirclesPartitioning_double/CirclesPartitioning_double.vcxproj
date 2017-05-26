@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug_Console|x64">
       <Configuration>Debug_Console</Configuration>
@@ -20,14 +20,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <FLAMEGPU_Template_Build_RuleAfterTargets>
@@ -36,7 +36,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.0.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.props" />
     <Import Project="../../tools/FLAMEGPU.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">
@@ -73,7 +73,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>..\..\include;.\src;.\src\model;.\src\dynamic;.\src\visualisation;%(Include)</Include>
-      <CodeGeneration>compute_20,sm_20;compute_30,sm_30;compute_35,sm_35;compute_50,sm_50</CodeGeneration>
+      <CodeGeneration>compute_30,sm_30;compute_35,sm_35;compute_50,sm_50;compute_60,sm_60</CodeGeneration>
       <GPUDebugInfo>true</GPUDebugInfo>
       <GenerateLineInfo>true</GenerateLineInfo>
       <HostDebugInfo>true</HostDebugInfo>
@@ -105,7 +105,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>..\..\include;.\src;.\src\model;.\src\dynamic;.\src\visualisation;%(Include)</Include>
-      <CodeGeneration>compute_20,sm_20;compute_30,sm_30;compute_35,sm_35;compute_50,sm_50</CodeGeneration>
+      <CodeGeneration>compute_30,sm_30;compute_35,sm_35;compute_50,sm_50;compute_60,sm_60</CodeGeneration>
       <Runtime>MT</Runtime>
       <Defines>WIN32</Defines>
     </CudaCompile>
@@ -167,7 +167,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.0.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.targets" />
     <Import Project="../../tools/FLAMEGPU.targets" />
   </ImportGroup>
 </Project>
