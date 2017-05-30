@@ -616,7 +616,7 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
 		</xsl:for-each>
 		cudaEventDestroy(start);
     cudaEventDestroy(stop);
-		exit( 0);
+		exit(EXIT_SUCCESS);
 	}
 }
 
