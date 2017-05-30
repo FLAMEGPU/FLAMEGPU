@@ -177,7 +177,7 @@ void setPaddingAndOffset()
 	// This function call returns 9999 for both major &amp; minor fields, if no CUDA capable devices are present
 	if (deviceProp.major == 9999 &amp;&amp; deviceProp.minor == 9999){
 		printf("Error: There is no device supporting CUDA.\n");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
     
     //check if double is used and supported
@@ -185,7 +185,7 @@ void setPaddingAndOffset()
 	printf("Simulation requires full precision double values\n");
 	if ((deviceProp.major &lt; 2)&amp;&amp;(deviceProp.minor &lt; 3)){
 		printf("Error: Hardware does not support full precision double values!\n");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
     
 #endif
@@ -258,7 +258,7 @@ void initialise(char * inputfile){
 	//Exit if agent or message buffer sizes are to small for function outputs<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function/xmml:xagentOutputs/gpu:xagentOutput">
 	<xsl:variable name="xagent_output" select="xmml:xagentName"/><xsl:variable name="xagent_buffer" select="../../../../gpu:bufferSize"/><xsl:if test="../../../../../gpu:xagent[xmml:name=$xagent_output]/gpu:bufferSize&lt;$xagent_buffer">
 	printf("ERROR: <xsl:value-of select="$xagent_output"/> agent buffer is too small to be used for output by <xsl:value-of select="../../../../xmml:name"/> agent in <xsl:value-of select="../../xmml:name"/> function!\n");
-	exit(0);
+	exit(EXIT_FAILURE);
 	</xsl:if>    
 	</xsl:for-each>
     
@@ -270,7 +270,7 @@ void initialise(char * inputfile){
 	//check the width
 	if (!is_sqr_pow2(xmachine_message_<xsl:value-of select="xmml:name"/>_MAX)){
 		printf("ERROR: <xsl:value-of select="xmml:name"/> message max must be a square power of 2 for a 2D discrete message grid!\n");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_range, &amp;h_message_<xsl:value-of select="xmml:name"/>_range, sizeof(int)));	
 	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_width, &amp;h_message_<xsl:value-of select="xmml:name"/>_width, sizeof(int)));
@@ -294,7 +294,7 @@ void initialise(char * inputfile){
 	/* Check that population size is a square power of 2*/
 	if (!is_sqr_pow2(xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX)){
 		printf("ERROR: <xsl:value-of select="xmml:name"/>s agent count must be a square power of 2!\n");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	h_xmachine_memory_<xsl:value-of select="xmml:name"/>_pop_width = (int)sqrt(xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX);
 	</xsl:if></xsl:for-each>
@@ -865,7 +865,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
 	if (h_message_<xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_count + h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count > xmachine_message_<xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_MAX){
 		printf("Error: Buffer size of <xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/> message will be exceeded in function <xsl:value-of select="xmml:name"/>\n");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	</xsl:if></xsl:if>
 	
@@ -889,7 +889,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//check that the range is not greater than the square of the block size. If so then there will be too many uncoalesded reads
 	if (h_message_<xsl:value-of select="xmml:name"/>_range > (int)blockSize){
 		printf("ERROR: Message range is greater than the thread block size. Increase thread block size or reduce the range!");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	</xsl:if></xsl:for-each></xsl:if></xsl:if>
 	
@@ -1047,7 +1047,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//check buffer is not exceeded
 	if (<xsl:value-of select="xmml:xagentName"/>_after_birth_count > xmachine_memory_<xsl:value-of select="xmml:xagentName"/>_MAX){
 		printf("Error: Buffer size of <xsl:value-of select="xmml:xagentName"/> agents in state <xsl:value-of select="xmml:state"/> will be exceeded writing new agents in function <xsl:value-of select="../../xmml:name"/>\n");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	//Scatter into swap
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, scatter_<xsl:value-of select="xmml:xagentName"/>_Agents, no_sm, state_list_size); 
@@ -1115,7 +1115,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//check the working agents wont exceed the buffer size in the new state list
 	if (h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count+h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count > xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX){
 		printf("Error: Buffer size of <xsl:value-of select="xmml:name"/> agents in state <xsl:value-of select="xmml:nextState"/> will be exceeded moving working agents to next state in function <xsl:value-of select="xmml:name"/>\n");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	//append agents to next state list
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, append_<xsl:value-of select="../../xmml:name"/>_Agents, no_sm, state_list_size); 
