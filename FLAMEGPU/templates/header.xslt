@@ -432,20 +432,24 @@ typedef enum {
 <xsl:for-each select="xmml:states/gpu:state">
   <xsl:variable name="state" select="xmml:name"/>
 <xsl:for-each select="../../xmml:memory/gpu:variable">
+<xsl:if test="not(xmml:arrayLength)"> <!-- Disable agent array reductions -->
 /** <xsl:value-of select="xmml:type"/> reduce_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 <xsl:value-of select="xmml:type"/> reduce_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable();
+</xsl:if>
 
 
 <xsl:if test="xmml:type='int'">
+<xsl:if test="not(xmml:arrayLength)"> <!-- Disable agent array reductions -->
 /** <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state varaible list
  */
 <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value);
+</xsl:if>
 </xsl:if>
 
 </xsl:for-each>
