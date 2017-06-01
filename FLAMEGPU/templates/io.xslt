@@ -44,7 +44,7 @@ void readIntArrayInput(char* buffer, int *array, unsigned int expected_items){
     while (token != NULL){
         if (i>=expected_items){
             printf("Error: Agent memory array has too many items, expected %d!\n", expected_items);
-            exit(0);
+            exit(EXIT_FAILURE);
         }
         
         array[i++] = atoi(token);
@@ -53,7 +53,7 @@ void readIntArrayInput(char* buffer, int *array, unsigned int expected_items){
     }
     if (i != expected_items){
         printf("Error: Agent memory array has %d items, expected %d!\n", i, expected_items);
-        exit(0);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -66,7 +66,7 @@ void readFloatArrayInput(char* buffer, float *array, unsigned int expected_items
     while (token != NULL){
         if (i>=expected_items){
             printf("Error: Agent memory array has too many items, expected %d!\n", expected_items);
-            exit(0);
+            exit(EXIT_FAILURE);
         }
         
         array[i++] = (float)atof(token);
@@ -75,7 +75,7 @@ void readFloatArrayInput(char* buffer, float *array, unsigned int expected_items
     }
     if (i != expected_items){
         printf("Error: Agent memory array has %d items, expected %d!\n", i, expected_items);
-        exit(0);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -162,7 +162,7 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 	if((file = fopen(inputpath, "r"))==NULL)
 	{
 		printf("Error opening initial states\n");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	
 	/* Initialise variables */
@@ -224,7 +224,7 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 						printf("ERROR: MAX Buffer size (%i) for agent <xsl:value-of select="xmml:name"/> exceeded whilst reading data\n", xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX);
 						// Close the file and stop reading
 						fclose(file);
-						exit(0);
+						exit(EXIT_FAILURE);
 					}
                     <xsl:for-each select="xmml:memory/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength">
                     for (int k=0;k&lt;<xsl:value-of select="xmml:arrayLength"/>;k++){
