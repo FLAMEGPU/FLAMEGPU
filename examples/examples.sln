@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Boids_BruteForce", "Boids_BruteForce\Boids_BruteForce.vcxproj", "{E6EA73EB-F133-4103-B375-768E6086339A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Boids_Partitioning", "Boids_Partitioning\Boids_Partitioning.vcxproj", "{34AFE3CE-9AAE-4A46-B7C2-9CF569D43A8C}"
@@ -24,6 +26,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StableMarriage", "StableMarriage\StableMarriage.vcxproj", "{EC5C36BF-885C-43CF-A8C2-97B68C5C9B83}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sugarscape", "Sugarscape\Sugarscape.vcxproj", "{906E5258-3B85-496E-B148-F1578004ED1C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Analytics", "Analytics\Analytics.vcxproj", "{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +133,14 @@ Global
 		{906E5258-3B85-496E-B148-F1578004ED1C}.Release_Console|x64.Build.0 = Release_Console|x64
 		{906E5258-3B85-496E-B148-F1578004ED1C}.Release_Visualisation|x64.ActiveCfg = Release_Visualisation|x64
 		{906E5258-3B85-496E-B148-F1578004ED1C}.Release_Visualisation|x64.Build.0 = Release_Visualisation|x64
+		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
+		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Debug_Console|x64.Build.0 = Debug_Console|x64
+		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Debug_Visualisation|x64.ActiveCfg = Debug_Console|x64
+		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Debug_Visualisation|x64.Build.0 = Debug_Console|x64
+		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Release_Console|x64.ActiveCfg = Release_Console|x64
+		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Release_Console|x64.Build.0 = Release_Console|x64
+		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Release_Visualisation|x64.ActiveCfg = Release_Console|x64
+		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Release_Visualisation|x64.Build.0 = Release_Console|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
