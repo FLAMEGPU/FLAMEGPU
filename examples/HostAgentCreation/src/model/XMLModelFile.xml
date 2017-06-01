@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
+        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+  <name>HostAgentCreation</name>
+  <gpu:environment>
+    <gpu:constants>
+       <gpu:variable>
+         <type>unsigned int</type>
+         <name>MAX_LIFESPAN</name>
+       </gpu:variable>
+    </gpu:constants>
+
+    <gpu:functionFiles>
+      <file>functions.c</file>
+    </gpu:functionFiles>
+
+    <gpu:initFunctions>
+      <gpu:initFunction>
+        <gpu:name>generateAgentInit</gpu:name>
+        <xagentOutputs>
+          <gpu:xagentOutput>
+            <xagentName>Agent</xagentName>
+            <state>default</state>
+          </gpu:xagentOutput>
+        </xagentOutputs>
+      </gpu:initFunction>
+    </gpu:initFunctions>
+
+    <gpu:exitFunctions>
+      <gpu:exitFunction>
+        <gpu:name>exitFunction</gpu:name>
+      </gpu:exitFunction>
+    </gpu:exitFunctions>
+
+    <gpu:stepFunctions>
+      <gpu:stepFunction>
+        <gpu:name>generateAgentStep</gpu:name>
+        <xagentOutputs>
+          <gpu:xagentOutput>
+            <xagentName>Agent</xagentName>
+            <state>default</state>
+          </gpu:xagentOutput>
+        </xagentOutputs>
+      </gpu:stepFunction>
+    </gpu:stepFunctions>
+
+  </gpu:environment>
+  <xagents>
+    <gpu:xagent>
+      <name>Agent</name>
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>time_alive</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>example_array</name>
+          <arrayLength>4</arrayLength>
+        </gpu:variable>
+      </memory>
+      <functions>
+        <gpu:function>
+          <name>update</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+      <states>
+        <gpu:state><name>default</name></gpu:state>
+        <initialState>default</initialState>
+      </states>
+      <gpu:type>continuous</gpu:type>
+      <gpu:bufferSize>1024</gpu:bufferSize>
+    </gpu:xagent>
+  </xagents>
+  <messages>
+  </messages>
+  <layers>
+    <layer><gpu:layerFunction><name>update</name></gpu:layerFunction></layer>
+  </layers>
+
+
+</gpu:xmodel>
