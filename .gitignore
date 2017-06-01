@@ -10,6 +10,7 @@ stadium.obj
 **/bin/**/*.exe
 **/bin/**/cudart*.dll
 **/dynamic/*.cu
+**/dynamic/*.cpp
 **/dynamic/*.h
 *.zip
 ######

@@ -22,7 +22,7 @@
 		<VisualisationTransform>false</VisualisationTransform>
 		
 		<CommandLineTemplate>[HeaderTransform] [FLAMEGPUKernalsTransform] [IOTransform] [SimulationTransform] [MainTransform] [VisualisationTransform]</CommandLineTemplate>
-		<Outputs>.\src\dynamic\header.h;.\src\dynamic\FLAMEGPU_kernals.cu;.\src\dynamic\io.cu;.\src\dynamic\simulation.cu;.\src\dynamic\main.cu;.\src\dynamic\visualisation.cu</Outputs>
+		<Outputs>.\src\dynamic\header.h;.\src\dynamic\FLAMEGPU_kernals.cu;.\src\dynamic\io.cpp;.\src\dynamic\simulation.cu;.\src\dynamic\main.cu;.\src\dynamic\visualisation.cu</Outputs>
       <ExecutionDescription>Generating Dynamic Code from FLAMEGPU Templates</ExecutionDescription>
     </FLAMEGPU_Template_Build_Rule>
   </ItemDefinitionGroup>
