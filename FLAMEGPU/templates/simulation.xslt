@@ -895,7 +895,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	<xsl:if test="../../gpu:type='discrete'"><xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]"><xsl:if test="gpu:partitioningDiscrete">
 	//check that the range is not greater than the square of the block size. If so then there will be too many uncoalesded reads
 	if (h_message_<xsl:value-of select="xmml:name"/>_range > (int)blockSize){
-		printf("ERROR: Message range is greater than the thread block size. Increase thread block size or reduce the range!");
+		printf("ERROR: Message range is greater than the thread block size. Increase thread block size or reduce the range!\n");
 		exit(EXIT_FAILURE);
 	}
 	</xsl:if></xsl:for-each></xsl:if></xsl:if>
