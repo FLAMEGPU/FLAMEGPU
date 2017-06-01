@@ -65,7 +65,7 @@ XSLTPREP:
 ################################################################################
 
 # Location of the CUDA Toolkit
-CUDA_PATH ?= "/usr/local/cuda-7.5"
+CUDA_PATH ?= "/usr/local/cuda-8.0"
 
 # architecture
 HOST_ARCH   := $(shell uname -m)
@@ -189,7 +189,7 @@ LIBRARIES :=
 SAMPLE_ENABLED := 1
 
 # Gencode arguments
-SMS ?= 20 30 35 37 50 52
+SMS ?= 30 35 37 50 60
 
 ifeq ($(SMS),)
 $(info >>> WARNING - no SM architectures have been specified - waiving sample <<<)
