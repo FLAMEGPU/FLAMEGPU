@@ -35,6 +35,8 @@
 #include "header.h"
 #include "visualisation.h"
 
+#define FOVY 45.0
+
 // bo variables
 GLuint sphereVerts;
 GLuint sphereNormals;
@@ -86,6 +88,7 @@ void deleteVBO( GLuint* vbo);
 void createTBO( GLuint* tbo, GLuint* tex, GLuint size);
 void deleteTBO( GLuint* tbo);
 void setVertexBufferData();
+void reshape(int width, int height);
 void display();
 void keyboard( unsigned char key, int x, int y);
 void special(int key, int x, int y);
@@ -230,6 +233,7 @@ void initVisualisation()
 	initShader();
 
 	// register callbacks
+	glutReshapeFunc( reshape);
 	glutDisplayFunc( display);
 	glutKeyboardFunc( keyboard);
 	glutSpecialFunc( special);
@@ -333,14 +337,7 @@ int initGL()
 	glClearColor( 1.0, 1.0, 1.0, 1.0);
 	glEnable( GL_DEPTH_TEST);
 
-	// viewport
-	glViewport( 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-	// projection
-	glMatrixMode( GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0, (GLfloat)WINDOW_WIDTH / (GLfloat) WINDOW_HEIGHT, NEAR_CLIP, FAR_CLIP);
-
+	reshape(WINDOW_WIDTH, WINDOW_HEIGHT);
 	checkGLError();
 
 	//lighting
@@ -530,6 +527,25 @@ void setVertexBufferData()
 		}
     }
 	glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! Reshape callback
+////////////////////////////////////////////////////////////////////////////////
+
+void reshape(int width, int height){
+	// viewport
+	glViewport( 0, 0, width, height);
+
+	// projection
+	glMatrixMode( GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(FOVY, (GLfloat)width / (GLfloat) height, NEAR_CLIP, FAR_CLIP);
+
+	checkGLError();
 }
 
 
