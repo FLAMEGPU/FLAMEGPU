@@ -626,6 +626,161 @@ int get_<xsl:value-of select="xmml:name"/>_population_width(){
 </xsl:for-each>
 
 
+/* Host based agent creation functions */
+
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+/* copy_single_xmachine_memory_<xsl:value-of select="xmml:name"/>_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_<xsl:value-of select="xmml:name"/>_hostToDevice(xmachine_memory_<xsl:value-of select="xmml:name"/>_list * d_dst, xmachine_memory_<xsl:value-of select="xmml:name"/> * h_agent){
+<xsl:for-each select="xmml:memory/gpu:variable"><xsl:if test="xmml:arrayLength"> 
+	for(unsigned int i = 0; i &lt; <xsl:value-of select="xmml:arrayLength"/>; i++){
+		gpuErrchk(cudaMemcpy(d_dst-&gt;<xsl:value-of select="xmml:name"/> + (i * xmachine_memory_<xsl:value-of select="../../xmml:name" />_MAX), h_agent-&gt;<xsl:value-of select="xmml:name"/> + i, sizeof(<xsl:value-of select="xmml:type"/>), cudaMemcpyHostToDevice));
+    }
+</xsl:if><xsl:if test="not(xmml:arrayLength)"> 
+		gpuErrchk(cudaMemcpy(d_dst-&gt;<xsl:value-of select="xmml:name"/>, &amp;h_agent-&gt;<xsl:value-of select="xmml:name"/>, sizeof(<xsl:value-of select="xmml:type"/>), cudaMemcpyHostToDevice));
+</xsl:if>
+</xsl:for-each>
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_<xsl:value-of select="xmml:name"/>_hostToDevice(xmachine_memory_<xsl:value-of select="xmml:name"/>_list * d_dst, xmachine_memory_<xsl:value-of select="xmml:name"/>_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count &gt; 0){
+	<xsl:for-each select="xmml:memory/gpu:variable"><xsl:if test="xmml:arrayLength"> 
+		for(unsigned int i = 0; i &lt; <xsl:value-of select="xmml:arrayLength"/>; i++){
+			gpuErrchk(cudaMemcpy(d_dst-&gt;<xsl:value-of select="xmml:name"/> + (i * xmachine_memory_<xsl:value-of select="../../xmml:name" />_MAX), h_src-&gt;<xsl:value-of select="xmml:name"/> + (i * xmachine_memory_<xsl:value-of select="../../xmml:name" />_MAX), count * sizeof(<xsl:value-of select="xmml:type"/>), cudaMemcpyHostToDevice));
+        }
+    }
+
+</xsl:if><xsl:if test="not(xmml:arrayLength)"> 
+		gpuErrchk(cudaMemcpy(d_dst-&gt;<xsl:value-of select="xmml:name"/>, h_src-&gt;<xsl:value-of select="xmml:name"/>, count * sizeof(<xsl:value-of select="xmml:type"/>), cudaMemcpyHostToDevice));
+</xsl:if>
+	</xsl:for-each>
+}
+</xsl:for-each>
+
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>
+xmachine_memory_<xsl:value-of select="$agent_name" />* h_allocate_agent_<xsl:value-of select="$agent_name" />(){
+	xmachine_memory_<xsl:value-of select="$agent_name" />* agent = (xmachine_memory_<xsl:value-of select="$agent_name" />*)malloc(sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
+<xsl:for-each select="xmml:memory/gpu:variable">
+<xsl:choose>
+<xsl:when test="not(xmml:arrayLength)">
+    agent-&gt;<xsl:value-of select="xmml:name"/> = 0;</xsl:when>
+<xsl:otherwise>
+    agent-&gt;<xsl:value-of select="xmml:name"/> = (<xsl:value-of select="xmml:type"/>*)malloc(<xsl:value-of select="xmml:arrayLength"/> * sizeof(<xsl:value-of select="xmml:type"/>));
+    for(unsigned int i = 0; i &lt; <xsl:value-of select="xmml:arrayLength"/>; i++){
+        agent-&gt;<xsl:value-of select="xmml:name"/>[i] = 0;
+    }</xsl:otherwise>
+</xsl:choose>
+</xsl:for-each>
+	return agent;
+}
+void h_free_agent_<xsl:value-of select="$agent_name" />(xmachine_memory_<xsl:value-of select="$agent_name" />** agent){
+<xsl:variable name="xagentname" select="xmml:xagentName"/><xsl:for-each select="xmml:memory/gpu:variable"><xsl:if test="xmml:arrayLength">
+    free((*agent)-&gt;<xsl:value-of select="xmml:name"/>);
+</xsl:if></xsl:for-each> 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_<xsl:value-of select="$agent_name" />** h_allocate_agent_<xsl:value-of select="$agent_name" />_array(unsigned int count){
+	xmachine_memory_<xsl:value-of select="$agent_name" /> ** agents = (xmachine_memory_<xsl:value-of select="$agent_name" />**)malloc(count * sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />*));
+	for (unsigned int i = 0; i &lt; count; i++) {
+		agents[i] = h_allocate_agent_<xsl:value-of select="$agent_name" />();
+	}
+	return agents;
+}
+void h_free_agent_<xsl:value-of select="$agent_name" />_array(xmachine_memory_<xsl:value-of select="$agent_name" />*** agents, unsigned int count){
+	for (unsigned int i = 0; i &lt; count; i++) {
+		h_free_agent_Agent(&amp;((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_<xsl:value-of select="$agent_name"/>_AoS_to_SoA(xmachine_memory_<xsl:value-of select="$agent_name"/>_list * dst, xmachine_memory_<xsl:value-of select="$agent_name" />** src, unsigned int count){
+	if(count &gt; 0){
+		for(unsigned int i = 0; i &lt; count; i++){
+			<xsl:for-each select="xmml:memory/gpu:variable"><xsl:if test="xmml:arrayLength"> 
+			for(unsigned int j = 0; j &lt; <xsl:value-of select="xmml:arrayLength" />; j++){
+				dst-&gt;<xsl:value-of select="xmml:name"/>[(j * xmachine_memory_<xsl:value-of select="../../xmml:name" />_MAX) + i] = src[i]-&gt;<xsl:value-of select="xmml:name"/>[j];
+			}
+			</xsl:if><xsl:if test="not(xmml:arrayLength)"> 
+			dst-&gt;<xsl:value-of select="xmml:name"/>[i] = src[i]-&gt;<xsl:value-of select="xmml:name"/>;
+			</xsl:if>
+			</xsl:for-each>
+		}
+	}
+}
+<xsl:for-each select="xmml:states/gpu:state"><xsl:variable name="state" select="xmml:name"/>
+
+void h_add_agent_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />(xmachine_memory_<xsl:value-of select="$agent_name" />* agent){
+	if (h_xmachine_memory_<xsl:value-of select="$agent_name"/>_count + 1 &gt; xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX){
+		printf("Error: Buffer size of <xsl:value-of select="$agent_name"/> agents in state <xsl:value-of select="$state"/> will be exceeded by h_add_agent_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_<xsl:value-of select="$agent_name"/>_hostToDevice(d_<xsl:value-of select="$agent_name"/>s_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&amp;minGridSize, &amp;blockSize, append_<xsl:value-of select="$agent_name"/>_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_<xsl:value-of select="$agent_name"/>_Agents &lt;&lt;&lt;gridSize, blockSize, 0, stream1 &gt;&gt;&gt;(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>, d_<xsl:value-of select="$agent_name"/>s_new, h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, &amp;h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+}
+void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />(xmachine_memory_<xsl:value-of select="$agent_name" />** agents, unsigned int count){
+	if(count &gt; 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_<xsl:value-of select="$agent_name"/>_count + count &gt; xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX){
+			printf("Error: Buffer size of <xsl:value-of select="$agent_name"/> agents in state <xsl:value-of select="$state"/> will be exceeded by h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_<xsl:value-of select="$agent_name"/>_AoS_to_SoA(h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_<xsl:value-of select="$agent_name"/>_hostToDevice(d_<xsl:value-of select="$agent_name"/>s_new, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&amp;minGridSize, &amp;blockSize, append_<xsl:value-of select="$agent_name"/>_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_<xsl:value-of select="$agent_name"/>_Agents &lt;&lt;&lt;gridSize, blockSize, 0, stream1 &gt;&gt;&gt;(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>, d_<xsl:value-of select="$agent_name"/>s_new, h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, &amp;h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+	}
+}
+</xsl:for-each>
+</xsl:for-each>
+
 /*  Analytics Functions */
 
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
