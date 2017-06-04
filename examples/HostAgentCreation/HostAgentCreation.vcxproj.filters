@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="src\dynamic\io.cu">
+      <Filter>dynamic</Filter>
+    </CudaCompile>
+    <CudaCompile Include="src\dynamic\main.cu">
+      <Filter>dynamic</Filter>
+    </CudaCompile>
+    <CudaCompile Include="src\dynamic\simulation.cu">
+      <Filter>dynamic</Filter>
+    </CudaCompile>
+    <CudaCompile Include="src\dynamic\visualisation.cu">
+      <Filter>dynamic</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="XMML.h" />
+    <ClInclude Include="XMMLGPU.h" />
+    <ClInclude Include="src\dynamic\FLAMEGPU_kernals.cu">
+      <Filter>dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dynamic\header.h">
+      <Filter>dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\visualisation\visualisation.h">
+      <Filter>visualisation</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\FLAMEGPU\templates\FLAMEGPU_kernals.xslt">
+      <Filter>templates</Filter>
+    </Xml>
+    <Xml Include="..\..\FLAMEGPU\templates\header.xslt">
+      <Filter>templates</Filter>
+    </Xml>
+    <Xml Include="..\..\FLAMEGPU\templates\io.xslt">
+      <Filter>templates</Filter>
+    </Xml>
+    <Xml Include="..\..\FLAMEGPU\templates\main.xslt">
+      <Filter>templates</Filter>
+    </Xml>
+    <Xml Include="..\..\FLAMEGPU\templates\simulation.xslt">
+      <Filter>templates</Filter>
+    </Xml>
+    <Xml Include="..\..\FLAMEGPU\templates\visualisation.xslt">
+      <Filter>templates</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="dynamic">
+      <UniqueIdentifier>{0d1e4764-47ad-4530-833f-9faa04877689}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="model">
+      <UniqueIdentifier>{68a822ce-68b8-40a9-8f05-ff3b9d740f13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="templates">
+      <UniqueIdentifier>{765ed822-27f7-46a9-95ac-e617b504cc6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="schemas">
+      <UniqueIdentifier>{9ce5c34b-314c-4f85-9fe5-afc8093a2049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="visualisation">
+      <UniqueIdentifier>{19aa7ca1-80be-4c38-97ec-b46c207b3984}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\model\functions.c">
+      <Filter>model</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\dynamic\_README.txt">
+      <Filter>dynamic</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <FLAMEGPU_Template_Build_Rule Include="src\model\XMLModelFile.xml">
+      <Filter>model</Filter>
+    </FLAMEGPU_Template_Build_Rule>
+  </ItemGroup>
+  <ItemGroup>
+    <Xsd Include="..\..\FLAMEGPU\schemas\XMML.xsd">
+      <Filter>schemas</Filter>
+    </Xsd>
+    <Xsd Include="..\..\FLAMEGPU\schemas\XMMLGPU.xsd">
+      <Filter>schemas</Filter>
+    </Xsd>
+  </ItemGroup>
+</Project>
