@@ -62,6 +62,9 @@ void increaseTimeScaler()
 void decreaseTimeScaler()
 {
 	timeScaler -= TIME_SCALER_INCREMENT;
+	//prevent negative time scaler
+	if (timeScaler < 0)
+		timeScaler += TIME_SCALER_INCREMENT;
 	set_TIME_SCALER(&timeScaler);
 }
 
