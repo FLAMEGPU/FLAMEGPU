@@ -661,12 +661,12 @@ void copy_partial_xmachine_memory_<xsl:value-of select="xmml:name"/>_hostToDevic
 		for(unsigned int i = 0; i &lt; <xsl:value-of select="xmml:arrayLength"/>; i++){
 			gpuErrchk(cudaMemcpy(d_dst-&gt;<xsl:value-of select="xmml:name"/> + (i * xmachine_memory_<xsl:value-of select="../../xmml:name" />_MAX), h_src-&gt;<xsl:value-of select="xmml:name"/> + (i * xmachine_memory_<xsl:value-of select="../../xmml:name" />_MAX), count * sizeof(<xsl:value-of select="xmml:type"/>), cudaMemcpyHostToDevice));
         }
-    }
 
 </xsl:if><xsl:if test="not(xmml:arrayLength)"> 
 		gpuErrchk(cudaMemcpy(d_dst-&gt;<xsl:value-of select="xmml:name"/>, h_src-&gt;<xsl:value-of select="xmml:name"/>, count * sizeof(<xsl:value-of select="xmml:type"/>), cudaMemcpyHostToDevice));
 </xsl:if>
 	</xsl:for-each>
+    }
 }
 </xsl:for-each>
 
