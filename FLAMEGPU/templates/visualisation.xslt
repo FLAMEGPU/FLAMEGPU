@@ -220,7 +220,9 @@ void initVisualisation()
 
 	// Create GL context
 	int   argc   = 1;
-	char *argv[] = {"GLUT application", NULL};
+        char glutString[] = "GLUT application"; 
+	char *argv[] = {glutString, NULL};
+	//char *argv[] = {"GLUT application", NULL};
 	glutInit( &amp;argc, argv);
 	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize( WINDOW_WIDTH, WINDOW_HEIGHT);

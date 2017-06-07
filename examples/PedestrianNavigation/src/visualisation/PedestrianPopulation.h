@@ -95,4 +95,4 @@ static const char pedestrian_vshader_source[] =
 };
 
 
-#endif __PEDESTRIAN_POPULATION
+#endif //__PEDESTRIAN_POPULATION

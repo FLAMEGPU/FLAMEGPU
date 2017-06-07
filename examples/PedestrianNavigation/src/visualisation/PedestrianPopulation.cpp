@@ -86,12 +86,14 @@ void initPedestrianPopulation()
 	lod1_v_count = 354;
 	lod1_f_count = 704;
 	//Left
+	char lod1LeftString[] = "../../media/person-lod1-left.obj"; 
 	allocateObjModel(lod1_v_count, lod1_f_count, &lod1l_vertices, &lod1l_normals, &lod1l_faces);
-	loadObjFromFile("../../media/person-lod1-left.obj",	lod1_v_count, lod1_f_count, lod1l_vertices, lod1l_normals, lod1l_faces);
+	loadObjFromFile(lod1LeftString,	lod1_v_count, lod1_f_count, lod1l_vertices, lod1l_normals, lod1l_faces);
 	scaleObj(PEDESTRIAN_MODEL_SCALE, lod1_v_count, lod1l_vertices);		 
 	//Right
+	char lod1RightString[] = "../../media/person-lod1-right.obj"; 
 	allocateObjModel(lod1_v_count, lod1_f_count, &lod1r_vertices, &lod1r_normals, &lod1r_faces);
-	loadObjFromFile("../../media/person-lod1-right.obj", lod1_v_count, lod1_f_count, lod1r_vertices, lod1r_normals, lod1r_faces);
+	loadObjFromFile(lod1RightString, lod1_v_count, lod1_f_count, lod1r_vertices, lod1r_normals, lod1r_faces);
 	scaleObj(PEDESTRIAN_MODEL_SCALE, lod1_v_count, lod1r_vertices);
 
 	createPedestrianBufferObjects();

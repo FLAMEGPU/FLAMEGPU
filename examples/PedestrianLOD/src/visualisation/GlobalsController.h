@@ -57,4 +57,4 @@ void decreaseGoalWeight();
 float getGoalWeight();
 void setGoalWeightText(char* text);
 
-#endif __GLOBALS_CONTROLLER
+#endif //__GLOBALS_CONTROLLER

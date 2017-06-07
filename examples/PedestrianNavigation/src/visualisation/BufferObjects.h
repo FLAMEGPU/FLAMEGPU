@@ -59,4 +59,4 @@ extern void unregisterBO(GLuint* bo);
 
 
 
-#endif __BUFFER_OBJECTS
+#endif //__BUFFER_OBJECTS
