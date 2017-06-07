@@ -202,8 +202,11 @@ void drawInfoDisplay(int width, int height)
 		
 		text_position = 0;
 
+                char simInfoString[] = "********** Simulation Information **********"; 
+                char simEndInfoString[] = "******** End Simulation Information ********"; 
+                                
 		glColor3f(0.0, 0.0, 0.0);
-		printInfoLine("********** Simulation Information **********");
+		printInfoLine(simInfoString);
 
 		sprintf(output_buffer,"Current Frames Per Second: %f", getFPS());
 		printInfoLine(output_buffer);
@@ -214,7 +217,7 @@ void drawInfoDisplay(int width, int height)
 		sprintf(output_buffer,"Maximum Pedestrian Agent Count: %i", get_agent_agent_MAX_count());
 		printInfoLine(output_buffer);
 
-		printInfoLine("******** End Simulation Information ********");
+		printInfoLine(simEndInfoString);
 	}
 }
 
@@ -241,8 +244,11 @@ void drawMenuDisplay(int width, int height)
 
 		text_position = 0;
 
+                char simMenueString[] = "********** Simulation Menu **********"; 
+                char simEndMenueString[] = "******** End Simulation Menu ********"; 
+                
 		glColor3f(0.0f,0.0f,0.0f);
-		printInfoLine("********** Simulation Menu **********");
+		printInfoLine(simMenueString);
 
 		//print menu
 		if (menu)
@@ -259,7 +265,7 @@ void drawMenuDisplay(int width, int height)
 		}
 
 		glColor3f(0.0f,0.0f,0.0f);
-		printInfoLine("******** End Simulation Menu ********");
+		printInfoLine(simEndMenueString);
 	}
 }
 

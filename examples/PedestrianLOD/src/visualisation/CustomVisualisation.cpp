@@ -61,10 +61,12 @@ extern void initVisualisation()
 
 
     // Create GL context
-	int   argc   = 1;
-    char *argv[] = {"GLUT application", NULL};	
+   int   argc   = 1;
+   char glutString[] = "GLUT application"; 
+   char *argv[] = {glutString, NULL};
+   //char *argv[] = {"GLUT application", NULL};	
 	
-	setCudaDevice();
+    setCudaDevice();
     glutInit(&argc, argv);
 
 

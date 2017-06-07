@@ -47,4 +47,4 @@ extern void setCudaDevice();
 void checkGLError();
 
 
-#endif __VISUALISATION
+#endif //__VISUALISATION
