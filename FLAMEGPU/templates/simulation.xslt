@@ -702,7 +702,7 @@ xmachine_memory_<xsl:value-of select="$agent_name" />** h_allocate_agent_<xsl:va
 }
 void h_free_agent_<xsl:value-of select="$agent_name" />_array(xmachine_memory_<xsl:value-of select="$agent_name" />*** agents, unsigned int count){
 	for (unsigned int i = 0; i &lt; count; i++) {
-		h_free_agent_Agent(&amp;((*agents)[i]));
+		h_free_agent_<xsl:value-of select="$agent_name" />(&amp;((*agents)[i]));
 	}
 	free((*agents));
 	(*agents) = NULL;
