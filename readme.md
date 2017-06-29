@@ -30,7 +30,79 @@ Pre-compiled Windows binaries are available for the example projects in the [FLA
 
 Linux compilation is controlled using `make`, with makefiles provided for each example.
 
-**@todo @mozghan-kch**
+# How to setup, build, and run FLAMEGPU examples on Linux
+
+1\. Install [Ubuntu](http://www.ubuntu.com/download) 16.04 or later.  
+
+2\. Install all the needed build tools and libraries  
+
+```bash
+sudo apt-get install g++ git make libxml2-utils
+```
+
+Minimum versions:
+- g++: 4.8
+- cuda: 7.5
+
+3\. Clone the project using Git (it will be stored in the folder "FLAMEGPU"):  
+
+```bash
+git clone https://github.com/FLAMEGPU/FLAMEGPU.git
+```
+
+Going forward, you will want to pull from the _master_ branch, which will always contain the last known release.
+
+4\. Build the SDK in Release mode (this is the default mode)
+
+```bash
+cd FLAMEGPU/examples
+make all
+```
+
+You can build the Debug version by specifying _dbg_ value on the make line instead (`make all dbg=1`).  Moreover, for each example, exacutables can also be built in either Visualisation (`make Visualisation_mode`) or Console (`make Console_mode`) mode.
+
+```bash
+cd examples/{folder name}
+make XSLTPREP
+make Visualisation_mode
+# or
+make Console_mode
+```
+_Replace '{folder name}' with the name of the example folder._
+
+5\. After building the executables, you can run the examples by executing the relevant bash script inside the "bin/x64" folder:
+
+- Visualisation mode `./*_vis.sh`
+
+- Console mode `./*_console.sh iter='arg'`
+
+Note: If 'arg' is not set, the default value for the number of iterations would be 1. You can simply change this by setting a value. _(e.g: iter=50)_
+
+Alternatively, run the executables from each example folder (`cd examples/{folder name}`) using _make_.
+
+- Visualisation mode `make run_vis`
+
+- Console mode `make run_console iter='arg'`
+
+6\. Debugging examples:
+```bash
+cd examples/{folder name}
+make Console_mode dbg=1
+```
+- Debugging with _cuda-gdb_
+```bash
+cuda-gdb ../../bin/x64/Debug_Console/{folder name}_console
+..
+(cuda-gdb) run iterations/0.xml 2
+...
+```
+- Debugging with _valgrind_
+```bash
+valgrind --tool=memcheck ../../bin/x64/Debug_Console/{folder name}_console iterations/0.xml 1
+```
+
+6\. For more details on how to build specific targets for each example, run
+`make help`
 
 
 ## Usage
@@ -119,3 +191,7 @@ The Library, examples and all source code are covered by the Licence in [LICENCE
 ### [1.4.0](https://github.com/FLAMEGPU/FLAMEGPU/releases/tag/v1.4)
 
 + FLAME GPU 1.4 for CUDA 7 and Visual Studio 2012
+
+#Problem reports
+
+To report a bug in this documentation or in the software or propose an improvement, please use the FLAMEGPU github issue tracker.
