@@ -30,7 +30,7 @@ Pre-compiled Windows binaries are available for the example projects in the [FLA
 
 Linux compilation is controlled using `make`, with makefiles provided for each example.
 
-# How to setup, build, and run FLAMEGPU examples on Linux
+## How to setup, build, and run FLAMEGPU examples on Linux
 
 1\. Install [Ubuntu](http://www.ubuntu.com/download) 16.04 or later.  
 
@@ -101,7 +101,9 @@ cuda-gdb ../../bin/x64/Debug_Console/{folder name}_console
 valgrind --tool=memcheck ../../bin/x64/Debug_Console/{folder name}_console iterations/0.xml 1
 ```
 
-6\. For more details on how to build specific targets for each example, run
+7\. Clean generated dynamic and object files with `make clobber`. Note that you need to use `make XSLTPREP` to generate the .cu files first, then build a specific target (console or visualisation mode). `make all` would generate the dynamic files as well as building the executables. And `make clean` only deletes the object files and leaves the .cu files behind.
+
+8\. For more details on how to build specific targets for each example, run
 `make help`
 
 
@@ -192,6 +194,6 @@ The Library, examples and all source code are covered by the Licence in [LICENCE
 
 + FLAME GPU 1.4 for CUDA 7 and Visual Studio 2012
 
-#Problem reports
+##Problem reports
 
 To report a bug in this documentation or in the software or propose an improvement, please use the FLAMEGPU github issue tracker.
