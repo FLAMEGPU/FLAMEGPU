@@ -67,7 +67,7 @@ cd examples/MonteCarlo_MSMPR/iterations
 gnuplot plot_cs2.plt
 ```
 
-8\. For the detailed information and the performance results, please view this [document]().
+8\. For the detailed information and the performance results, please view this [document](FLAMEGPU/doc/Notes_on_Monte_Carlo_Simulation.pdf).
 
 #Problem reports
 
