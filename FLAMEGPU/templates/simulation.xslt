@@ -673,16 +673,12 @@ void copy_partial_xmachine_memory_<xsl:value-of select="xmml:name"/>_hostToDevic
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>
 xmachine_memory_<xsl:value-of select="$agent_name" />* h_allocate_agent_<xsl:value-of select="$agent_name" />(){
 	xmachine_memory_<xsl:value-of select="$agent_name" />* agent = (xmachine_memory_<xsl:value-of select="$agent_name" />*)malloc(sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
+    memset(agent, 0, sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
 <xsl:for-each select="xmml:memory/gpu:variable">
-<xsl:choose>
-<xsl:when test="not(xmml:arrayLength)">
-    agent-&gt;<xsl:value-of select="xmml:name"/> = 0;</xsl:when>
-<xsl:otherwise>
+<xsl:if test="xmml:arrayLength">
     agent-&gt;<xsl:value-of select="xmml:name"/> = (<xsl:value-of select="xmml:type"/>*)malloc(<xsl:value-of select="xmml:arrayLength"/> * sizeof(<xsl:value-of select="xmml:type"/>));
-    for(unsigned int i = 0; i &lt; <xsl:value-of select="xmml:arrayLength"/>; i++){
-        agent-&gt;<xsl:value-of select="xmml:name"/>[i] = 0;
-    }</xsl:otherwise>
-</xsl:choose>
+    memset(agent-&gt;<xsl:value-of select="xmml:name"/>, 0, sizeof(<xsl:value-of select="xmml:type"/>)*<xsl:value-of select="xmml:arrayLength"/>);
+</xsl:if>
 </xsl:for-each>
 	return agent;
 }
