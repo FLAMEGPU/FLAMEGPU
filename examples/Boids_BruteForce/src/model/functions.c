@@ -97,7 +97,7 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	int collision_count = 0;
 
 	xmachine_message_location* location_message = get_first_location_message(location_messages);
-	int count;
+	int count = 0;
 	
     while(location_message)
 	{
