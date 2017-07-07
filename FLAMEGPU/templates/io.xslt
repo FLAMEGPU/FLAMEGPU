@@ -130,7 +130,13 @@ void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each sel
 	/* Close the file */
 	fclose(file);
 }
-
+<xsl:if test="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable/xmml:defaultValue">
+void initEnvVars()
+{<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
+<xsl:if test="xmml:defaultValue"><!--We cast the variable, so we don't accidentally create 1f or similiar if user omits decimal--><xsl:text>
+    </xsl:text><xsl:value-of select="xmml:type"/> t_<xsl:value-of select="xmml:name"/> = (<xsl:value-of select="xmml:type"/>)<xsl:value-of select="xmml:defaultValue"/>;
+    set_<xsl:value-of select="xmml:name"/>(&amp;t_<xsl:value-of select="xmml:name"/>);</xsl:if></xsl:for-each>
+}</xsl:if>
 void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">xmachine_memory_<xsl:value-of select="xmml:name"/>_list* h_<xsl:value-of select="xmml:name"/>s, int* h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>)
 {
 
@@ -165,7 +171,8 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 		exit(EXIT_FAILURE);
 	}
 	
-	/* Initialise variables */
+	/* Initialise variables */<xsl:if test="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable/xmml:defaultValue">
+    initEnvVars();</xsl:if>
     agent_maximum.x = 0;
     agent_maximum.y = 0;
     agent_maximum.z = 0;
