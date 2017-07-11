@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
                 xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML"
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
@@ -137,7 +137,7 @@ void initCUDA(int argc, char** argv){
 /**
  * Program main (Handles arguments)
  */
-int main( int argc, char** argv)
+int main( int argc, char** argv) 
 {
 	cudaError_t cudaStatus;
 	//check usage mode
@@ -158,20 +158,19 @@ int main( int argc, char** argv)
 	//initialise the simulation
 	initialise(inputfile);
 
-  printf("Initialise ok");
-
+    
 #ifdef VISUALISATION
 	runVisualisation();
 	exit(EXIT_SUCCESS);
-#else
+#else	
 	//Benchmark simulation
 	cudaEvent_t start, stop;
 	float milliseconds = 0;
-
+	
 	//create timing events
 	cudaEventCreate(&amp;start);
 	cudaEventCreate(&amp;stop);
-
+	
 	//Get the number of iterations
 	int iterations = atoi(argv[2]);
 	if (iterations == 0)
@@ -179,7 +178,7 @@ int main( int argc, char** argv)
 		printf("Second argument must be an integer (Number of Iterations)\n");
 		exit(EXIT_FAILURE);
 	}
-
+  
 	//start timing
 	cudaEventRecord(start);
 
@@ -196,7 +195,7 @@ int main( int argc, char** argv)
 				//<xsl:value-of select="xmml:name"/> state <xsl:value-of select="../../xmml:name"/> agents
 				get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose>
 				</xsl:for-each>
-
+			
 				printf("Iteration %i Saved to XML\n", i+1);
 		}
 
