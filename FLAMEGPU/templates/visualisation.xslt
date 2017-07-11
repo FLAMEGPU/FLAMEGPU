@@ -313,7 +313,7 @@ int initGL()
 	glewInit();
 	if (! glewIsSupported( "GL_VERSION_2_0 " 
 		"GL_ARB_pixel_buffer_object")) {
-		fprintf( stderr, "ERROR: Support for necessary OpenGL extensions missing.\n");
+		fprintf( stderr, "ERROR: Support for necessary OpenGL extensions missing.");
 		fflush( stderr);
 		return 1;
 	}
