@@ -151,7 +151,7 @@ help:
 	@echo "                                                                       *"
 	@echo "           ------------------------------------------------            *"
 	@echo "                                                                       *"
-	@echo "make console_mode -> builds executables in console mode                *"
+	@echo "make Console_mode -> builds executables in console mode                *"
 	@echo "                                                                       *"
 	@echo "make < .. > dbg='arg' -> builds in Release/Debug only                  *"
 	@echo "                                'arg' -> 0 or 1 value                  *"
