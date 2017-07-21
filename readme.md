@@ -70,7 +70,7 @@ make Console_mode
 ```
 _Replace '{folder name}' with the name of the example folder._
 
-5\. After building the executables, you can run the examples by executing the relevant bash script inside the "bin/x64" folder:
+5\. After building the executables, you can run the examples by executing the relevant bash script inside the "bin/linux-x64" folder:
 
 - Visualisation mode `./*_vis.sh`
 
