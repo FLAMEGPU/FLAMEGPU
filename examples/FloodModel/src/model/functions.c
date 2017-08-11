@@ -6,6 +6,7 @@
 #include "cutil_math.h"
 
 
+
 #define PI 3.1415f
 #define RADIANS(x) (PI / 180.0f) * x
 
@@ -21,7 +22,7 @@
 //#define tol_h 1.0e-4
 #define epsilon 1.0e-3
 #define emsmall 1.0e-12
-#define g 9.80665 
+#define GRAVITY 9.80665 
 #define sqrt3 1.73205081
 //#define Krivo_threshold 0.99
 //#define Manning 0.000
@@ -250,7 +251,7 @@ inline __device__  double2 friction_2D(double dt_loc, double et_loc, double qx_l
 	{
 		// The is motional. The FRICTIONS CONTRUBUTION HAS TO BE ADDED SO THAT IT DOESN'T REVERSE THE FLOW.
 
-		double Cf = g * pow(GLOBAL_MANNING, 2.0) / pow(h_loc, 1.0 / 3.0);
+		double Cf = GRAVITY * pow(GLOBAL_MANNING, 2.0) / pow(h_loc, 1.0 / 3.0);
 
 		double expULoc = pow(u_loc, 2);
 		double expVLoc = pow(v_loc, 2);
@@ -413,9 +414,9 @@ __FLAME_GPU_FUNC__ int PrepareLFVNeighbourMessages(xmachine_memory_FloodCell* ag
 		if (agent->inflowHydrographIndex > -1)
 		{
 
-			float qXinflow = tex1D(QX_HydrographTexture0, agent->inflowHydrographIndex);
-			float qYinflow = tex1D(QY_HydrographTexture0, agent->inflowHydrographIndex);
-			float qZinflow = tex1D(Z_HydrographTexture0, agent->inflowHydrographIndex);
+			float qXinflow = 0.0f;// tex1D(QX_HydrographTexture0, agent->inflowHydrographIndex);
+			float qYinflow = 0.0f;//tex1D(QY_HydrographTexture0, agent->inflowHydrographIndex);
+			float qZinflow = 0.0f;//tex1D(Z_HydrographTexture0, agent->inflowHydrographIndex);
 
 			//TEMP:  sort out this!!!
 			//agent->waterLevel = 0.0; 
@@ -967,7 +968,7 @@ inline __device__ double3 hll_x(double zb_LR, double z_L, double z_R, double qx_
 	{
 		F_face.x = 0.0;
 		F_face.y = pow(0.5 * (z_L + z_R), 2.0) - ((zb_LR + zb_LR) * ((z_L + z_R) * 0.5));
-		F_face.y *= (0.5 * g);
+		F_face.y *= (0.5 * GRAVITY);
 		F_face.z = 0.0;
 
 		return F_face;
@@ -997,12 +998,12 @@ inline __device__ double3 hll_x(double zb_LR, double z_L, double z_R, double qx_
 		v_R = qy_R / h_R;
 	}
 
-	double a_L = sqrt(g * h_L);
-	double a_R = sqrt(g * h_R);
+	double a_L = sqrt(GRAVITY * h_L);
+	double a_R = sqrt(GRAVITY * h_R);
 
-	double h_star = pow(((a_L + a_R) / 2.0 + (u_L - u_R) / 4.0), 2) / g;
+	double h_star = pow(((a_L + a_R) / 2.0 + (u_L - u_R) / 4.0), 2) / GRAVITY;
 	double u_star = (u_L + u_R) / 2.0 + a_L - a_R;
-	double a_star = sqrt(g * h_star);
+	double a_star = sqrt(GRAVITY * h_star);
 
 	double s_L = 0.0;
 
@@ -1031,11 +1032,11 @@ inline __device__ double3 hll_x(double zb_LR, double z_L, double z_R, double qx_
 	double3 F_L, F_R;
 
 	F_L.x = qx_L;
-	F_L.y = u_L * qx_L + 0.5 * g * (pow(z_L, 2.0) - (2.0 * zb_LR * z_L));
+	F_L.y = u_L * qx_L + 0.5 * GRAVITY * (pow(z_L, 2.0) - (2.0 * zb_LR * z_L));
 	F_L.z = u_L * qy_L;
 
 	F_R.x = qx_R;
-	F_R.y = u_R * qx_R + 0.5 * g * (pow(z_R, 2.0) - (2.0 * zb_LR * z_R));
+	F_R.y = u_R * qx_R + 0.5 * GRAVITY * (pow(z_R, 2.0) - (2.0 * zb_LR * z_R));
 	F_R.z = u_R * qy_R;
 
 	if (s_L >= 0.0)
@@ -1095,7 +1096,7 @@ inline __device__ double3 hll_y(double zb_SN, double z_S, double z_N, double qx_
 		G_face.x = 0.0;
 		G_face.y = 0.0;
 		G_face.z = pow(0.5 * (z_S + z_N), 2.0) - ((zb_SN + zb_SN) * ((z_S + z_N) * 0.5));
-		G_face.z *= (g * 0.5);
+		G_face.z *= (GRAVITY * 0.5);
 
 		return G_face;
 	}
@@ -1124,12 +1125,12 @@ inline __device__ double3 hll_y(double zb_SN, double z_S, double z_N, double qx_
 		v_N = qy_N / h_N;
 	}
 
-	double a_S = sqrt(g * h_S);
-	double a_N = sqrt(g * h_N);
+	double a_S = sqrt(GRAVITY * h_S);
+	double a_N = sqrt(GRAVITY * h_N);
 
-	double h_star = pow(((a_S + a_N) / 2.0 + (v_S - v_N) / 4.0), 2.0) / g;
+	double h_star = pow(((a_S + a_N) / 2.0 + (v_S - v_N) / 4.0), 2.0) / GRAVITY;
 	double v_star = (v_S + v_N) / 2.0 + a_S - a_N;
-	double a_star = sqrt(g * h_star);
+	double a_star = sqrt(GRAVITY * h_star);
 
 	double s_S = 0.0;
 
@@ -1160,11 +1161,11 @@ inline __device__ double3 hll_y(double zb_SN, double z_S, double z_N, double qx_
 
 	G_S.x = qy_S;
 	G_S.y = v_S * qx_S;
-	G_S.z = v_S * qy_S + 0.5 * g * (pow(z_S, 2.0) - (2.0 * zb_SN * z_S));
+	G_S.z = v_S * qy_S + 0.5 * GRAVITY * (pow(z_S, 2.0) - (2.0 * zb_SN * z_S));
 
 	G_N.x = qy_N;
 	G_N.y = v_N * qx_N;
-	G_N.z = v_N * qy_N + 0.5 * g * (pow(z_N, 2.0) - (2.0 * zb_SN * z_N));
+	G_N.z = v_N * qy_N + 0.5 * GRAVITY * (pow(z_N, 2.0) - (2.0 * zb_SN * z_N));
 
 	if (s_S >= 0.0)
 	{
@@ -1747,8 +1748,8 @@ __FLAME_GPU_FUNC__ int ProcessRKStageMessages(xmachine_memory_FloodCell* agent, 
 				double vp = agent->qy0 / h0;
 
 				//store for timestep calc
-				double xStep = CFL * DXL / (fabs(up) + sqrt(g * h0));
-				double yStep = CFL * DYL / (fabs(vp) + sqrt(g * h0));
+				double xStep = CFL * DXL / (fabs(up) + sqrt(GRAVITY * h0));
+				double yStep = CFL * DYL / (fabs(vp) + sqrt(GRAVITY * h0));
 
 				agent->timeStep = min(xStep, yStep);
 
@@ -1883,8 +1884,8 @@ inline __device__ double3 Sb(double etta, double zprime_x, double zprime_y)
 	double3 result;
 
 	result.x = 0.0;
-	result.y = -g * etta * zprime_x;
-	result.z = -g * etta * zprime_y;
+	result.y = -GRAVITY * etta * zprime_x;
+	result.z = -GRAVITY * etta * zprime_y;
 
 	return result;
 
@@ -1909,7 +1910,7 @@ inline __device__ double3 Sf_explicit(double et_loc, double z_loc, double qx_loc
 			double u_loc = qx_loc / h_loc;
 			double v_loc = qy_loc / h_loc;
 
-			double Cf = g * pow(GLOBAL_MANNING, 2.0) / pow(h_loc, 1.0 / 3.0);
+			double Cf = GRAVITY * pow(GLOBAL_MANNING, 2.0) / pow(h_loc, 1.0 / 3.0);
 
 			Sf.y = -Cf * u_loc * sqrt(pow(u_loc, 2) + pow(v_loc, 2));
 			Sf.z = -Cf * v_loc * sqrt(pow(u_loc, 2) + pow(v_loc, 2));
@@ -1930,13 +1931,13 @@ inline __device__ double3 Flux_F(double et, double qx, double qy, double zb)
 	if (h <= TOL_H)
 	{
 		FF.x = 0.0;
-		FF.y = (g / 2.0) * (pow(et, 2.0) - (2.0 * et * zb));
+		FF.y = (GRAVITY / 2.0) * (pow(et, 2.0) - (2.0 * et * zb));
 		FF.z = 0.0;
 	}
 	else
 	{
 		FF.x = qx;
-		FF.y = (pow(qx, 2) / h) + ((g / 2.0) * (pow(et, 2.0) - (2.0 * et * zb)));
+		FF.y = (pow(qx, 2) / h) + ((GRAVITY / 2.0) * (pow(et, 2.0) - (2.0 * et * zb)));
 		FF.z = qx * qy / h;
 	}
 
@@ -1956,13 +1957,13 @@ inline __device__ double3 Flux_G(double et, double qx, double qy, double zb)
 	{
 		GG.x = 0.0;
 		GG.y = 0.0;
-		GG.z = (g / 2.0) * (pow(et, 2.0) - (2.0 * et * zb));
+		GG.z = (GRAVITY / 2.0) * (pow(et, 2.0) - (2.0 * et * zb));
 	}
 	else
 	{
 		GG.x = qy;
 		GG.y = qx * qy / h;
-		GG.z = (pow(qy, 2) / h) + ((g / 2.0) * (pow(et, 2.0) - (2.0 * et * zb)));
+		GG.z = (pow(qy, 2) / h) + ((GRAVITY / 2.0) * (pow(et, 2.0) - (2.0 * et * zb)));
 	}
 
 	return GG;
