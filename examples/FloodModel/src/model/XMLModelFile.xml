@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
+        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+  <name>Street Model</name>
+  <gpu:environment>
+    <gpu:constants>
+
+      <gpu:variable>
+        <type>double</type>
+        <name>MINHEIGHT_LIMITER</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>double</type>
+        <name>TIMESTEP</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>double</type>
+        <name>DXL</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>double</type>
+        <name>DYL</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>bool</type>
+        <name>INTERMEDIATE_STAGE</name>
+      </gpu:variable>
+      <!-- Making it conditional variable-->
+      <gpu:variable>
+        <type>double</type>
+        <name>CFL</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>double</type>
+        <name>KRIVO_THRESHOLD</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>double</type>
+        <name>GLOBAL_MANNING</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>double</type>
+        <name>TOL_H</name>
+      </gpu:variable>
+
+    </gpu:constants>
+
+    <gpu:functionFiles>
+      <file>functions.c</file>
+    </gpu:functionFiles>
+  </gpu:environment>
+  <xagents>
+    <gpu:xagent>
+      <name>FloodCell</name>
+      <memory>
+
+        <gpu:variable>
+          <type>int</type>
+          <name>x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>int</type>
+          <name>inDomain</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>inflowHydrographIndex</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>timeStep</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>minh_loc</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>zb0</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zb1x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zb1y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>z0</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qx0</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qy0</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>z1x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qx1x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qy1x</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>z1y</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qx1y</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qy1y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>z0_int</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qx0_int</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qy0_int</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>z1x_int</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qx1x_int</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qy1x_int</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>z1y_int</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qx1y_int</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qy1y_int</name>
+        </gpu:variable>
+
+        <!-- CONSERVED SLOPE-->
+        <gpu:variable>
+          <type>double</type>
+          <name>xHat_X</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>xHat_Y</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>xHat_Z</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>yHat_X</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>yHat_Y</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>yHat_Z</name>
+        </gpu:variable>
+
+        <!-- EAST LFV-->
+        <gpu:variable>
+          <type>double</type>
+          <name>hFace_E</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zFace_E</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_E_X</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_E_Y</name>
+        </gpu:variable>
+
+        <!-- WEST LFV-->
+        <gpu:variable>
+          <type>double</type>
+          <name>hFace_W</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zFace_W</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_W_X</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_W_Y</name>
+        </gpu:variable>
+
+        <!-- NORTH LFV-->
+        <gpu:variable>
+          <type>double</type>
+          <name>hFace_N</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zFace_N</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_N_X</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_N_Y</name>
+        </gpu:variable>
+
+        <!-- SOUTH LFV-->
+        <gpu:variable>
+          <type>double</type>
+          <name>hFace_S</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zFace_S</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_S_X</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_S_Y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>bool</type>
+          <name>isDry</name>
+        </gpu:variable>
+
+      </memory>
+      <functions>
+
+        <gpu:function>
+          <name>RKStage</name>
+          <currentState>Default</currentState>
+          <nextState>Default</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>RKStageMessage</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+
+        <gpu:function>
+          <name>ProcessRKStageMessages</name>
+          <currentState>Default</currentState>
+          <nextState>Default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>RKStageMessage</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+
+        <gpu:function>
+          <name>PrepareWetDryFrontMessages</name>
+          <currentState>Default</currentState>
+          <nextState>Default</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>WetDryMessage</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+
+        <gpu:function>
+          <name>ProcessWetDryFront</name>
+          <currentState>Default</currentState>
+          <nextState>Default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>WetDryMessage</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+
+        <gpu:function>
+          <name>PrepareLFVNeighbourMessages</name>
+          <currentState>Default</currentState>
+          <nextState>Default</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>LFVNeighbourMessage</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+
+        <gpu:function>
+          <name>ProcessLFVNeighbourMessages</name>
+          <currentState>Default</currentState>
+          <nextState>Default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>LFVNeighbourMessage</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+
+      </functions>
+      <states>
+        <gpu:state>
+          <name>Default</name>
+        </gpu:state>
+        <initialState>Default</initialState>
+      </states>
+      <gpu:type>discrete</gpu:type>
+      <gpu:bufferSize>262144</gpu:bufferSize>
+    </gpu:xagent>
+
+  </xagents>
+
+  <messages>
+
+    <gpu:message>
+      <name>RKStageMessage</name>
+
+      <variables>
+
+        <gpu:variable>
+          <type>int</type>
+          <name>inDomain</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>int</type>
+          <name>x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>hFace_E</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zFace_E</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_X_E</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_Y_E</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>hFace_W</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zFace_W</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_X_W</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_Y_W</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>hFace_N</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zFace_N</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_X_N</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_Y_N</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>hFace_S</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zFace_S</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_X_S</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qFace_Y_S</name>
+        </gpu:variable>
+
+      </variables>
+
+      <gpu:partitioningDiscrete>
+        <gpu:radius>1</gpu:radius>
+      </gpu:partitioningDiscrete>
+      <gpu:bufferSize>262144</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
+      <name>WetDryMessage</name>
+
+      <variables>
+
+        <gpu:variable>
+          <type>int</type>
+          <name>inDomain</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>int</type>
+          <name>x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>y</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>min_hloc</name>
+        </gpu:variable>
+      </variables>
+
+      <gpu:partitioningDiscrete>
+        <gpu:radius>1</gpu:radius>
+      </gpu:partitioningDiscrete>
+      <gpu:bufferSize>262144</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
+      <name>LFVNeighbourMessage</name>
+      <variables>
+
+        <gpu:variable>
+          <type>int</type>
+          <name>inDomain</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>int</type>
+          <name>x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>zb0</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zb1x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>zb1y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>z0</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>z1x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>z1y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qx0</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qx1x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qx1y</name>
+        </gpu:variable>
+
+        <gpu:variable>
+          <type>double</type>
+          <name>qy0</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qy1x</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>double</type>
+          <name>qy1y</name>
+        </gpu:variable>
+
+      </variables>
+      <gpu:partitioningDiscrete>
+        <gpu:radius>1</gpu:radius>
+      </gpu:partitioningDiscrete>
+      <gpu:bufferSize>262144</gpu:bufferSize>
+    </gpu:message>
+
+
+  </messages>
+
+  <layers>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>PrepareWetDryFrontMessages</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>ProcessWetDryFront</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>PrepareLFVNeighbourMessages</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>ProcessLFVNeighbourMessages</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>RKStage</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>ProcessRKStageMessages</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>PrepareWetDryFrontMessages</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>ProcessWetDryFront</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>PrepareLFVNeighbourMessages</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>ProcessLFVNeighbourMessages</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>RKStage</name>
+      </gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>ProcessRKStageMessages</name>
+      </gpu:layerFunction>
+
+
+    </layer>
+
+  </layers>
+
+</gpu:xmodel>
