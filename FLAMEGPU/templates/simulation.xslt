@@ -1581,13 +1581,23 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//check the working agents wont exceed the buffer size in the new state list
 	if (h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count+h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count > xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX){
 		printf("Error: Buffer size of <xsl:value-of select="xmml:name"/> agents in state <xsl:value-of select="xmml:nextState"/> will be exceeded moving working agents to next state in function <xsl:value-of select="xmml:name"/>\n");
-		exit(EXIT_FAILURE);
-	}
-	//append agents to next state list
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, append_<xsl:value-of select="../../xmml:name"/>_Agents, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	append_<xsl:value-of select="../../xmml:name"/>_Agents&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:nextState"/>, d_<xsl:value-of select="../../xmml:name"/>s, h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count, h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count);
-	gpuErrchkLaunch();
+      exit(EXIT_FAILURE);
+      }
+      <xsl:choose>
+        <xsl:when test="xmml:currentState=xmml:nextState and not(xmml:condition) and not(gpu:globalCondition) and gpu:reallocate='false'">
+  //pointer swap the updated data
+  <xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>_temp = d_<xsl:value-of select="../../xmml:name"/>s;
+  d_<xsl:value-of select="../../xmml:name"/>s = d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>;
+  d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/> = <xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>_temp;
+        </xsl:when>
+        <xsl:otherwise>
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, append_<xsl:value-of select="../../xmml:name"/>_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_<xsl:value-of select="../../xmml:name"/>_Agents&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:nextState"/>, d_<xsl:value-of select="../../xmml:name"/>s, h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count, h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count);
+  gpuErrchkLaunch();
+        </xsl:otherwise>
+      </xsl:choose>
 	//update new state agent size
 	h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count += h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count, &amp;h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count, sizeof(int)));	
