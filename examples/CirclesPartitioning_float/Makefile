@@ -244,7 +244,7 @@ endif
 	xsltproc $< $(XML_MODEL_FILE) > $@
 
 # Rule to create *.cu files in the dynamic folder, as requested by build dependencies.
-$(SRC_DYNAMIC)/%.cu: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(SRC_DYNAMIC)/header.h
+$(SRC_DYNAMIC)/%.cu: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
 endif 
