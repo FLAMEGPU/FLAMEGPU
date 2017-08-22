@@ -22,9 +22,15 @@
  */
 
 //Disable internal thrust warnings about conversions
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable : 4267)
 #pragma warning (disable : 4244)
+#endif
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 // includes
 #include &lt;cuda_runtime.h&gt;
@@ -51,7 +57,12 @@
 </xsl:if>
 </xsl:for-each>
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 /* Error check function for safe CUDA API calling */
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
