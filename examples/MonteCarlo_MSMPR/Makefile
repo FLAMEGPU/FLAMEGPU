@@ -4,8 +4,8 @@
 #
 # Copyright 2017 University of Sheffield.  All rights reserved.
 #
-# Authors : Dr Mozhgan Kabiri Chimeh, Dr Paul Richmond
-# Contact : {m.kabiri-chimeh,p.richmond}@sheffield.ac.uk
+# Authors : Dr Mozhgan Kabiri Chimeh, Peter Heywood, Dr Paul Richmond
+# Contact : {m.kabiri-chimeh,p.heywood,p.richmond}@sheffield.ac.uk
 #
 # NOTICE TO USER:
 #
@@ -17,99 +17,181 @@
 #
 # For terms of licence agreement please attached licence or view licence
 # on www.flamegpu.com website.
-#
+
+
 ################################################################################
 # USAGE : make help
 ################################################################################
-#
-# Makefile project only supported on Linux Platforms
-#
-################################################################################
-# Folders containing FLAMEGPU example files and templates
-BIN_DIR := ../../bin/linux-x64/
- 
-IDIR := ../../include/
-# For now this will only work for x64 linux. 32x is uninportant as deprecated in CUDA 8.0 Other systems are currently not possible to test.
-LDIR := ../../lib/x86_64-linux-gnu/
-TEMPLATE := ../../FLAMEGPU/templates/
-XSD_SCHEMA := ../../FLAMEGPU/schemas/
 
-INPUT_DATA:=iterations/0.xml
+# The name of the example (i.e. the name of the parent directory.)
+EXAMPLE := MonteCarlo_MSMPR
 
-SRC_ := src/model/
-SRC_VIZ := src/visualisation/
-SRC_CUDA := src/dynamic/
+# Flag indicating if a visualistion target should exist
+HAS_VISUALISATION := 0
+# Flag indicating if a custom visulisation is used. 0 = no, 1 = yes.
+CUSTOM_VISUALISATION := 0
 
-OPENGL_FLAGS := -lglut -lGLEW -lGLU -lGL
-FLAMELIB := -I $(IDIR) -I $(SRC_) -I $(SRC_CUDA) -I $(SRC_VIZ) -I $(IDIR)GL/
+# Parent directory for generated executable files.
+EXAMPLE_BIN_DIR := ../../bin
 
-################################################################################
-#Generating Dynamic Code from FLAMEGPU Templates
-
-XML_MODEL:=$(SRC_)XMLModelFile.xml
-
-all: XSLTPREP build
-
-XML_Validate:
-	xmllint --noout $(XML_MODEL) --schema $(XSD_SCHEMA)XMMLGPU.xsd 
-
-XSLTPREP: XML_Validate
-XSLTPREP:
-	xsltproc $(TEMPLATE)header.xslt  $(XML_MODEL)> $(SRC_CUDA)header.h 
-	xsltproc $(TEMPLATE)FLAMEGPU_kernals.xslt $(XML_MODEL) > $(SRC_CUDA)FLAMEGPU_kernals.cu
-	xsltproc $(TEMPLATE)io.xslt $(XML_MODEL) > $(SRC_CUDA)io.cu 
-	xsltproc $(TEMPLATE)simulation.xslt $(XML_MODEL) > $(SRC_CUDA)simulation.cu 
-	xsltproc $(TEMPLATE)main.xslt $(XML_MODEL) > $(SRC_CUDA)main.cu
-
-################################################################################
-#Generating initial states
-
-input_Gen: 
-	cd iterations && chmod +x generate_charge.sh 
-	cd iterations && ./generate_charge.sh
-	
-################################################################################
-
-HOST_COMPILER ?= g++
-NVCC          := nvcc -ccbin $(HOST_COMPILER)
-
-# internal flags
-NVCCFLAGS   := -m64
-CCFLAGS     :=
-LDFLAGS     := -L$(LDIR)
-
-# Debug build flags
-ifeq ($(dbg),1)
-      NVCCFLAGS += -g -G
-      Mode_TYPE := Debug
-else
-      Mode_TYPE := Release
-endif
-
-ALL_CCFLAGS :=
-ALL_CCFLAGS += $(NVCCFLAGS)
-ALL_CCFLAGS += $(EXTRA_NVCCFLAGS)
-ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
-ALL_CCFLAGS += $(addprefix -Xcompiler ,$(EXTRA_CCFLAGS))
-
-ALL_LDFLAGS :=
-ALL_LDFLAGS += $(ALL_CCFLAGS)
-ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
-ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
-
-# Common includes and paths for CUDA
-INCLUDES  := -I../../common/inc
-
-################################################################################
-
-SAMPLE_ENABLED := 1
+# Directory for temprorary files
+EXAMPLE_BUILD_DIR := ./build
 
 # Gencode arguments
 SMS ?= 30 35 37 50 60
 
+################################################################################
+
+
+# OS Specific settings.
+ifeq ($(OS),Windows_NT)
+	OS_BIN_DIR := x64
+	OS_BUILD_DIR := x64
+	OS_LIB_DIR :=
+	OS_BIN_EXT := .exe
+else
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Linux)
+		OS_BIN_DIR := linux-x64
+		OS_BUILD_DIR := linux-x64
+		OS_LIB_DIR := x86_64-linux-gnu
+		OS_BIN_EXT :=
+	endif
+endif
+
+# OS specific output location for executable files
+BIN_DIR := $(EXAMPLE_BIN_DIR)/$(OS_BIN_DIR)
+# Temporary directory for building
+BUILD_DIR := $(EXAMPLE_BUILD_DIR)/$(OS_BUILD_DIR)
+
+# Path to FLAME GPU include directory
+INCLUDE_DIR := ../../include
+# Path to FLAME GPU Lib directory (OS specific)
+LIB_DIR := ../../lib/$(OS_LIB_DIR)
+# Path to the library shard object files relative to the final bin directory location.
+LD_RUN_PATH := '$$ORIGIN/../$(LIB_DIR)'
+
+# Path to the FLAME GPU Templates directory
+TEMPLATES_DIR := ../../FLAMEGPU/templates
+# Path to FLAME GPU XSD Schema directory
+XSD_SCHEMA_DIR := ../../FLAMEGPU/schemas
+
+# Paths to various source file directories for this example
+SRC_MODEL := src/model
+SRC_VISUALISATION := src/visualisation
+SRC_DYNAMIC := src/dynamic
+
+# Full path to the XMLModelFile xml file for this model.
+XML_MODEL_FILE:=$(SRC_MODEL)/XMLModelFile.xml
+
+# Function Files(s) used within this model.
+FUNCTIONS_FILES:= \
+	$(SRC_MODEL)/functions.c
+
+# Include directories for console and visualisation builds
+# If a custom visualisation is used, this may also need to include $SRC_VISUALISATION because functions.c may include it.
+INCLUDE_DIRS := \
+	$(INCLUDE_DIR) \
+	$(SRC_MODEL) \
+	$(SRC_DYNAMIC) \
+	$(SRC_VISUALISATION) 
+
+# Include directories specific to visualisation builds
+INCLUDE_DIRS_VISUALISATION := \
+	$(INCLUDE_DIR)/GL
+
+
+# Executables used for compilation
+HOST_COMPILER ?= g++
+NVCC          := nvcc -ccbin $(HOST_COMPILER)
+
+# Flags used for compilation.
+NVCCFLAGS   := -m64 -lineinfo 
+CCFLAGS     := -Wall
+LDFLAGS     := -L$(LIB_DIR)
+
+# Debug specific build flags
+ifeq ($(debug),1)
+	  NVCCFLAGS += -g -G -DDEBIG -D_DEBUG
+	  Mode_TYPE := Debug
+	  BUILD_DIR := $(BUILD_DIR)/$(Mode_TYPE)
+else
+	  Mode_TYPE := Release
+	  BUILD_DIR := $(BUILD_DIR)/$(Mode_TYPE)
+endif
+
+# All flags to be passed to the compiler
+ALL_CCFLAGS :=
+ALL_CCFLAGS += $(NVCCFLAGS)
+ALL_CCFLAGS += $(EXTRA_NVCCFLAGS)
+ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
+
+# All flags to be passed to the linker
+ALL_LDFLAGS :=
+ALL_LDFLAGS += $(ALL_CCFLAGS)
+ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
+
+# Build the actual include compiler arguments.
+# @todo - seperate vis and console 
+CONSOLE_INCLUDES := $(addprefix -I ,$(INCLUDE_DIRS)) 
+VISUALISATION_INCLUDES := $(addprefix -I ,$(INCLUDE_DIRS_VISUALISATION))
+
+# List of linker archive commands for visualisation
+LINK_ARCHIVES_VISUALISATION := -lglut -lGLEW -lGLU -lGL
+
+# Verify that xsltlint and xsltproc are on the path.
+XSLTPROC := $(shell command -v xsltproc 2> /dev/null)
+XMLLINT := $(shell command -v xmllint 2> /dev/null)
+
+# Generate the full path to target executable files
+TARGET_VISUALISATION := $(BIN_DIR)/$(Mode_TYPE)_Visualisation/$(EXAMPLE)$(OS_BIN_EXT)
+TARGET_CONSOLE := $(BIN_DIR)/$(Mode_TYPE)_Console/$(EXAMPLE)$(OS_BIN_EXT)
+
+# Dependancies for the targets
+CONSOLE_DEPENDANCIES := $(BUILD_DIR)/io.cu.o $(BUILD_DIR)/simulation.cu.o $(BUILD_DIR)/main_console.cu.o 
+
+# If this is not a custom visualistaion
+ifeq ($(CUSTOM_VISUALISATION), 0)
+# List of Dynamic FLAME GPU files
+XSLT_OUTPUT_FILES := \
+	$(SRC_DYNAMIC)/header.h \
+	$(SRC_DYNAMIC)/FLAMEGPU_kernals.cu\
+	$(SRC_DYNAMIC)/io.cu \
+	$(SRC_DYNAMIC)/simulation.cu \
+	$(SRC_DYNAMIC)/main.cu \
+	$(SRC_DYNAMIC)/visualisation.cu
+
+# Dependancies for default visusliastion
+VISUALISATION_DEPENDANCIES := $(BUILD_DIR)/io.cu.o $(BUILD_DIR)/simulation.cu.o $(BUILD_DIR)/main_visualisation.cu.o $(BUILD_DIR)/visualisation.cu.o
+# Else this is a custom visualisation
+else
+# List of Dynamic FLAME GPU files
+XSLT_OUTPUT_FILES := \
+	$(SRC_DYNAMIC)/header.h \
+	$(SRC_DYNAMIC)/FLAMEGPU_kernals.cu\
+	$(SRC_DYNAMIC)/io.cu \
+	$(SRC_DYNAMIC)/simulation.cu \
+	$(SRC_DYNAMIC)/main.cu 
+# Find all the cpp and cu files in the visusalistion direcotry
+
+CUSTOM_VISUALISATION_C_FILES := $(wildcard $(SRC_VISUALISATION)/*.c)
+CUSTOM_VISUALISATION_C_OBJECTS := $(addprefix $(BUILD_DIR)/,$(notdir $(CUSTOM_VISUALISATION_C_FILES:.c=.o)))
+CUSTOM_VISUALISATION_CPP_FILES := $(wildcard $(SRC_VISUALISATION)/*.cpp)
+CUSTOM_VISUALISATION_CPP_OBJECTS := $(addprefix $(BUILD_DIR)/,$(notdir $(CUSTOM_VISUALISATION_CPP_FILES:.cpp=.o)))
+CUSTOM_VISUALISATION_CU_FILES := $(wildcard $(SRC_VISUALISATION)/*.cu)
+CUSTOM_VISUALISATION_CU_OBJECTS := $(addprefix $(BUILD_DIR)/,$(notdir $(CUSTOM_VISUALISATION_CU_FILES:.cu=.cu.o)))
+
+CUSTOM_VISUALISATION_OBJECTS := $(CUSTOM_VISUALISATION_C_OBJECTS) $(CUSTOM_VISUALISATION_CPP_OBJECTS) $(CUSTOM_VISUALISATION_CU_OBJECTS)
+
+# Dependancies for custom visusliastion
+VISUALISATION_DEPENDANCIES := $(BUILD_DIR)/io.cu.o $(BUILD_DIR)/simulation.cu.o $(BUILD_DIR)/main_visualisation.cu.o $(CUSTOM_VISUALISATION_OBJECTS)
+endif
+
+################################################################################
+
+# Verify that atleast one SM value has been specified.
 ifeq ($(SMS),)
-$(info >>> WARNING - no SM architectures have been specified - waiving sample <<<)
-SAMPLE_ENABLED := 0
+$(error "Error - no SM architectures have been specified. Aborting.")
 endif
 
 ifeq ($(GENCODE_FLAGS),)
@@ -123,95 +205,135 @@ GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM)
 endif
 endif
 
-ifeq ($(SAMPLE_ENABLED),0)
-EXEC ?= @echo "[@]"
-endif
-
 ################################################################################
 
-# Target rules
-help:
-	@echo "************************************************************************"
-	@echo "*  Copyright 2017 University of Sheffield.  All rights reserved.       *"
-	@echo "************************************************************************"
-	@echo "make all -> validate &processes XSL model and generates all .cu files  *" 
-	@echo "                                                                       *"  
-	@echo "           ------------------------------------------------            *"
-	@echo "make XSLTPREP -> Validate and preprocesses the xml model               *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"
-	@echo "make XML_Validate -> To validate the XML file                          *"
-	@echo "run "sudo apt install libxml2-utils" to install xmllint                *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"
-	@echo "make build -> builds executables in either release or debug            *"
-	@echo "                   -Debug_Console                                      *"
-	@echo "                          OR                                           *"
-	@echo "                   -Release_Console                                    *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"
-	@echo "                                                                       *"
-	@echo "make Console_mode -> builds executables in console mode                *"
-	@echo "                                                                       *"
-	@echo "make < .. > dbg='arg' -> builds in Release/Debug only                  *"
-	@echo "                                'arg' -> 0 or 1 value                  *"
-	@echo "                                                                       *"
-	@echo "To run executables for console mode, run below command:                *"
-	@echo "make run_console iter='arg'                                            *"
-	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *" 
-	@echo "To run executables for charge generation, run below command:           *"
-	@echo "make input_Gen                                                         *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"                
-	@echo "Alternatively, run the bash script stored in bin/linux-x64.            *"
-	@echo "The iteration default value in console mode is 10. You can simple      *"
-	@echo "change it by entering a new value while running the ./*.sh file.       *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"
-	@echo "Note: You can manualy change the location/name of the INPUT_DATA       *"
-	@echo "                                                                       *" 
-	@echo "************************************************************************"
- 
-build: Console_mode 
+# Mark several targets as PHONY, i.e. they do not create a file of the target name
+.PHONY: help all validate xslt visualisation console clean clobber makedirs
 
-Console_mode:  Montecarlo_MSMPR_console
-
-check.deps:
-ifeq ($(SAMPLE_ENABLED),0)
-	@echo "Sample will be waived due to the above missing dependencies"
+# When make all is called, the model is validated, all xslt is generated and then both console and visualisation targets are built
+ifeq ($(HAS_VISUALISATION), 1)
+all: validate xslt console visualisation
 else
-	@echo "Sample is ready - all dependencies have been met"
+all: validate xslt console
 endif
 
-io.o: $(SRC_CUDA)io.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
+# Use XMLLint to validate the model (if installed and accessible on the path.)
+validate: $(XML_MODEL_FILE) $(XSD_SCHEMA_DIR)/XMMLGPU.xsd
+ifndef XMLLINT
+	$(warning "Warning: xmllint is not available, please install libxml2-utils to enable validation")
+else
+	@xmllint --noout $(XML_MODEL_FILE) --schema $(XSD_SCHEMA_DIR)/XMMLGPU.xsd 
+endif
 
-simulation.o: $(SRC_CUDA)simulation.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
+# Target to use xsltproc to generate all dynamic files.
+xslt: validate $(XSLT_OUTPUT_FILES)
 
-main.o: $(SRC_CUDA)main.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
+# Create the console version of this application, inlcuding directory creation and validation of the XML Model
+console: makedirs validate $(TARGET_CONSOLE)
 
+# Create the visualisation version of this application, inlcuding directory creation and validation of the XML Model
+ifeq ($(HAS_VISUALISATION), 1)
+visualisation: makedirs validate $(TARGET_VISUALISATION)
+endif
 
-Montecarlo_MSMPR_console: BUILD_TYPE=$(Mode_TYPE)_Console
-Montecarlo_MSMPR_console: io.o simulation.o  main.o 
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
-	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/Montecarlo_MSMPR_console ../../examples/Montecarlo_MSMPR/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)Montecarlo_MSMPR_console.sh
-	chmod +x $(BIN_DIR)Montecarlo_MSMPR_console.sh
+# Rule to create header.h from XSLT. Depends upon both header.xslt and the XML file, so if either is changed a re-build will occur.
+$(SRC_DYNAMIC)/%.h: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
+ifndef XSLTPROC
+	$(error "xsltproc is not available, please install xlstproc")
+endif 
+	xsltproc $< $(XML_MODEL_FILE) > $@
 
+# Rule to create *.cu files in the dynamic folder, as requested by build dependencies.
+$(SRC_DYNAMIC)/%.cu: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(SRC_DYNAMIC)/header.h
+ifndef XSLTPROC
+	$(error "xsltproc is not available, please install xlstproc")
+endif 
+	xsltproc $< $(XML_MODEL_FILE) > $@
 
-run_console: Montecarlo_MSMPR_console
-	cd $(BIN_DIR) && ./Montecarlo_MSMPR_console.sh $(iter)
+# Explicit rules for object files in the dynamic folder.
+# Explicit rules are used (rather than generic) as the dependancis are non-trivial (currently)
+$(BUILD_DIR)/io.cu.o: $(SRC_DYNAMIC)/io.cu $(SRC_DYNAMIC)/header.h
+	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+$(BUILD_DIR)/simulation.cu.o: $(SRC_DYNAMIC)/simulation.cu $(SRC_DYNAMIC)/FLAMEGPU_kernals.cu $(FUNCTIONS_FILES) $(SRC_DYNAMIC)/header.h
+	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+$(BUILD_DIR)/main_console.cu.o: $(SRC_DYNAMIC)/main.cu $(SRC_DYNAMIC)/header.h
+	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
+ifeq ($(HAS_VISUALISATION), 1)
+# Visualisation specific dynamic file rules.
+$(BUILD_DIR)/main_visualisation.cu.o: $(SRC_DYNAMIC)/main.cu $(SRC_DYNAMIC)/header.h
+	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
+# Only build visualistion.o if not a custom visuations
+ifeq ($(CUSTOM_VISUALISATION), 0)
+$(BUILD_DIR)/visualisation.cu.o: $(SRC_DYNAMIC)/visualisation.cu $(SRC_VISUALISATION)/visualisation.h $(SRC_DYNAMIC)/header.h
+	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
+else
+# Rules for custom visualistion compilation of c files
+$(BUILD_DIR)/%.o: $(SRC_VISUALISATION)/%.c
+	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
+# Rules for custom visualistion compilation of cpp files
+$(BUILD_DIR)/%.o: $(SRC_VISUALISATION)/%.cpp
+	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
+# Rules for custom visualistion compilation of cu files
+$(BUILD_DIR)/%.cu.o: $(SRC_VISUALISATION)/%.cu
+	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
+endif
+
+# Rule to create the visualisation binary by linking the dependant object files.
+$(TARGET_VISUALISATION): $(VISUALISATION_DEPENDANCIES)
+	$(EXEC) LD_RUN_PATH=$(LD_RUN_PATH) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(LINK_ARCHIVES_VISUALISATION) -o $@ $+
+endif
+
+# Rule to create the console binary by linking the dependant object files.
+$(TARGET_CONSOLE): $(CONSOLE_DEPENDANCIES)
+	$(EXEC) LD_RUN_PATH=$(LD_RUN_PATH) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+
+
+# Clean object files, but do not regenerate xslt. `|| true` is used to support the case where dirs do not exist.
 clean:
-	find . -name '*.o' -delete
+	find $(EXAMPLE_BUILD_DIR)/ -name '*.o' -delete || true 
+	find $(EXAMPLE_BUILD_DIR)/ -name '*.cu.o' -delete || true 
 
+# Clobber all temporary files, including dynamic files and the target executable. `|| true` is used to support the case where dirs do not exist.
 clobber: clean 
-	find . -name '*.cu' -delete
-	find . -name '*.png' -delete
-	rm -rf $(BIN_DIR)
+	find $(SRC_DYNAMIC)/ -name '*.cu' -delete || true 
+	find $(SRC_DYNAMIC)/ -name '*.h' -delete || true 
+	find $(BIN_DIR)/ -name '$(EXAMPLE)$(OS_BIN_EXT)' -delete || true 
 
+# Create any required directories.
+makedirs:
+	@mkdir -p $(BIN_DIR)/$(Mode_TYPE)_Console
+	@mkdir -p $(BIN_DIR)/$(Mode_TYPE)_Visualisation
+	@mkdir -p $(BUILD_DIR)
+
+help:
+	@echo "************************************************************************"
+	@echo "* Copyright 2017 University of Sheffield.  All rights reserved.        *"
+	@echo "************************************************************************"
+	@echo "  Usage: "
+	@echo "    make <target> <arguments>"
+	@echo ""
+	@echo "  Targets:"  
+	@echo ""  
+	@echo "    help         -> Shows this help documentation" 
+	@echo "    all          -> Validates XML, generates dynamic files" 
+	@echo "                      & builds console and visualisation modes"  
+	@echo "    validate     -> Validates XMLModelFile using 'xmllint' (if installed)"
+	@echo "                      install via '"apt install libxml2-utils"'"
+	@echo "    xslt         -> Validates XML and generates dynamic files"
+	@echo "                      depends on 'xsltproc'"
+	@echo "    console      -> Builds console mode exectuable"
+	@echo "    visualistion -> Builds visualisation mode executable, if it exists"
+	@echo "    clean        -> Deletes generated object files"
+	@echo "    clobber      -> Deletes all generated files including executables"
+	@echo ""
+	@echo "  Arguments":
+	@echo ""
+	@echo "    debug=<arg> -> Builds target in 'Release' or 'Debug' mode"
+	@echo "                     0 : Release (Default)"
+	@echo "                     1 : Debug"
+	@echo "                     I.e. 'make console debug=1'"
+	@echo "    SMS=<arg>   -> Builds target for the specified CUDA architectures"
+	@echo "                     I.e. 'make console SMS=60 61'"
+	@echo "                     Defaults to: '$(SMS)'"
+	@echo "                     Note: 'make clean' is required prior to using new values"
+	@echo "************************************************************************"

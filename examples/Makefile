@@ -1,8 +1,8 @@
 ################################################################################
 #
-# FLAME GPU Script for CUDA 7.5
+# FLAME GPU Script for CUDA 7.5, CUDA 8.0
 #
-# Copyright 2016 University of Sheffield.  All rights reserved.
+# Copyright 2017 University of Sheffield.  All rights reserved.
 #
 # Authors : Dr Mozhgan Kabiri Chimeh, Dr Paul Richmond
 # Contact : {m.kabiri-chimeh,p.richmond}@sheffield.ac.uk
@@ -21,16 +21,32 @@
 ################################################################################
 # USAGE : make help
 help:
-	@echo "*********************************************************************"
-	@echo "*  Copyright 2016 University of Sheffield.  All rights reserved.    *"
-	@echo "*********************************************************************"
-	@echo "make all -> Processes XML model and builds default modes per example*"
-	@echo "           ------------------------------------------------         *"
-	@echo "make build -> builds all executables in either release or debug     *"
-	@echo "              only use this, if you already have all the .cu files  *"
-	@echo "           ------------------------------------------------         *"
-	@echo "All scripts are stored in bin/x64. To run, simple exectue the script*" 
-	@echo "*********************************************************************"
+	@echo "************************************************************************"
+	@echo "* Copyright 2017 University of Sheffield.  All rights reserved.        *"
+	@echo "************************************************************************"
+	@echo "  Usage: "
+	@echo "    make <target> <arguments>"
+	@echo ""
+	@echo "  Targets:"  
+	@echo ""  
+	@echo "    help         -> Shows this help documentation" 
+	@echo "    all          -> For each example, validates XML, generates dynamic files" 
+	@echo "                      & builds console and visualisation modes"  
+	@echo "    clean        -> Deletes generated object files"
+	@echo "    clobber      -> Deletes all generated files including executables"
+	@echo ""
+	@echo "  Arguments":
+	@echo ""
+	@echo "    debug=<arg> -> Builds target in 'Release' or 'Debug' mode"
+	@echo "                     0 : Release (Default)"
+	@echo "                     1 : Debug"
+	@echo "                     I.e. 'make all debug=1'"
+	@echo "    SMS=<arg>   -> Builds target for the specified CUDA architectures"
+	@echo "                     I.e. 'make all SMS=60 61'"
+	@echo "                     Defaults to: '$(SMS)'"
+	@echo "                     Note: 'make clean' is required prior to using new values"
+	@echo "************************************************************************"
+
 
 ################################################################################
 ################################################################################
@@ -40,9 +56,11 @@ help:
 TARGET_ARCH ?= $(shell uname -m)
 
 # Project folders that contain FLAMEGPU examples
-PROJECTS ?= $(shell find Boids_BruteForce Boids_Partitioning CirclesBruteForce_double CirclesBruteForce_float CirclesPartitioning_double CirclesPartitioning_float GameOfLife Keratinocyte MonteCarlo_BATCH MonteCarlo_MSMPR PedestrianLOD PedestrianNavigation StableMarriage Sugarscape Template -name Makefile)
+PROJECTS ?= $(shell find ./ -maxdepth 2 -mindepth 2  -name "Makefile")
 
-%.ph_build :
+.PHONY: help all tidy clean clobber %.ph_all %.ph_clean %.ph_clobber
+
+%.ph_all :
 	+@$(MAKE) -C $(dir $*) $(MAKECMDGOALS)
 
 %.ph_clean : 
@@ -51,11 +69,9 @@ PROJECTS ?= $(shell find Boids_BruteForce Boids_Partitioning CirclesBruteForce_d
 %.ph_clobber :
 	+@$(MAKE) -C $(dir $*) clobber $(USE_DEVICE)
 
-all:  $(addsuffix .ph_build,$(PROJECTS))
+all:  $(addsuffix .ph_all,$(PROJECTS))
 	@echo "Finished building FLAMEGPU examples"
 
-# Generate .cu files first.
-build: $(addsuffix .ph_build,$(PROJECTS))
 
 tidy:
 	@find * | egrep "#" | xargs rm -f
