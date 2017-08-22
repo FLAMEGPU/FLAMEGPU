@@ -6,82 +6,56 @@
 
 	<xagent>
 		<name>example_agent</name>
-		<x>0.0</x>
-		<y>0.0</y>
+		<id>0</id>
+		<x>0</x>
+		<y>0</y>
 	</xagent>
 	<xagent>
 		<name>example_agent</name>
-		<x>1.0</x>
-		<y>0.0</y>
+		<id>1</id>
+		<x>1</x>
+		<y>0</y>
 	</xagent>
 	<xagent>
 		<name>example_agent</name>
-		<x>2.0</x>
-		<y>0.0</y>
+		<id>2</id>
+		<x>2</x>
+		<y>0</y>
 	</xagent>
 	<xagent>
 		<name>example_agent</name>
-		<x>3.0</x>
-		<y>0.0</y>
+		<id>3</id>
+		<x>3</x>
+		<y>0</y>
 	</xagent>
 	<xagent>
 		<name>example_agent</name>
-		<x>0.0</x>
-		<y>1.0</y>
+		<id>4</id>
+		<x>4</x>
+		<y>0</y>
 	</xagent>
 	<xagent>
 		<name>example_agent</name>
-		<x>1.0</x>
-		<y>1.0</y>
+		<id>5</id>
+		<x>5</x>
+		<y>0</y>
 	</xagent>
 	<xagent>
 		<name>example_agent</name>
-		<x>2.0</x>
-		<y>1.0</y>
+		<id>6</id>
+		<x>6</x>
+		<y>0</y>
 	</xagent>
 	<xagent>
 		<name>example_agent</name>
-		<x>3.0</x>
-		<y>1.0</y>
+		<id>7</id>
+		<x>7</x>
+		<y>0</y>
 	</xagent>
 	<xagent>
 		<name>example_agent</name>
-		<x>0.0</x>
-		<y>2.0</y>
-	</xagent>
-	<xagent>
-		<name>example_agent</name>
-		<x>1.0</x>
-		<y>2.0</y>
-	</xagent>
-	<xagent>
-		<name>example_agent</name>
-		<x>2.0</x>
-		<y>2.0</y>
-	</xagent>
-	<xagent>
-		<name>example_agent</name>
-		<x>3.0</x>
-		<y>2.0</y>
-	</xagent>
-	<xagent>
-		<name>example_agent</name>
-		<x>0.0</x>
-		<y>3.0</y>
-	</xagent>
-	<xagent>
-		<name>example_agent</name>
-		<x>1.0</x>
-		<y>3.0</y>
-	</xagent>
-	<xagent>
-		<name>example_agent</name>
-		<x>2.0</x>
-		<y>3.0</y>
-	</xagent>
-	<xagent>
-		<name>example_agent</name>
-		<x>3.0</x>
-		<y>3.0</y>
+		<id>8</id>
+		<x>8</x>
+		<y>0</y>
 	</xagent>
 </states>

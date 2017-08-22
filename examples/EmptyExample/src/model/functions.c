@@ -20,6 +20,7 @@
 
 #include <header.h>
 
+#define NUM_COLOURS 9
 
 /**
  * output_example FLAMEGPU Agent Function
@@ -37,6 +38,40 @@ __FLAME_GPU_FUNC__ int output_example(xmachine_memory_example_agent* agent, xmac
      * add_example_message_message(example_message_messages, x, y);
      */
      
+    // Arbitrary colour selection, as an example.
+    int index = ((int)agent->id) % NUM_COLOURS;
+    // This is not how these values should be used, as they map to the case variable.
+    switch(index){
+        case 0:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_BLACK;
+            break;
+        case 1:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_RED;
+            break;
+        case 2:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_GREEN;
+            break;
+        case 3:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_BLUE;
+            break;
+        case 4:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_YELLOW;
+            break;
+        case 5:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_CYAN;
+            break;
+        case 6:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_MAGENTA;
+            break;
+        case 7:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_WHITE;
+            break;
+        case 8:
+        default:
+            agent->state = FLAME_GPU_VISUALISATION_COLOUR_BROWN;
+            break;
+    }
+
      
   
     return 0;
