@@ -58,6 +58,12 @@ typedef unsigned int uint;
 //Maximum population size of xmachine_memory_<xsl:value-of select="xmml:name"/>
 #define xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX <xsl:value-of select="gpu:bufferSize" />
 </xsl:for-each>
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:for-each select="xmml:memory/gpu:variable"><xsl:if test="xmml:arrayLength"> 
+//Agent variable array length for xmachine_memory_<xsl:value-of select="../../xmml:name"/>-&gt;<xsl:value-of select="xmml:name"/>
+#define xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_LENGTH <xsl:value-of select="xmml:arrayLength" />
+</xsl:if></xsl:for-each></xsl:for-each>
+
+
   
   
 /* Message population size definitions */<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message">
@@ -417,6 +423,51 @@ void sort_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:n
  */
 extern int get_<xsl:value-of select="xmml:name"/>_population_width();
 </xsl:if>
+</xsl:for-each>
+
+/* Host based agent creation functions */
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>
+/** h_allocate_agent_<xsl:value-of select="$agent_name" />
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated <xsl:value-of select="$agent_name" /> struct.
+ */
+xmachine_memory_<xsl:value-of select="$agent_name" />* h_allocate_agent_<xsl:value-of select="$agent_name" />();
+/** h_free_agent_<xsl:value-of select="$agent_name" />
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_<xsl:value-of select="$agent_name" />(xmachine_memory_<xsl:value-of select="$agent_name" />** agent);
+/** h_allocate_agent_<xsl:value-of select="$agent_name" />_array
+ * Utility function to allocate an array of structs for  <xsl:value-of select="$agent_name" /> agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_<xsl:value-of select="$agent_name" />** h_allocate_agent_<xsl:value-of select="$agent_name" />_array(unsigned int count);
+/** h_free_agent_<xsl:value-of select="$agent_name" />_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_<xsl:value-of select="$agent_name" />_array(xmachine_memory_<xsl:value-of select="$agent_name" />*** agents, unsigned int count);
+<xsl:for-each select="xmml:states/gpu:state"><xsl:variable name="state" select="xmml:name"/>
+
+/** h_add_agent_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />
+ * Host function to add a single agent of type <xsl:value-of select="$agent_name" /> to the <xsl:value-of select="$state" /> state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" /> instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />(xmachine_memory_<xsl:value-of select="$agent_name" />* agent);
+
+/** h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />(
+ * Host function to add multiple agents of type <xsl:value-of select="$agent_name" /> to the <xsl:value-of select="$state" /> state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of <xsl:value-of select="$agent_name" /> agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />(xmachine_memory_<xsl:value-of select="$agent_name" />** agents, unsigned int count);
+</xsl:for-each>
 </xsl:for-each>
   
   
