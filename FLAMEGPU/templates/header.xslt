@@ -98,7 +98,19 @@ typedef glm::dvec4 dvec4;
 #define xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size <xsl:value-of select="$x_dim * $y_dim * $z_dim"/>
 </xsl:if></xsl:for-each>
   
-  
+
+/* Default visualisation Colour indices */
+ 
+#define FLAME_GPU_VISUALISATION_COLOUR_BLACK 0
+#define FLAME_GPU_VISUALISATION_COLOUR_RED 1
+#define FLAME_GPU_VISUALISATION_COLOUR_GREEN 2
+#define FLAME_GPU_VISUALISATION_COLOUR_BLUE 3
+#define FLAME_GPU_VISUALISATION_COLOUR_YELLOW 4
+#define FLAME_GPU_VISUALISATION_COLOUR_CYAN 5
+#define FLAME_GPU_VISUALISATION_COLOUR_MAGENTA 6
+#define FLAME_GPU_VISUALISATION_COLOUR_WHITE 7
+#define FLAME_GPU_VISUALISATION_COLOUR_BROWN 8
+
 /* enum types */
 
 /**
