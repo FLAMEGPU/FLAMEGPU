@@ -1,8 +1,8 @@
 ################################################################################
 #
-# FLAME GPU Script for CUDA 7.5
+# FLAME GPU Script for CUDA 7.5, CUDA 8.0
 #
-# Copyright 2016 University of Sheffield.  All rights reserved.
+# Copyright 2017 University of Sheffield.  All rights reserved.
 #
 # Authors : Dr Mozhgan Kabiri Chimeh, Dr Paul Richmond
 # Contact : {m.kabiri-chimeh,p.richmond}@sheffield.ac.uk
@@ -21,16 +21,16 @@
 ################################################################################
 # USAGE : make help
 help:
-	@echo "*********************************************************************"
-	@echo "*  Copyright 2016 University of Sheffield.  All rights reserved.    *"
-	@echo "*********************************************************************"
-	@echo "make all -> Processes XML model and builds default modes per example*"
-	@echo "           ------------------------------------------------         *"
-	@echo "make build -> builds all executables in either release or debug     *"
-	@echo "              only use this, if you already have all the .cu files  *"
-	@echo "           ------------------------------------------------         *"
-	@echo "All scripts are stored in bin/x64. To run, simple exectue the script*" 
-	@echo "*********************************************************************"
+	@echo "**********************************************************************"
+	@echo "*  Copyright 2017 University of Sheffield.  All rights reserved.     *"
+	@echo "**********************************************************************"
+	@echo "make all -> Processes XML model and builds default modes per example *"
+	@echo "           ------------------------------------------------          *"
+	@echo "make build -> builds all executables in either release or debug      *"
+	@echo "              only use this, if you already have all the .cu files   *"
+	@echo "           ------------------------------------------------          *"
+	@echo "Scripts are stored in bin/linux-x64.To run, simply exectue the script*" 
+	@echo "**********************************************************************"
 
 ################################################################################
 ################################################################################
@@ -40,7 +40,7 @@ help:
 TARGET_ARCH ?= $(shell uname -m)
 
 # Project folders that contain FLAMEGPU examples
-PROJECTS ?= $(shell find Boids_BruteForce Boids_Partitioning CirclesBruteForce_double CirclesBruteForce_float CirclesPartitioning_double CirclesPartitioning_float GameOfLife Keratinocyte MonteCarlo_BATCH MonteCarlo_MSMPR PedestrianLOD PedestrianNavigation StableMarriage Sugarscape Template -name Makefile)
+PROJECTS ?= $(shell find Analytics Boids_BruteForce Boids_Partitioning CirclesBruteForce_double CirclesBruteForce_float CirclesPartitioning_double CirclesPartitioning_float GameOfLife Keratinocyte MonteCarlo_BATCH MonteCarlo_MSMPR PedestrianLOD PedestrianNavigation StableMarriage Sugarscape Template -name Makefile)
 
 %.ph_build :
 	+@$(MAKE) -C $(dir $*) $(MAKECMDGOALS)
