@@ -675,9 +675,12 @@ xmachine_memory_<xsl:value-of select="$agent_name" />* h_allocate_agent_<xsl:val
 	xmachine_memory_<xsl:value-of select="$agent_name" />* agent = (xmachine_memory_<xsl:value-of select="$agent_name" />*)malloc(sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
     memset(agent, 0, sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
 <xsl:for-each select="xmml:memory/gpu:variable">
+<xsl:if test="xmml:defaultValue and not(xmml:arrayLength)">
+    agent-&gt;<xsl:value-of select="xmml:name"/> = <xsl:value-of select="xmml:defaultValue"/>;
+</xsl:if>
 <xsl:if test="xmml:arrayLength">
     agent-&gt;<xsl:value-of select="xmml:name"/> = (<xsl:value-of select="xmml:type"/>*)malloc(<xsl:value-of select="xmml:arrayLength"/> * sizeof(<xsl:value-of select="xmml:type"/>));
-    memset(agent-&gt;<xsl:value-of select="xmml:name"/>, 0, sizeof(<xsl:value-of select="xmml:type"/>)*<xsl:value-of select="xmml:arrayLength"/>);
+    memset(agent-&gt;<xsl:value-of select="xmml:name"/>, <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose>, sizeof(<xsl:value-of select="xmml:type"/>)*<xsl:value-of select="xmml:arrayLength"/>);
 </xsl:if>
 </xsl:for-each>
 	return agent;
