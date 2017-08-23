@@ -627,8 +627,11 @@ int get_<xsl:value-of select="xmml:name"/>_population_width(){
 
 
 /* Host based agent creation functions */
+// These are only available for continuous agents.
 
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:if test="gpu:type='continuous'">
+
 /* copy_single_xmachine_memory_<xsl:value-of select="xmml:name"/>_hostToDevice
  * Private function to copy a host agent struct into a device SoA agent list.
  * @param d_dst destination agent state list
@@ -668,9 +671,11 @@ void copy_partial_xmachine_memory_<xsl:value-of select="xmml:name"/>_hostToDevic
 	</xsl:for-each>
     }
 }
+</xsl:if>
 </xsl:for-each>
 
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:if test="gpu:type='continuous'">
 xmachine_memory_<xsl:value-of select="$agent_name" />* h_allocate_agent_<xsl:value-of select="$agent_name" />(){
 	xmachine_memory_<xsl:value-of select="$agent_name" />* agent = (xmachine_memory_<xsl:value-of select="$agent_name" />*)malloc(sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
     memset(agent, 0, sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
@@ -775,6 +780,7 @@ void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$s
 	}
 }
 </xsl:for-each>
+</xsl:if>
 </xsl:for-each>
 
 /*  Analytics Functions */
