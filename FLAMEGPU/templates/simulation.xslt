@@ -673,14 +673,21 @@ void copy_partial_xmachine_memory_<xsl:value-of select="xmml:name"/>_hostToDevic
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>
 xmachine_memory_<xsl:value-of select="$agent_name" />* h_allocate_agent_<xsl:value-of select="$agent_name" />(){
 	xmachine_memory_<xsl:value-of select="$agent_name" />* agent = (xmachine_memory_<xsl:value-of select="$agent_name" />*)malloc(sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
+	// Memset the whole agent strcuture
     memset(agent, 0, sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
 <xsl:for-each select="xmml:memory/gpu:variable">
 <xsl:if test="xmml:defaultValue and not(xmml:arrayLength)">
     agent-&gt;<xsl:value-of select="xmml:name"/> = <xsl:value-of select="xmml:defaultValue"/>;
 </xsl:if>
-<xsl:if test="xmml:arrayLength">
+<xsl:if test="xmml:arrayLength">	// Agent variable arrays must be allocated
     agent-&gt;<xsl:value-of select="xmml:name"/> = (<xsl:value-of select="xmml:type"/>*)malloc(<xsl:value-of select="xmml:arrayLength"/> * sizeof(<xsl:value-of select="xmml:type"/>));
-    memset(agent-&gt;<xsl:value-of select="xmml:name"/>, <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose>, sizeof(<xsl:value-of select="xmml:type"/>)*<xsl:value-of select="xmml:arrayLength"/>);
+	<xsl:choose><xsl:when test="xmml:defaultValue">// If we have a defauly value, set each element correctly.
+	for(unsigned int index = 0; index &lt; <xsl:value-of select="xmml:arrayLength"/>; index++){
+		agent-&gt;<xsl:value-of select="xmml:name"/>[index] = (<xsl:value-of select="xmml:type"/>)<xsl:value-of select="xmml:defaultValue"/>;
+	}</xsl:when><xsl:otherwise>
+    // If there is no default value, memset to 0.
+    memset(agent-&gt;<xsl:value-of select="xmml:name"/>, 0, sizeof(<xsl:value-of select="xmml:type"/>)*<xsl:value-of select="xmml:arrayLength"/>);</xsl:otherwise>
+	</xsl:choose>
 </xsl:if>
 </xsl:for-each>
 	return agent;

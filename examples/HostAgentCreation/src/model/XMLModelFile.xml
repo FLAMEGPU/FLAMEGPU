@@ -43,11 +43,13 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>time_alive</name>
+          <defaultValue>12</defaultValue>
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
           <name>example_array</name>
           <arrayLength>4</arrayLength>
+          <defaultValue>1</defaultValue>
         </gpu:variable>
       </memory>
       <functions>
