@@ -7,6 +7,7 @@ bin_private/
 examples/**/x64
 *.obj
 **/bin/**
+**/iterations/**
 **/dynamic/*.cu
 **/dynamic/*.h
 *.zip
