@@ -1,6 +1,6 @@
 ################################################################################
 #
-# FLAME GPU Script for CUDA 7.5, CUDA 8.0
+# FLAME GPU Makefile for CUDA 7.5 and above
 #
 # Copyright 2017 University of Sheffield.  All rights reserved.
 #
