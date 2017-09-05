@@ -71,6 +71,12 @@ typedef unsigned int uint;
 #define xmachine_message_<xsl:value-of select="xmml:name"/>_MAX <xsl:value-of select="gpu:bufferSize" /><xsl:text>
 </xsl:text></xsl:for-each>
 
+/* Define preprocessor symbols for each message to specify the type, to simplify / improve portability */
+<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message/*">
+<xsl:if test="contains(local-name(), 'partitioning')">
+#define xmachine_message_<xsl:value-of select="../xmml:name"/>_<xsl:value-of select="local-name()"/>
+</xsl:if>
+</xsl:for-each>
 
 /* Spatial partitioning grid size definitions */<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:if test="gpu:partitioningSpatial">
 //xmachine_message_<xsl:value-of select="xmml:name"/> partition grid size (gridDim.X*gridDim.Y*gridDim.Z)<xsl:variable name="x_dim"><xsl:value-of select="ceiling ((gpu:partitioningSpatial/gpu:xmax - gpu:partitioningSpatial/gpu:xmin) div gpu:partitioningSpatial/gpu:radius)"/></xsl:variable>
