@@ -1130,6 +1130,10 @@ __device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_mes
 	return true;
 }
 
+<!-- @note - The following functions check the number of messages prior to attempting to load a message. This resolves an issue realted to spatially partitioned messages being output by conditional functions.
+If no agents meet the condition, the PBM is not reset. 
+This has been fixed using the computationally cheap soluton of checking the number of messages.
+It may be more correct to instead ensure that the PBM is reset. -->
 /*
  * get first spatial partitioned <xsl:value-of select="xmml:name"/> message (first batch load into shared memory)
  */
@@ -1137,6 +1141,11 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	extern __shared__ int sm_data [];
 	char* message_share = (char*)&amp;sm_data[0];
+
+	// If there are no messages, do not load any messages
+	if(d_message_<xsl:value-of select="xmml:name"/>_count == 0){
+		return false;
+	}
 
 	glm::ivec3 relative_cell = glm::ivec3(-2, -1, -1);
 	int cell_index_max = 0;
@@ -1163,7 +1172,10 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 	extern __shared__ int sm_data [];
 	char* message_share = (char*)&amp;sm_data[0];
 	
-	//TODO: check message count
+	// If there are no messages, do not load any messages
+	if(d_message_<xsl:value-of select="xmml:name"/>_count == 0){
+		return false;
+	}
 	
 	if (load_next_<xsl:value-of select="xmml:name"/>_message(messages, partition_matrix, message->_relative_cell, message->_cell_index_max, message->_agent_grid_cell, message->_cell_index))
 	{
