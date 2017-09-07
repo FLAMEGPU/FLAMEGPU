@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FloodModel", "FloodModel.vcxproj", "{7CE78BF1-9E76-450A-B3C2-892470AD791B}"
 EndProject
 Global
@@ -16,7 +18,6 @@ Global
 		{7CE78BF1-9E76-450A-B3C2-892470AD791B}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
 		{7CE78BF1-9E76-450A-B3C2-892470AD791B}.Debug_Visualisation|x64.Build.0 = Debug_Visualisation|x64
 		{7CE78BF1-9E76-450A-B3C2-892470AD791B}.Release_Console|x64.ActiveCfg = Release_Console|x64
-		{7CE78BF1-9E76-450A-B3C2-892470AD791B}.Release_Console|x64.Build.0 = Release_Console|x64
 		{7CE78BF1-9E76-450A-B3C2-892470AD791B}.Release_Visualisation|x64.ActiveCfg = Release_Visualisation|x64
 		{7CE78BF1-9E76-450A-B3C2-892470AD791B}.Release_Visualisation|x64.Build.0 = Release_Visualisation|x64
 	EndGlobalSection
