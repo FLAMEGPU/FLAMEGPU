@@ -4,25 +4,19 @@
   <name>flood</name>
   <gpu:environment>
     <gpu:constants>
-
       <gpu:variable>
         <type>double</type>
         <name>TIMESTEP</name>
       </gpu:variable>
-
       <gpu:variable>
         <type>double</type>
         <name>DXL</name>
       </gpu:variable>
-
       <gpu:variable>
         <type>double</type>
         <name>DYL</name>
       </gpu:variable>
-
-
     </gpu:constants>
-
     <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
@@ -36,8 +30,7 @@
           <name>inDomain</name>
         </gpu:variable>
         <gpu:variable>
-          <type>float</type>
-          <!-- the type 'int' changed to 'float' MS01Sep2017-->
+          <type>float</type><!-- the type 'int' changed to 'float' MS01Sep2017-->    
           <name>x</name>
         </gpu:variable>
         <gpu:variable>
@@ -62,27 +55,20 @@
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
-          <name>timeStep</name>
-          <!--This is to assign dynamic adaptive 'dt' with respect to CFL and velocities -  MS01Sep2017-->
+          <name>timeStep</name><!--This is to assign dynamic adaptive 'dt' with respect to CFL and velocities -  MS01Sep2017-->   
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
-          <name>minh_loc</name>
-          <!--This is to assign dynamic 'hmin' with respect to LFVs - MS01Sep2017-->
-        </gpu:variable>
-
-
-        <!-- EAST LFV-->
-        <gpu:variable>
+          <name>minh_loc</name><!--This is to assign dynamic 'hmin' with respect to LFVs - MS01Sep2017-->          
+        </gpu:variable>       
+        <gpu:variable><!-- EAST LFV-->
           <type>double</type>
           <name>hFace_E</name>
-        </gpu:variable>
-        
+        </gpu:variable>    
         <gpu:variable>
           <type>double</type>
           <name>etFace_E</name>
         </gpu:variable>
-
         <gpu:variable>
           <type>double</type>
           <name>qxFace_E</name>
@@ -90,19 +76,15 @@
         <gpu:variable>
           <type>double</type>
           <name>qyFace_E</name>
-        </gpu:variable>
-
-        <!-- WEST LFV-->
-        <gpu:variable>
+        </gpu:variable> 
+        <gpu:variable><!-- WEST LFV-->
           <type>double</type>
           <name>hFace_W</name>
-        </gpu:variable>
-        
+        </gpu:variable> 
         <gpu:variable>
           <type>double</type>
           <name>etFace_W</name>
         </gpu:variable>
-
         <gpu:variable>
           <type>double</type>
           <name>qxFace_W</name>
@@ -110,19 +92,15 @@
         <gpu:variable>
           <type>double</type>
           <name>qyFace_W</name>
-        </gpu:variable>
-
-        <!-- NORTH LFV-->
-        <gpu:variable>
+        </gpu:variable>    
+        <gpu:variable><!-- NORTH LFV-->
           <type>double</type>
           <name>hFace_N</name>
-        </gpu:variable>
-        
+        </gpu:variable>   
         <gpu:variable>
           <type>double</type>
           <name>etFace_N</name>
         </gpu:variable>
-
         <gpu:variable>
           <type>double</type>
           <name>qxFace_N</name>
@@ -130,10 +108,8 @@
         <gpu:variable>
           <type>double</type>
           <name>qyFace_N</name>
-        </gpu:variable>
-
-        <!-- SOUTH LFV-->
-        <gpu:variable>
+        </gpu:variable>       
+        <gpu:variable><!-- SOUTH LFV-->
           <type>double</type>
           <name>hFace_S</name>
         </gpu:variable>
@@ -141,7 +117,6 @@
           <type>double</type>
           <name>etFace_S</name>
         </gpu:variable>
-
         <gpu:variable>
           <type>double</type>
           <name>qxFace_S</name>
@@ -150,18 +125,8 @@
           <type>double</type>
           <name>qyFace_S</name>
         </gpu:variable>
-
-
-        <!--<gpu:variable>
-          <type>bool</type>
-          <name>isDry</name>
-          --><!--Needed for Wet and Dry message function--><!--
-        </gpu:variable>-->
-
-
       </memory>
       <functions>
-
         <gpu:function>
           <name>PrepareSpaceOperator</name>
           <currentState>Default</currentState>
@@ -175,7 +140,6 @@
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
-
         <gpu:function>
           <name>ProcessSpaceOperatorMessage</name>
           <currentState>Default</currentState>
@@ -188,9 +152,6 @@
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
-
-
-
         <gpu:function>
           <name>PrepareWetDry</name>
           <currentState>Default</currentState>
@@ -204,7 +165,6 @@
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
-
         <gpu:function>
           <name>ProcessWetDryMessage</name>
           <currentState>Default</currentState>
@@ -217,9 +177,6 @@
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
-
-
-
         <gpu:function>
           <name>PrepareLFV</name>
           <currentState>Default</currentState>
@@ -233,7 +190,6 @@
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
-
         <gpu:function>
           <name>ProcessLFVMessage</name>
           <currentState>Default</currentState>
@@ -246,8 +202,6 @@
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
-
-
       </functions>
       <states>
         <gpu:state>
@@ -258,19 +212,14 @@
       <gpu:type>discrete</gpu:type>
       <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
-
   </xagents>
-
-
   <messages>
-
     <gpu:message>
       <name>SpaceOperatorMessage</name>
       <variables>
         <gpu:variable>
           <type>int</type>
           <name>inDomain</name>
-          <!--Check why?! MS01Sep2017-->
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
@@ -279,11 +228,8 @@
         <gpu:variable>
           <type>float</type>
           <name>y</name>
-        </gpu:variable>
-
-
-        <!--EAST-->
-        <gpu:variable>
+        </gpu:variable>    
+        <gpu:variable><!--EAST-->
           <type>double</type>
           <name>hFace_E</name>
         </gpu:variable>
@@ -293,18 +239,13 @@
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
-          <name>qFace_X_E</name>
-          <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
+          <name>qFace_X_E</name><!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->         
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
-          <name>qFace_Y_E</name>
-          <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
-        </gpu:variable>
-
-
-        <!--WEST-->
-        <gpu:variable>
+          <name>qFace_Y_E</name>      
+        </gpu:variable>       
+        <gpu:variable><!--WEST-->
           <type>double</type>
           <name>hFace_W</name>
         </gpu:variable>
@@ -315,17 +256,12 @@
         <gpu:variable>
           <type>double</type>
           <name>qFace_X_W</name>
-          <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
           <name>qFace_Y_W</name>
-          <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
-        </gpu:variable>
-
-
-        <!--NORTH-->
-        <gpu:variable>
+        </gpu:variable>  
+        <gpu:variable><!--NORTH-->
           <type>double</type>
           <name>hFace_N</name>
         </gpu:variable>
@@ -335,18 +271,13 @@
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
-          <name>qFace_X_N</name>
-          <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
+          <name>qFace_X_N</name><!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->       
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
           <name>qFace_Y_N</name>
-          <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
         </gpu:variable>
-
-
-        <!--SOUTH-->
-        <gpu:variable>
+        <gpu:variable><!--SOUTH-->
           <type>double</type>
           <name>hFace_S</name>
         </gpu:variable>
@@ -356,22 +287,18 @@
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
-          <name>qFace_X_S</name>
-          <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
+          <name>qFace_X_S</name>        
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
           <name>qFace_Y_S</name>
-          <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
         </gpu:variable>
       </variables>
-
       <gpu:partitioningDiscrete>
         <gpu:radius>1</gpu:radius>
       </gpu:partitioningDiscrete>
       <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
-
     <gpu:message>
       <name>WetDryMessage</name>
       <variables>
@@ -389,8 +316,7 @@
         </gpu:variable>
         <gpu:variable>
           <type>double</type>
-          <name>min_hloc</name>
-          <!--This is different from that of the agent memory _ Messaging sake ("MS01Sep2017") - can be revised later -->
+          <name>min_hloc</name><!--This is different from that of the agent memory _ Messaging sake ("MS01Sep2017") - can be revised later -->  
         </gpu:variable>
       </variables>
       <gpu:partitioningDiscrete>
@@ -398,15 +324,12 @@
       </gpu:partitioningDiscrete>
       <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
-
-
     <gpu:message>
       <name>LFVMessage</name>
       <variables>
         <gpu:variable>
           <type>int</type>
           <name>inDomain</name>
-          <!-- the use to be Checked in the code MS01Sep2017-->
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
@@ -439,10 +362,8 @@
       <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
   </messages>
-
   <layers>
     <layer>
-      <!--execution sequence depends on the introduction order MS01Sep2017-->
       <gpu:layerFunction>
         <name>PrepareWetDry</name>
       </gpu:layerFunction>
@@ -483,5 +404,4 @@
       </gpu:layerFunction>
     </layer>
   </layers>
-
 </gpu:xmodel>

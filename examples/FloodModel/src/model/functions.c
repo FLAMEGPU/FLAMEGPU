@@ -4,7 +4,7 @@
 
 #include "header.h"
 #include "cutil_math.h"
-
+//#include "math.h"
 
 
 #define PI 3.1415f
@@ -612,8 +612,8 @@ inline __device__ double3 Roe_x(double h_L, double h_R, double qx_L, double qx_R
 	}
 	else
 	{
-		u_L = qx_R / h_R;
-		v_L = qy_R / h_R;
+		u_R = qx_R / h_R;
+		v_R = qy_R / h_R;
 	}
 
 	double c_L = sqrt(GRAVITY * h_L);
@@ -714,8 +714,8 @@ inline __device__ double3 Roe_y(double h_L, double h_R, double qx_L, double qx_R
 	}
 	else
 	{
-		u_L = qx_R / h_R;
-		v_L = qy_R / h_R;
+		u_R = qx_R / h_R;
+		v_R = qy_R / h_R;
 	}
 
 	double c_L = sqrt(GRAVITY * h_L);
@@ -787,6 +787,16 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 	double3 FMinus = make_double3(0.0, 0.0, 0.0);
 	double3 GPlus = make_double3(0.0, 0.0, 0.0);
 	double3 GMinus = make_double3(0.0, 0.0, 0.0);
+	
+	// Wetting/Drying function variables 
+	double z0_F ;
+	double h_F_L ;
+	double h_F_R ;
+	double qx_F_L ;
+	double qx_F_R ;
+	double qy_F_L;
+	double qy_F_R ;
+	// Outputs of WD functs with respect to direction
 	double z0f_E;
 	double z0f_W;
 	double z0f_N;
@@ -805,7 +815,7 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 	//double qyf_S;
 
 	xmachine_message_SpaceOperatorMessage* msg = get_first_SpaceOperatorMessage_message<DISCRETE_2D>(SpaceOperatorMessage_messages, agent->x, agent->y);
-
+				
 	while (msg)
 	{
 		if (msg->inDomain)
@@ -824,13 +834,13 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 				double2 q_L = make_double2(agent->qxFace_E, agent->qyFace_E);
 
 				// initiating the outputs of WD function
-				double z0_F = 0.0;
-				double h_F_L = 0.0;
-				double h_F_R = 0.0;
-				double qx_F_L = 0.0;
-				double qx_F_R = 0.0;
-				double qy_F_L = 0.0;
-				double qy_F_R = 0.0;
+				z0_F = 0.0;
+				h_F_L = 0.0;
+				h_F_R = 0.0;
+				qx_F_L = 0.0;
+				qx_F_R = 0.0;
+				qy_F_L = 0.0;
+				qy_F_R = 0.0;
 
 				//Wetting and drying "depth-positivity-preserving" reconstructions
 				WD(h_L, h_R, et_L, et_R, q_L.x, q_R.x, q_L.y, q_R.y, EAST, z0_F, h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
@@ -966,8 +976,8 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 	double z01y_mod = (z0f_N - z0f_S) * 0.5;
 
 	// Water height average
-	double hx_mod = (hf_E - hf_W) * 0.5;
-	double hy_mod = (hf_N - hf_S) * 0.5;
+	double hx_mod = (hf_E + hf_W) * 0.5;
+	double hy_mod = (hf_N + hf_S) * 0.5;
 
 
 	// Evaluating bed slope source term
