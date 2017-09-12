@@ -95,7 +95,7 @@ NVCC          := nvcc
 # NVCC compiler flags
 NVCCFLAGS   := -m64 -lineinfo
 # Host compiler flags (gcc/cicc etc), passed to nvcc using -Xcompiler
-CCFLAGS     := -Wall
+CCFLAGS     := 
 # NVCC linker flags
 NVCCLDFLAGS :=
 # Host linker flags (ld etc), passed to nvcc using -Xlinker
@@ -119,6 +119,8 @@ ifeq ($(OS),Windows_NT)
 	XSLTPROC := $(FLAMEGPU_ROOT)tools/XSLTProcessor.exe
 	# by default, do not use a linter on windows
 	XMMLLINT :=
+	# Set windows specific host compiler flags
+	CCFLAGS := -W3
 	# Pass directory to lib files
 	NVCCLDFLAGS += -L "$(LIB_DIR)"
 	# Specify windows specific shared libraries to link against.
@@ -131,6 +133,7 @@ else
 		XMLLINT := $(shell command -v xmllint 2> /dev/null)
 		# Pass specific nvcc flags for linux
 		NVCCFLAGS += -std=c++11
+		CCFLAGS += -Wall
 		# Pass directory to lib files
 		NVCCLDFLAGS += -L$(LIB_DIR)
 		# Path to the library shard object files relative to the final bin directory location.
