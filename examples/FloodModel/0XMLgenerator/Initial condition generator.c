@@ -33,8 +33,8 @@ int main()
         int ymin = 0;
         int ymax = 30;
         
-        int nx = 46;
-        int ny = 16;
+        int nx = 64;
+        int ny = 64;
         
         float Lx , Ly;
         float dx , dy;
@@ -73,11 +73,11 @@ int main()
     fprintf(fp," </environment>\n");
     
 
-      for ( i=1 ; i < nx+1 ; i++){  
-          for ( j=1 ; j < ny+1 ; j++){
+      for ( i=0 ; i <= nx ; i++){  
+          for ( j=0 ; j <= ny ; j++){
             
-            x_int[i] = xmin + (i-1) * dx; 
-            y_int[j] = ymin + (j-1) * dy;
+            x_int[i] = xmin + (i) * dx; 
+            y_int[j] = ymin + (j) * dy;
             
             z0_int[i][j] = bed_data    ((float)x_int[i],(float)y_int[j]);
             h_int[i][j]  = initial_flow((float)x_int[i],(float)y_int[j],(float)z0_int[i][j]);
@@ -89,8 +89,8 @@ int main()
                      }
             }
             
-            for ( i=2 ; i < nx+1 ; i++){  
-                for ( j=2 ; j < ny+1 ; j++){
+            for ( i=1 ; i <= nx ; i++){  
+                for ( j=1 ; j <= ny ; j++){
                     
                     x[i] = 0.5*(x_int[i] + x_int[i-1]);
                     y[j] = 0.5*(y_int[j] + y_int[j-1]);
