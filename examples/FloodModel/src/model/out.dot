@@ -1,0 +1,73 @@
+digraph model {
+  newrank=true;
+compound=true; 
+   START [style=invisible];
+  MID [style=invisible];
+  END [style=invisible];
+subgraph cluster_0{
+ color=blue; label=initFunctions;penwidth=3;  
+
+}
+
+subgraph cluster_1{
+ color=blue;label=stepFunctions;penwidth=3; 
+
+}
+
+subgraph cluster_2{
+ color=blue; label=exitFunctions;penwidth=3; 
+
+}
+
+{node [shape=plaintext, fontsize=16];/* the time-line graph */
+ Layer->1->2->3->4->5->6;}
+
+{rank = same ;1;PrepareWetDry ;}
+
+{rank = same ;2;ProcessWetDryMessage ;}
+
+{rank = same ;3;PrepareLFV ;}
+
+{rank = same ;4;ProcessLFVMessage ;}
+
+{rank = same ;5;PrepareSpaceOperator ;}
+
+{rank = same ;6;ProcessSpaceOperatorMessage ;}
+
+subgraph cluster_3{
+ label="FloodCell";color=blue; penwidth=3; 
+
+   PrepareSpaceOperator [shape=box,penwidth=3];
+   PrepareSpaceOperator -> SpaceOperatorMessage [color=green4,penwidth=3];
+   ProcessSpaceOperatorMessage [shape=box,penwidth=3];
+   SpaceOperatorMessage -> ProcessSpaceOperatorMessage [color=green4,penwidth=3];
+   PrepareWetDry [shape=box,penwidth=3];
+   PrepareWetDry -> WetDryMessage [color=green4,penwidth=3];
+   ProcessWetDryMessage [shape=box,penwidth=3];
+   WetDryMessage -> ProcessWetDryMessage [color=green4,penwidth=3];
+   PrepareLFV [shape=box,penwidth=3];
+   PrepareLFV -> LFVMessage [color=green4,penwidth=3];
+   ProcessLFVMessage [shape=box,penwidth=3];
+   LFVMessage -> ProcessLFVMessage [color=green4,penwidth=3];
+   "Default" -> PrepareWetDry ;
+   PrepareWetDry -> "Default'";
+   "Default'" -> ProcessWetDryMessage ;
+   ProcessWetDryMessage -> "Default''";
+   "Default''" -> PrepareLFV ;
+   PrepareLFV -> "Default'''";
+   "Default'''" -> ProcessLFVMessage ;
+   ProcessLFVMessage -> "Default''''";
+   "Default''''" -> PrepareSpaceOperator ;
+   PrepareSpaceOperator -> "Default'''''";
+   "Default'''''" -> ProcessSpaceOperatorMessage ;
+   ProcessSpaceOperatorMessage -> "Default''''''";
+  "Default''''''"-> MID [style=invis];
+}
+
+ START-> "Default"[style=invis] ;
+MID -> END [style=invis];
+
+   SpaceOperatorMessage [shape=box][shape=diamond, label=SpaceOperatorMessage, fontcolor=green4, color=green4,penwidth=3];
+   WetDryMessage [shape=box][shape=diamond, label=WetDryMessage, fontcolor=green4, color=green4,penwidth=3];
+   LFVMessage [shape=box][shape=diamond, label=LFVMessage, fontcolor=green4, color=green4,penwidth=3];
+}

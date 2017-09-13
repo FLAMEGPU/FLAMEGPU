@@ -331,8 +331,7 @@ inline __device__ LFVResult LFV(
 	return result;
 }
 
-
-__FLAME_GPU_FUNC__ int ProcessLFVMessages(xmachine_memory_FloodCell* agent, xmachine_message_LFVMessage_list* LFVMessage_messages)
+__FLAME_GPU_FUNC__ int ProcessLFVMessage(xmachine_memory_FloodCell* agent, xmachine_message_LFVMessage_list* LFVMessage_messages)
 {
 	if (agent->inDomain
 		&& agent->minh_loc > TOL_H)
