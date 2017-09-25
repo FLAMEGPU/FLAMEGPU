@@ -20,3 +20,9 @@ Done by the date:
 
 - 0.xml has been modified to the correct number of agents and array indicators.
 - The project builds, but no result is achieved.
+
+----------------- MS25Sep2017 ------------------ 
+
+- 0.xml - the correct i and j is assigned to the variables (all in accordance with the same 'C' project).
+- Roe solver is replaced by hll and SWE flux is modified to the correct varibales.
+- Still struggling with outputing the results.

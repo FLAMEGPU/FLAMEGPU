@@ -73,11 +73,11 @@ int main()
     fprintf(fp," </environment>\n");
     
 
-      for ( i=0 ; i <= nx ; i++){  
-          for ( j=0 ; j <= ny ; j++){
+      for ( i=1 ; i <= nx+1 ; i++){  
+          for ( j=1 ; j <= ny+1 ; j++){
             
-            x_int[i] = xmin + (i) * dx; 
-            y_int[j] = ymin + (j) * dy;
+            x_int[i] = xmin + (i-1) * dx; 
+            y_int[j] = ymin + (j-1) * dy;
             
             z0_int[i][j] = bed_data    ((float)x_int[i],(float)y_int[j]);
             h_int[i][j]  = initial_flow((float)x_int[i],(float)y_int[j],(float)z0_int[i][j]);
@@ -92,14 +92,14 @@ int main()
             for ( i=1 ; i <= nx ; i++){  
                 for ( j=1 ; j <= ny ; j++){
                     
-                    x[i] = 0.5*(x_int[i] + x_int[i-1]);
-                    y[j] = 0.5*(y_int[j] + y_int[j-1]);
+                    x[i] = 0.5*(x_int[i] + x_int[i+1]);
+                    y[j] = 0.5*(y_int[j] + y_int[j+1]);
                     
-                    z0[i][j] = 0.25*(z0_int[i][j-1] + z0_int[i][j] + z0_int[i-1][j] + z0_int[i-1][j-1]);
-                    h[i][j] = 0.25*(h_int[i][j-1] + h_int[i][j] + h_int[i-1][j] + h_int[i-1][j-1]);
+                    z0[i][j] = 0.25*(z0_int[i][j+1] + z0_int[i][j] + z0_int[i+1][j] + z0_int[i+1][j+1]);
+                    h[i][j]  = 0.25*(h_int [i][j+1] +  h_int[i][j] +  h_int[i+1][j] +  h_int[i+1][j+1]);
                     
-                    qx[i][j] = 0.25*(qx_int[i][j-1] + qx_int[i][j] + qx_int[i-1][j] + qx_int[i-1][j-1]);
-                    qy[i][j] = 0.25*(qy_int[i][j-1] + qy_int[i][j] + qy_int[i-1][j] + qy_int[i-1][j-1]);
+                    qx[i][j] = 0.25*(qx_int[i][j+1] + qx_int[i][j] + qx_int[i+1][j] + qx_int[i+1][j+1]);
+                    qy[i][j] = 0.25*(qy_int[i][j+1] + qy_int[i][j] + qy_int[i+1][j] + qy_int[i+1][j+1]);
                    
 //                   printf("The value of z0 in x[%f] y[%f] %3f\n", x[i], y[j] , z0[i][j] );
 //                   *To test the results : 

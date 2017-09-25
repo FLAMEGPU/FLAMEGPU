@@ -30,11 +30,18 @@
 
 
 
-inline __device__ double3 Roe_x(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R);
-inline __device__ double3 Roe_y(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R);
+//inline __device__ double3 Roe_x(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R);
+//inline __device__ double3 Roe_y(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R);
+
+inline __device__ double3 hll_x(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R);
+inline __device__ double3 hll_y(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R);
+
 inline __device__ double3 Flux_F(double hh, double qx, double qy);
 inline __device__ double3 Flux_G(double hh, double qx, double qy);
-inline __device__ double psi_Roe(double a, double d);
+inline __device__ double3 F_SWE(double hh, double qx, double qy);
+inline __device__ double3 G_SWE(double hh, double qx, double qy);
+
+//inline __device__ double psi_Roe(double a, double d);
 inline __device__ double3 Sb(double hx_mod, double hy_mod, double zprime_x, double zprime_y);
 
 enum ECellDirection { NORTH = 1, EAST = 2, SOUTH = 3, WEST = 4 };
@@ -572,14 +579,14 @@ inline __device__ void WD(double h_L,
 }
 
 
-inline __device__ double3 Roe_x(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R)
+//inline __device__ double3 Roe_x(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R)
+inline __device__ double3 hll_x(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R)
 {
 	double3 F_face = make_double3(0.0, 0.0, 0.0);
-	// This function calculates the interface fluxes in x-direction.
 
 	double u_L = 0.0;
-	double u_R = 0.0;
 	double v_L = 0.0;
+	double u_R = 0.0;
 	double v_R = 0.0;
 
 	if ((h_L <= TOL_H) && (h_R <= TOL_H))
@@ -590,103 +597,137 @@ inline __device__ double3 Roe_x(double h_L, double h_R, double qx_L, double qx_R
 
 		return F_face;
 	}
-
-	if (h_L <= TOL_H)
-	{
-		//h_L = 0.0;  MS:25MAY2017 
-		u_L = 0.0;
-		v_L = 0.0;
-	}
 	else
 	{
-		u_L = qx_L / h_L;
-		v_L = qy_L / h_L;
+
+		if (h_L <= TOL_H)
+		{
+			h_L = 0.0;
+			u_L = 0.0;
+			v_L = 0.0;
+		}
+		else
+		{
+
+			u_L = qx_L / h_L;
+			v_L = qy_L / h_L;
+		}
+
+
+		if (h_R <= TOL_H)
+		{
+			h_R = 0.0;
+			u_R = 0.0;
+			v_R = 0.0;
+		}
+		else
+		{
+			u_R = qx_R / h_R;
+			v_R = qy_R / h_R;
+		}
+
+		double a_L = sqrt(GRAVITY * h_L);
+		double a_R = sqrt(GRAVITY * h_R);
+
+		double h_star = pow(((a_L + a_R) / 2.0 + (u_L - u_R) / 4.0), 2) / GRAVITY;
+		double u_star = (u_L + u_R) / 2.0 + a_L - a_R;
+		double a_star = sqrt(GRAVITY * h_star);
+
+		double s_L, s_R;
+
+		if (h_L <= TOL_H)
+		{
+			s_L = u_R - (2.0 * a_R);
+		}
+		else
+		{
+			s_L = min(u_L - a_L, u_star - a_star);
+		}
+
+
+
+		if (h_R <= TOL_H)
+		{
+			s_R = u_L + (2.0 * a_L);
+		}
+		else
+		{
+			s_R = max(u_R + a_R, u_star + a_star);
+		}
+
+		double s_M = ((s_L * h_R * (u_R - s_R)) - (s_R * h_L * (u_L - s_L))) / (h_R * (u_R - s_R) - (h_L * (u_L - s_L)));
+
+		double3 F_L, F_R;
+
+		//FSWE3 F_L = F_SWE((double)h_L, (double)qx_L, (double)qy_L);
+		 F_L = F_SWE(h_L, qx_L, qy_L);
+
+		//FSWE3 F_R = F_SWE((double)h_R, (double)qx_R, (double)qy_R);
+		 F_R = F_SWE(h_R, qx_R, qy_R);
+
+
+		if (s_L >= 0.0)
+		{
+			F_face.x = F_L.x;
+			F_face.y = F_L.y;
+			F_face.z = F_L.z;
+
+			//return F_L; 
+		}
+
+		else if ((s_L < 0.0) && s_R >= 0.0)
+
+		{
+
+			double F1_M = ((s_R * F_L.x) - (s_L * F_R.x) + s_L * s_R * ( h_R - h_L )) / (s_R - s_L);
+
+			double F2_M = ((s_R * F_L.y) - (s_L * F_R.y) + s_L * s_R * (qx_R - qx_L)) / (s_R - s_L);
+
+			//			
+			if ((s_L < 0.0) && (s_M >= 0.0)) // for 2D here must be changed
+			{
+				F_face.x = F1_M;
+				F_face.y = F2_M;
+				F_face.z = F1_M * v_L;
+				//				
+			}
+			else if ((s_M < 0.0) && (s_R >= 0.0))
+			{
+				//				
+				F_face.x = F1_M;
+				F_face.y = F2_M;
+				F_face.z = F1_M * v_R;
+				//					
+			}
+		}
+
+		else if (s_R < 0)
+		{
+			//			
+			F_face.x = F_R.x;
+			F_face.y = F_R.y;
+			F_face.z = F_R.z;
+			//	
+		}
+
+		return F_face;
+
 	}
-
-	if (h_R <= TOL_H)
-	{
-		//h_R = 0.0;  MS:25MAY2017 
-		u_R = 0.0;
-		v_R = 0.0;
-	}
-	else
-	{
-		u_R = qx_R / h_R;
-		v_R = qy_R / h_R;
-	}
-
-	double c_L = sqrt(GRAVITY * h_L);
-	double a1_L = u_L + c_L;
-	double a2_L = u_L;
-	double a3_L = u_L - c_L;
-
-	double c_R = sqrt(GRAVITY * h_R);
-	double a1_R = u_R + c_R;
-	double a2_R = u_R;
-	double a3_R = u_R - c_R;
-
-	//Roe Linearisation
-	double u_roe = (u_R * sqrt(h_R) + u_L * sqrt(h_L)) / (sqrt(h_R) + sqrt(h_L));
-	double v_roe = (v_R * sqrt(h_R) + v_L * sqrt(h_L)) / (sqrt(h_R) + sqrt(h_L));
-
-	double c_mid = sqrt(GRAVITY*(h_L + h_R) / 2.0);
-
-	//Associated eigenvalues
-	double a1 = u_roe + c_mid;
-	double a2 = u_roe;
-	double a3 = u_roe - c_mid;
-
-	// Entropy-fix parameters
-	double d1 = min(c_mid, max(0.0, 2.0*(a1_R - a1_L)));
-	double d2 = min(c_mid, max(0.0, 2.0*(a2_R - a2_L)));
-	double d3 = min(c_mid, max(0.0, 2.0*(a3_R - a3_L)));
-
-	//Eigenvectors (these are vectors)
-
-	double e1[3] = { 1.0, a1, v_roe };
-	double e2[3] = { 0, 0, c_mid };
-	double e3[3] = { 1.0, a3, v_roe };
-
-	// Waves Strength
-	double alpha_1 = 0.5 * (h_R - h_L) + ((h_R*u_R - h_L*u_L) - u_roe*(h_R - h_L)) / (2.0*c_mid);
-	double alpha_2 = ((h_R*v_R - h_L*v_L) - v_roe*(h_R - h_L)) / c_mid;
-	double alpha_3 = 0.5 * (h_R - h_L) - ((h_R*u_R - h_L*u_L) - u_roe*(h_R - h_L)) / (2.0*c_mid);
-
-	//Physical Left and Right - FLUX EVALUATION -
-	double qx_tempL = h_L*u_L; // temporary qx and qy MS:25MAY2017
-	double qy_tempL = h_L*v_L;
-
-	double qx_tempR = h_R*u_R;
-	double qy_tempR = h_R*v_R;
-
-	double3 F_L = Flux_F(h_L, qx_tempL, qy_tempL); // for each h,qx,qy F_L.x F_L.y and F_L.z
-	double3 F_R = Flux_F(h_R, qx_tempR, qy_tempR); // for each h,qx,qy F_R.x F_R.y and F_R.z
-
-	// Entropy-fix for eigenvalues
-	double f1 = psi_Roe(a1, d1);
-	double f2 = psi_Roe(a2, d2);
-	double f3 = psi_Roe(a3, d3);
-
-	// Average Roe Riemann flux
-	F_face.x = 0.5 * (F_L.x + F_R.x - alpha_1*f1*e1[0] - alpha_2*f2*e2[0] - alpha_3*f3*e3[0]);
-	F_face.y = 0.5 * (F_L.y + F_R.y - alpha_1*f1*e1[1] - alpha_2*f2*e2[1] - alpha_3*f3*e3[1]);
-	F_face.z = 0.5 * (F_L.z + F_R.z - alpha_1*f1*e1[2] - alpha_2*f2*e2[2] - alpha_3*f3*e3[2]);
-
-	return F_face;
+	//	
 
 }
 
-inline __device__ double3 Roe_y(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R)
+//inline __device__ double3 Roe_y(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R)
+inline __device__ double3 hll_y(double h_S, double h_N, double qx_S, double qx_N, double qy_S, double qy_N)
 {
 	double3 G_face = make_double3(0.0, 0.0, 0.0);
 	// This function calculates the interface fluxes in x-direction.
+	double u_S = 0.0;
+	double v_S = 0.0;
+	double u_N = 0.0;
+	double v_N = 0.0;
 
-	double u_L = 0.0;
-	double u_R = 0.0;
-	double v_L = 0.0;
-	double v_R = 0.0;
-
-	if ((h_L <= TOL_H) && (h_R <= TOL_H))
+	if ((h_S <= TOL_H) && (h_N <= TOL_H))
 	{
 		G_face.x = 0.0;
 		G_face.y = 0.0;
@@ -694,97 +735,133 @@ inline __device__ double3 Roe_y(double h_L, double h_R, double qx_L, double qx_R
 
 		return G_face;
 	}
-
-	if (h_L <= TOL_H)
-	{
-		u_L = 0.0;
-		v_L = 0.0;
-	}
 	else
 	{
-		u_L = qx_L / h_L;
-		v_L = qy_L / h_L;
+
+		if (h_S <= TOL_H)
+		{
+			h_S = 0.0;
+			u_S = 0.0;
+			v_S = 0.0;
+		}
+		else
+		{
+
+			u_S = qx_S / h_S;
+			v_S = qy_S / h_S;
+		}
+
+
+		if (h_N <= TOL_H)
+		{
+			h_N = 0.0;
+			u_N = 0.0;
+			v_N = 0.0;
+		}
+		else
+		{
+			u_N = qx_N / h_N;
+			v_N = qy_N / h_N;
+		}
+
+		double a_S = sqrt(GRAVITY * h_S);
+		double a_N = sqrt(GRAVITY * h_N);
+
+		double h_star = pow(((a_S + a_N) / 2.0 + (v_S - v_N) / 4.0), 2.0) / GRAVITY;
+		double v_star = (v_S + v_N) / 2.0 + a_S - a_N;
+		double a_star = sqrt(GRAVITY * h_star);
+
+		double s_S, s_N;
+
+		if (h_S <= TOL_H)
+		{
+			s_S = v_N - (2.0 * a_N);
+		}
+		else
+		{
+			s_S = min(v_S - a_S, v_star - a_star);
+		}
+
+
+
+		if (h_N <= TOL_H)
+		{
+			s_N = v_S + (2.0 * a_S);
+		}
+		else
+		{
+			s_N = max(v_N + a_N, v_star + a_star);
+		}
+
+		double s_M = ((s_S * h_N * (v_N - s_N)) - (s_N * h_S * (v_S - s_S))) / (h_N * (v_N - s_N) - (h_S * (v_S - s_S)));
+
+		
+		double3 G_S, G_N;
+
+		 G_S = G_SWE((double)h_S, (double)qx_S, (double)qy_S);
+
+		 G_N = G_SWE((double)h_N, (double)qx_N, (double)qy_N);
+
+
+		if (s_S >= 0.0)
+		{
+			G_face.x = G_S.x;
+			G_face.y = G_S.y;
+			G_face.z = G_S.z;
+
+			//return G_S; the Lewis code
+
+		}
+
+		else if ((s_S < 0.0) && (s_N >= 0.0))
+
+		{
+
+			double G1_M = ((s_N * G_S.x) - (s_S * G_N.x) + s_S * s_N * (h_N - h_S)) / (s_N - s_S);
+
+			double G3_M = ((s_N * G_S.z) - (s_S * G_N.z) + s_S * s_N * (qy_N - qy_S)) / (s_N - s_S);
+			//			
+			if ((s_S < 0.0) && (s_M >= 0.0))
+			{
+				G_face.x = G1_M;
+				G_face.y = G1_M * u_S;
+				G_face.z = G3_M;
+				//				
+			}
+			else if ((s_M < 0.0) && (s_N >= 0.0))
+			{
+				//				
+				G_face.x = G1_M;
+				G_face.y = G1_M * u_N;
+				G_face.z = G3_M;
+				//					
+			}
+		}
+
+		else if (s_N < 0)
+		{
+			//			
+			G_face.x = G_N.x;
+			G_face.y = G_N.y;
+			G_face.z = G_N.z;
+
+			//return G_N;
+			//	
+		}
+
+		return G_face;
+
 	}
-
-	if (h_R <= TOL_H)
-	{
-		u_R = 0.0;
-		v_R = 0.0;
-	}
-	else
-	{
-		u_R = qx_R / h_R;
-		v_R = qy_R / h_R;
-	}
-
-	double c_L = sqrt(GRAVITY * h_L);
-	double a1_L = v_L + c_L;
-	double a2_L = v_L;
-	double a3_L = v_L - c_L;
-
-	double c_R = sqrt(GRAVITY * h_R);
-	double a1_R = v_R + c_R;
-	double a2_R = v_R;
-	double a3_R = v_R - c_R;
-
-	//Roe Linearisation
-	double u_roe = (u_R * sqrt(h_R) + u_L * sqrt(h_L)) / (sqrt(h_R) + sqrt(h_L));
-	double v_roe = (v_R * sqrt(h_R) + v_L * sqrt(h_L)) / (sqrt(h_R) + sqrt(h_L));
-
-	double c_mid = sqrt(GRAVITY*(h_L + h_R) / 2.0);
-
-	//Associated eigenvalues
-	double a1 = v_roe + c_mid;
-	double a2 = v_roe;
-	double a3 = v_roe - c_mid;
-
-	// Entropy-fix parameters
-	double d1 = min(c_mid, max(0.0, 2.0*(a1_R - a1_L)));
-	double d2 = min(c_mid, max(0.0, 2.0*(a2_R - a2_L)));
-	double d3 = min(c_mid, max(0.0, 2.0*(a3_R - a3_L)));
-
-	//Eigenvectors (these are vectors)
-	double e1[3] = { 1.0, u_roe, a1 };
-	double e2[3] = { 0, -c_mid, 0 };
-	double e3[3] = { 1.0, u_roe, a3 };
-
-	// Waves Strength
-	double alpha_1 = 0.5 * (h_R - h_L) + ((h_R*v_R - h_L*v_L) - v_roe*(h_R - h_L)) / (2.0*c_mid);
-	double alpha_2 = 0.5 * (h_R - h_L) - ((h_R*v_R - h_L*v_L) - v_roe*(h_R - h_L)) / (2.0*c_mid);
-	double alpha_3 = -((h_R * u_R - h_L * u_L) - u_roe * (h_R - h_L)) / c_mid;
-
-
-	//Physical Left and Right - FLUX EVALUATION -
-	double qx_tempL = h_L*u_L; // temporary qx and qy MS:25MAY2017
-	double qy_tempL = h_L*v_L;
-
-	double qx_tempR = h_R*u_R;
-	double qy_tempR = h_R*v_R;
-
-	double3 G_L = Flux_G(h_L, qx_tempL, qy_tempL); // for each h,qx,qy F_L.x F_L.y and F_L.z
-	double3 G_R = Flux_G(h_R, qx_tempR, qy_tempR); // for each h,qx,qy F_R.x F_R.y and F_R.z
-
-	// Entropy-fix for eigenvalues
-	double f1 = psi_Roe(a1, d1);
-	double f2 = psi_Roe(a2, d2);
-	double f3 = psi_Roe(a3, d3);
-
-	// Average Roe Riemann flux
-	G_face.x = 0.5 * (G_L.x + G_R.x - alpha_1*f1*e1[0] - alpha_2*f2*e2[0] - alpha_3*f3*e3[0]);
-	G_face.y = 0.5 * (G_L.y + G_R.y - alpha_1*f1*e1[1] - alpha_2*f2*e2[1] - alpha_3*f3*e3[1]);
-	G_face.z = 0.5 * (G_L.z + G_R.z - alpha_1*f1*e1[2] - alpha_2*f2*e2[2] - alpha_3*f3*e3[2]);
-
-	return G_face;
-
+	//	
 }
 
 
 
 __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* agent, xmachine_message_SpaceOperatorMessage_list* SpaceOperatorMessage_messages)
 {
-	double3 FPlus = make_double3(0.0, 0.0, 0.0);
+	double3 FPlus  = make_double3(0.0, 0.0, 0.0);
 	double3 FMinus = make_double3(0.0, 0.0, 0.0);
-	double3 GPlus = make_double3(0.0, 0.0, 0.0);
+	double3 GPlus  = make_double3(0.0, 0.0, 0.0);
 	double3 GMinus = make_double3(0.0, 0.0, 0.0);
 	
 	// Wetting/Drying function variables 
@@ -845,7 +922,7 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 				WD(h_L, h_R, et_L, et_R, q_L.x, q_R.x, q_L.y, q_R.y, EAST, z0_F, h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
 
 				// Flux across the cell(ic):
-				FPlus = Roe_x(h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
+				FPlus = hll_x(h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
 
 				//** INNER/LOCAL flow data restrictions at the eastern face**!
 				z0f_E = z0_F;
@@ -880,7 +957,7 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 				WD(h_L, h_R, et_L, et_R, q_L.x, q_R.x, q_L.y, q_R.y, WEST, z0_F, h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
 
 				// Flux across the cell(ic):
-				FMinus = Roe_x(h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
+				FMinus = hll_x(h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
 
 				//** INNER/LOCAL flow data restrictions at the eastern face**!
 				z0f_W = z0_F;
@@ -917,7 +994,7 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 				WD(h_L, h_R, et_L, et_R, q_L.x, q_R.x, q_L.y, q_R.y, NORTH, z0_F, h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
 
 				// Flux across the cell(ic):
-				GPlus = Roe_y(h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
+				GPlus = hll_y(h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
 
 				//printf( "GPlus: %f, %f, %f\r\n", GPlus.x, GPlus.y, GPlus.z );
 
@@ -956,7 +1033,7 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 				WD(h_L, h_R, et_L, et_R, q_L.x, q_R.x, q_L.y, q_R.y, SOUTH, z0_F, h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
 
 				// Flux across the cell(ic):
-				GMinus = Roe_y(h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
+				GMinus = hll_y(h_F_L, h_F_R, qx_F_L, qx_F_R, qy_F_L, qy_F_R);
 
 				//** INNER/LOCAL flow data restrictions at the eastern face**!
 				z0f_S = z0_F;
@@ -999,7 +1076,7 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 	); */
 
 	// Updating the variables as the time ellapse // This is to test MS06Sep2017
-	agent->h = agent->h + agent->timeStep * L0_loc.x;
+	agent->h  = agent->h  + agent->timeStep * L0_loc.x;
 	agent->qx = agent->qx + agent->timeStep * L0_loc.y;
 	agent->qy = agent->qy + agent->timeStep * L0_loc.z;
 
@@ -1048,24 +1125,24 @@ inline __device__ double3 Sb(double hx_mod, double hy_mod, double zprime_x, doub
 
 }
 
-inline __device__ double psi_Roe(double a, double d)
-{
-	double f;
+//inline __device__ double psi_Roe(double a, double d)
+//{
+//	double f;
+//
+//	if (fabs(a) >= d)
+//	{
+//		f = fabs(a);
+//	}
+//	else
+//	{
+//		f = (pow(a, 2)) / (2 * d) + d / 2;
+//	}
+//
+//	return f;
+//}
 
-	if (fabs(a) >= d)
-	{
-		f = fabs(a);
-	}
-	else
-	{
-		f = (pow(a, 2)) / (2 * d) + d / 2;
-	}
 
-	return f;
-}
-
-
-inline __device__ double3 Flux_F(double hh, double qx, double qy)
+inline __device__ double3 F_SWE(double hh, double qx, double qy)
 {
 	//This function evaluates the physical flux in the x-direction
 
@@ -1080,7 +1157,7 @@ inline __device__ double3 Flux_F(double hh, double qx, double qy)
 	else
 	{
 		FF.x = qx;
-		FF.y = (pow(qx, 2) / hh) + ((GRAVITY / 2.0)*pow(hh, 2));
+		FF.y = (pow(qx, 2) / hh) + ((GRAVITY / 2.0)*pow(hh, 2.0));
 		FF.z = qx * qy / hh;
 	}
 
@@ -1089,7 +1166,7 @@ inline __device__ double3 Flux_F(double hh, double qx, double qy)
 }
 
 
-inline __device__ double3 Flux_G(double hh, double qx, double qy)
+inline __device__ double3 G_SWE(double hh, double qx, double qy)
 {
 	//This function evaluates the physical flux in the y-direction
 
@@ -1106,7 +1183,7 @@ inline __device__ double3 Flux_G(double hh, double qx, double qy)
 	{
 		GG.x = qy;
 		GG.y = qx * qy / hh;
-		GG.z = (pow(qy, 2) / hh) + ((GRAVITY / 2.0)*pow(hh, 2));
+		GG.z = (pow(qy, 2) / hh) + ((GRAVITY / 2.0)*pow(hh, 2.0));
 	}
 
 	return GG;
