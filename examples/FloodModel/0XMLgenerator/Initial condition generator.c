@@ -109,8 +109,10 @@ int main()
 	                fprintf(fp, "\t<name>FloodCell</name>\n");
 	                
 	                fprintf(fp, "\t<inDomain>%d</inDomain>\n", inDomain);
-                    fprintf(fp, "\t<x>%.4f</x>\n", x[i]);
-                    fprintf(fp, "\t<y>%.4f</y>\n", y[j]);
+//                    fprintf(fp, "\t<x>%.4f</x>\n", x[i]);
+//                    fprintf(fp, "\t<y>%.4f</y>\n", y[j]);
+                    fprintf(fp, "\t<x>%d</x>\n", i);
+                    fprintf(fp, "\t<y>%d</y>\n", j);
                     fprintf(fp, "\t<z0>%.4f</z0>\n",z0[i][j]);
                     fprintf(fp, "\t<h>%.4f</h>\n",h[i][j]);
                     fprintf(fp, "\t<qx>%.4f</qx>\n",qx[i][j]);
