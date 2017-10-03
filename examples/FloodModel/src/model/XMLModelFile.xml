@@ -30,12 +30,12 @@
                     <name>inDomain</name>
                 </gpu:variable>
                 <gpu:variable>
-                    <type>float</type>
-                    <!-- the type 'int' changed to 'float' MS01Sep2017-->
+                    <type>int</type>
+                    <!-- the type 'int' changed to 'int' MS01Sep2017-->
                     <name>x</name>
                 </gpu:variable>
                 <gpu:variable>
-                    <type>float</type>
+                    <type>int</type>
                     <name>y</name>
                 </gpu:variable>
                 <gpu:variable>
@@ -135,31 +135,6 @@
             </memory>
             <functions>
                 <gpu:function>
-                    <name>PrepareSpaceOperator</name>
-                    <currentState>Default</currentState>
-                    <nextState>Default</nextState>
-                    <outputs>
-                        <gpu:output>
-                            <messageName>SpaceOperatorMessage</messageName>
-                            <gpu:type>single_message</gpu:type>
-                        </gpu:output>
-                    </outputs>
-                    <gpu:reallocate>false</gpu:reallocate>
-                    <gpu:RNG>false</gpu:RNG>
-                </gpu:function>
-                <gpu:function>
-                    <name>ProcessSpaceOperatorMessage</name>
-                    <currentState>Default</currentState>
-                    <nextState>Default</nextState>
-                    <inputs>
-                        <gpu:input>
-                            <messageName>SpaceOperatorMessage</messageName>
-                        </gpu:input>
-                    </inputs>
-                    <gpu:reallocate>false</gpu:reallocate>
-                    <gpu:RNG>false</gpu:RNG>
-                </gpu:function>
-                <gpu:function>
                     <name>PrepareWetDry</name>
                     <currentState>Default</currentState>
                     <nextState>Default</nextState>
@@ -209,6 +184,31 @@
                     <gpu:reallocate>false</gpu:reallocate>
                     <gpu:RNG>false</gpu:RNG>
                 </gpu:function>
+              <gpu:function>
+                <name>PrepareSpaceOperator</name>
+                <currentState>Default</currentState>
+                <nextState>Default</nextState>
+                <outputs>
+                  <gpu:output>
+                    <messageName>SpaceOperatorMessage</messageName>
+                    <gpu:type>single_message</gpu:type>
+                  </gpu:output>
+                </outputs>
+                <gpu:reallocate>false</gpu:reallocate>
+                <gpu:RNG>false</gpu:RNG>
+              </gpu:function>
+              <gpu:function>
+                <name>ProcessSpaceOperatorMessage</name>
+                <currentState>Default</currentState>
+                <nextState>Default</nextState>
+                <inputs>
+                  <gpu:input>
+                    <messageName>SpaceOperatorMessage</messageName>
+                  </gpu:input>
+                </inputs>
+                <gpu:reallocate>false</gpu:reallocate>
+                <gpu:RNG>false</gpu:RNG>
+              </gpu:function>
             </functions>
             <states>
                 <gpu:state>
@@ -220,7 +220,72 @@
             <gpu:bufferSize>4096</gpu:bufferSize>
         </gpu:xagent>
     </xagents>
+  
     <messages>
+      <gpu:message>
+        <name>WetDryMessage</name>
+        <variables>
+          <gpu:variable>
+            <type>int</type>
+            <name>inDomain</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>int</type>
+            <name>x</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>int</type>
+            <name>y</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>double</type>
+            <name>min_hloc</name>
+          </gpu:variable>
+        </variables>
+        <gpu:partitioningDiscrete>
+          <gpu:radius>1</gpu:radius>
+        </gpu:partitioningDiscrete>
+        <gpu:bufferSize>4096</gpu:bufferSize>
+      </gpu:message>
+
+      <gpu:message>
+        <name>LFVMessage</name>
+        <variables>
+          <gpu:variable>
+            <type>int</type>
+            <name>inDomain</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>int</type>
+            <name>x</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>int</type>
+            <name>y</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>double</type>
+            <name>z0</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>double</type>
+            <name>h</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>double</type>
+            <name>qx</name>
+          </gpu:variable>
+          <gpu:variable>
+            <type>double</type>
+            <name>qy</name>
+          </gpu:variable>
+        </variables>
+        <gpu:partitioningDiscrete>
+          <gpu:radius>1</gpu:radius>
+        </gpu:partitioningDiscrete>
+        <gpu:bufferSize>4096</gpu:bufferSize>
+      </gpu:message>
+      
         <gpu:message>
             <name>SpaceOperatorMessage</name>
             <variables>
@@ -229,11 +294,11 @@
                     <name>inDomain</name>
                 </gpu:variable>
                 <gpu:variable>
-                    <type>float</type>
+                    <type>int</type>
                     <name>x</name>
                 </gpu:variable>
                 <gpu:variable>
-                    <type>float</type>
+                    <type>int</type>
                     <name>y</name>
                 </gpu:variable>
                 <gpu:variable>
@@ -248,7 +313,6 @@
                 <gpu:variable>
                     <type>double</type>
                     <name>qFace_X_E</name>
-                    <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
                 </gpu:variable>
                 <gpu:variable>
                     <type>double</type>
@@ -283,7 +347,6 @@
                 <gpu:variable>
                     <type>double</type>
                     <name>qFace_X_N</name>
-                    <!-- Different from those in Agent memory "MS01Sep2017" This is to apply boundary conditions (not sure yet)-->
                 </gpu:variable>
                 <gpu:variable>
                     <type>double</type>
@@ -312,69 +375,8 @@
             </gpu:partitioningDiscrete>
             <gpu:bufferSize>4096</gpu:bufferSize>
         </gpu:message>
-        <gpu:message>
-            <name>WetDryMessage</name>
-            <variables>
-                <gpu:variable>
-                    <type>int</type>
-                    <name>inDomain</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>float</type>
-                    <name>x</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>float</type>
-                    <name>y</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>double</type>
-                    <name>min_hloc</name>
-                    <!--This is different from that of the agent memory _ Messaging sake ("MS01Sep2017") - can be revised later -->
-                </gpu:variable>
-            </variables>
-            <gpu:partitioningDiscrete>
-                <gpu:radius>1</gpu:radius>
-            </gpu:partitioningDiscrete>
-            <gpu:bufferSize>4096</gpu:bufferSize>
-        </gpu:message>
-        <gpu:message>
-            <name>LFVMessage</name>
-            <variables>
-                <gpu:variable>
-                    <type>int</type>
-                    <name>inDomain</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>float</type>
-                    <name>x</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>float</type>
-                    <name>y</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>double</type>
-                    <name>z0</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>double</type>
-                    <name>h</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>double</type>
-                    <name>qx</name>
-                </gpu:variable>
-                <gpu:variable>
-                    <type>double</type>
-                    <name>qy</name>
-                </gpu:variable>
-            </variables>
-            <gpu:partitioningDiscrete>
-                <gpu:radius>1</gpu:radius>
-            </gpu:partitioningDiscrete>
-            <gpu:bufferSize>4096</gpu:bufferSize>
-        </gpu:message>
+        
+       
     </messages>
     <layers>
         <layer>

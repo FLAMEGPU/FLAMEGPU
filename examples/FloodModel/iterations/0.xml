@@ -1,7 +1,6 @@
 <states>
 <itno>0</itno>
  <environment>
-  <TIMESTEP>0.500000</TIMESTEP>
   <DXL>1.171875</DXL>
   <DYL>0.468750</DYL>
  </environment>

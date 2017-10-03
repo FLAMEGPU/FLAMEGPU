@@ -26,3 +26,8 @@ Done by the date:
 - 0.xml - the correct i and j is assigned to the variables (all in accordance with the same 'C' project).
 - Roe solver is replaced by hll and SWE flux is modified to the correct varibales.
 - Still struggling with outputing the results.
+
+----------------- MS03Oct2017 ------------------ still under debugging 
+- Corrections made in LFVs
+- Reimann Solver is refined with correct values 
+- Times step is introduced as global variable (instead of agent environment variable)

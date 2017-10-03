@@ -201,10 +201,10 @@ float maxi(float num1, float num2) {
        float h;
        
        if ( x_int <= 16 ) {
-            h = etta - z0_int;
+            h = maxi(0.0,etta - z0_int);
             }
             else{
-                 h = 0;
+                 h = 0.0 *maxi(0.0,etta - z0_int);
                  }
                  
           return h;
