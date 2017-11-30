@@ -206,7 +206,7 @@ CUSTOM_VISUALISATION_OBJECTS := $(CUSTOM_VISUALISATION_C_OBJECTS) $(CUSTOM_VISUA
 VISUALISATION_DEPENDANCIES := $(BUILD_DIR)/io.cu$(OBJ_EXT) $(BUILD_DIR)/simulation.cu$(OBJ_EXT) $(BUILD_DIR)/main_visualisation.cu$(OBJ_EXT) $(CUSTOM_VISUALISATION_OBJECTS)
 endif
 
-XLST_FUNCTIONS_GEN_C := $(SRC_DYNAMIC)/functions.gen.c
+XLST_FUNCTIONS_C := $(SRC_DYNAMIC)/functions.c
 
 # Verify that atleast one SM value has been specified.
 ifeq ($(SMS),)
@@ -227,7 +227,7 @@ endif
 ################################################################################
 
 # Mark several targets as PHONY, i.e. they do not create a file of the target name
-.PHONY: help all validate xslt visualisation console clean clobber makedirs functions.gen.c
+.PHONY: help all validate xslt visualisation console clean clobber makedirs functions.c
 
 # When make all is called, the model is validated, all xslt is generated and then both console and visualisation targets are built
 ifeq ($(HAS_VISUALISATION), 1)
@@ -248,7 +248,7 @@ endif
 xslt: validate $(XSLT_OUTPUT_FILES)
 
 # Create functions.c prototypes as a differently named file, to avoid overwriting user code.
-functions.gen.c: validate $(XLST_FUNCTIONS_GEN_C)
+functions.c: validate $(XLST_FUNCTIONS_C)
 
 # Create the console version of this application, inlcuding directory creation and validation of the XML Model
 console: makedirs validate $(TARGET_CONSOLE)
@@ -280,8 +280,8 @@ else
 	$(XSLTPROC) $< $(XML_MODEL_FILE) > $@
 endif
 
-# Rule to create functsion.gen.c file in the dynamic folder.
-$(SRC_DYNAMIC)/%.gen.c: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
+# Rule to create functsion.c file in the dynamic folder.
+$(SRC_DYNAMIC)/%.c: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
 endif
@@ -336,7 +336,7 @@ clean:
 
 # Clobber all temporary files, including dynamic files and the target executable. `|| true` is used to support the case where dirs do not exist.
 clobber: clean
-	find $(SRC_DYNAMIC)/ -name '*.gen.c' -delete || true
+	find $(SRC_DYNAMIC)/ -name '*.c' -delete || true
 	find $(SRC_DYNAMIC)/ -name '*.cu' -delete || true
 	find $(SRC_DYNAMIC)/ -name '*.h' -delete || true
 	find $(BIN_DIR)/ -name '$(EXAMPLE)$(BIN_EXT)' -delete || true
@@ -357,27 +357,28 @@ help:
 	@echo ""
 	@echo " Targets:"
 	@echo ""
-	@echo "   help            Shows this help documentation"
-	@echo "   all             Validates XML, generates dynamic files"
-	@echo "                     & builds console and visualisation modes"
-	@echo "   validate        Validates XMLModelFile using 'xmllint' (if installed)"
-	@echo "                     install via '"apt install libxml2-utils"'"
-	@echo "   xslt            Validates XML and generates dynamic files"
-	@echo "                      depends on 'xsltproc'"
-	@echo "   console         Builds console mode exectuable"
-	@echo "   visualistion    Builds visualisation mode executable, if it exists"
-	@echo "   clean           Deletes generated object files"
-	@echo "   clobber         Deletes all generated files including executables"
-	@echo "   functions.gen.c Generates functions.c as functions.gen.c via xslt"
+	@echo "   help          Shows this help documentation"
+	@echo "   all           Validates XML, generates dynamic files"
+	@echo "                   & builds console and visualisation modes"
+	@echo "   validate      Validates XMLModelFile using 'xmllint' (if installed)"
+	@echo "                   install via '"apt install libxml2-utils"'"
+	@echo "   xslt          Validates XML and generates dynamic files"
+	@echo "                    depends on 'xsltproc'"
+	@echo "   console       Builds console mode exectuable"
+	@echo "   visualistion  Builds visualisation mode executable, if it exists"
+	@echo "   clean         Deletes generated object files"
+	@echo "   clobber       Deletes all generated files including executables"
+	@echo "   functions.c   Generates functions.c in the dynamic folder using xslt"
+	@echo "                   This file is for reference only. Not used in build."
 	@echo ""
 	@echo " Arguments:"
 	@echo ""
-	@echo "   debug=<arg>  Builds target in 'Release' or 'Debug' mode"
-	@echo "                  0 : Release (Default)"
-	@echo "                  1 : Debug"
-	@echo "                  I.e. 'make console debug=1'"
-	@echo "   SMS=<arg>    Builds target for the specified CUDA architectures"
-	@echo "                  I.e. 'make console SMS=60 61'"
-	@echo "                  Defaults to: '$(SMS)'"
-	@echo "                  'make clean' is required prior to using new values"
+	@echo "   debug=<arg>   Builds target in 'Release' or 'Debug' mode"
+	@echo "                   0 : Release (Default)"
+	@echo "                   1 : Debug"
+	@echo "                   I.e. 'make console debug=1'"
+	@echo "   SMS=<arg>     Builds target for the specified CUDA architectures"
+	@echo "                   I.e. 'make console SMS=60 61'"
+	@echo "                   Defaults to: '$(SMS)'"
+	@echo "                   'make clean' is required prior to using new values"
 	@echo "************************************************************************"
