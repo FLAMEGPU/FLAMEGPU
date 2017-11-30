@@ -8,7 +8,8 @@ examples/**/x64
 *.obj
 **/bin/**
 **/iterations/**
-**/dynamic/**
+**/dynamic/*.cu
+**/dynamic/*.h
 *.zip
 *.png
 *.dat
