@@ -29,11 +29,13 @@ help:
 	@echo ""
 	@echo "  Targets:"  
 	@echo ""  
-	@echo "    help         -> Shows this help documentation" 
-	@echo "    all          -> For each example, validates XML, generates dynamic files" 
-	@echo "                      & builds console and visualisation modes"  
-	@echo "    clean        -> Deletes generated object files"
-	@echo "    clobber      -> Deletes all generated files including executables"
+	@echo "    help          -> Shows this help documentation" 
+	@echo "    all           -> For each example, validates XML, generates dynamic files" 
+	@echo "                     & builds console and visualisation modes"  
+	@echo "    console       -> Build the console executable for each example" 
+	@echo "    visualisation -> Build the visualisation executable for each example" 
+	@echo "    clean         -> Deletes generated object files"
+	@echo "    clobber       -> Deletes all generated files including executables"
 	@echo ""
 	@echo "  Arguments":
 	@echo ""
@@ -58,10 +60,16 @@ TARGET_ARCH ?= $(shell uname -m)
 # Project folders that contain FLAMEGPU examples
 PROJECTS ?= $(shell find ./ -maxdepth 2 -mindepth 2  -name "Makefile")
 
-.PHONY: help all tidy clean clobber %.ph_all %.ph_clean %.ph_clobber
+.PHONY: help all tidy clean clobber %.ph_all %.ph_console %.ph_visualisation %.ph_clean %.ph_clobber
 
 %.ph_all :
 	+@$(MAKE) -C $(dir $*) $(MAKECMDGOALS)
+
+%.ph_console : 
+	+@$(MAKE) -C $(dir $*) console $(USE_DEVICE)
+
+%.ph_visualisation :
+	+@$(MAKE) -C $(dir $*) visualisation $(USE_DEVICE)
 
 %.ph_clean : 
 	+@$(MAKE) -C $(dir $*) clean $(USE_DEVICE)
@@ -72,6 +80,11 @@ PROJECTS ?= $(shell find ./ -maxdepth 2 -mindepth 2  -name "Makefile")
 all:  $(addsuffix .ph_all,$(PROJECTS))
 	@echo "Finished building FLAMEGPU examples"
 
+console: $(addsuffix .ph_console,$(PROJECTS))
+	@echo "Finished building FLAMEGPU console examples"
+
+visualisation: $(addsuffix .ph_visualisation,$(PROJECTS))
+	@echo "Finished building FLAMEGPU visualisation examples"
 
 tidy:
 	@find * | egrep "#" | xargs rm -f
