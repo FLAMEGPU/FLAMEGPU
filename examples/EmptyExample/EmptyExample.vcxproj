@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7CE78BF1-9E76-450A-B3C2-892470AD791B}</ProjectGuid>
-    <RootNamespace>Template_</RootNamespace>
-    <ProjectName>Template</ProjectName>
+    <RootNamespace>EmptyExample_</RootNamespace>
+    <ProjectName>EmptyExample</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'" Label="Configuration">
