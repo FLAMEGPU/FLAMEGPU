@@ -35,6 +35,8 @@
 #include "header.h"
 #include "visualisation.h"
 
+#define FOVY 45.0
+
 // bo variables
 GLuint sphereVerts;
 GLuint sphereNormals;
@@ -50,6 +52,13 @@ int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
 float rotate_x = 0.0, rotate_y = 0.0;
 float translate_z = -VIEW_DISTANCE;
+
+// keyboard controls
+#if defined(PAUSE_ON_START)
+bool paused = true;
+#else
+bool paused = false;
+#endif
 
 // vertex Shader
 GLuint vertexShader;
@@ -79,8 +88,10 @@ void deleteVBO( GLuint* vbo);
 void createTBO( GLuint* tbo, GLuint* tex, GLuint size);
 void deleteTBO( GLuint* tbo);
 void setVertexBufferData();
+void reshape(int width, int height);
 void display();
 void keyboard( unsigned char key, int x, int y);
+void special(int key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 void runCuda();
@@ -222,8 +233,10 @@ void initVisualisation()
 	initShader();
 
 	// register callbacks
+	glutReshapeFunc( reshape);
 	glutDisplayFunc( display);
 	glutKeyboardFunc( keyboard);
+	glutSpecialFunc( special);
 	glutMouseFunc( mouse);
 	glutMotionFunc( motion);
     
@@ -254,6 +267,7 @@ void runVisualisation(){
 ////////////////////////////////////////////////////////////////////////////////
 void runCuda()
 {
+	if(!paused){
 #ifdef SIMULATION_DELAY
 	delay_count++;
 	if (delay_count == SIMULATION_DELAY){
@@ -263,6 +277,7 @@ void runCuda()
 #else
 	singleIteration();
 #endif
+	}
 
 	//kernals sizes
 	int threads_per_tile = 256;
@@ -322,14 +337,7 @@ int initGL()
 	glClearColor( 1.0, 1.0, 1.0, 1.0);
 	glEnable( GL_DEPTH_TEST);
 
-	// viewport
-	glViewport( 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-	// projection
-	glMatrixMode( GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0, (GLfloat)WINDOW_WIDTH / (GLfloat) WINDOW_HEIGHT, NEAR_CLIP, FAR_CLIP);
-
+	reshape(WINDOW_WIDTH, WINDOW_HEIGHT);
 	checkGLError();
 
 	//lighting
@@ -522,6 +530,25 @@ void setVertexBufferData()
 }
 
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! Reshape callback
+////////////////////////////////////////////////////////////////////////////////
+
+void reshape(int width, int height){
+	// viewport
+	glViewport( 0, 0, width, height);
+
+	// projection
+	glMatrixMode( GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(FOVY, (GLfloat)width / (GLfloat) height, NEAR_CLIP, FAR_CLIP);
+
+	checkGLError();
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //! Display callback
 ////////////////////////////////////////////////////////////////////////////////
@@ -608,17 +635,36 @@ void display()
 void keyboard( unsigned char key, int /*x*/, int /*y*/)
 {
 	switch( key) {
-	case( 27) :
+	// Space == 32
+    case(32):
+        paused = !paused;
+        break;
+    // Esc == 27
+	case(27) :
 		deleteVBO( &amp;sphereVerts);
 		deleteVBO( &amp;sphereNormals);
 		<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
 		deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
 		</xsl:for-each>
 		cudaEventDestroy(start);
-    cudaEventDestroy(stop);
+		cudaEventDestroy(stop);
 		exit(EXIT_SUCCESS);
 	}
 }
+
+
+
+
+void special(int key, int x, int y){
+    switch (key)
+    {
+    case(GLUT_KEY_RIGHT) :
+        singleIteration();
+        fflush(stdout);
+        break;
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //! Mouse event handlers
