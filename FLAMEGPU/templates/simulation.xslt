@@ -594,13 +594,11 @@ void set_<xsl:value-of select="xmml:name"/>(<xsl:value-of select="xmml:type"/>* 
     memcpy(&amp;h_env_<xsl:value-of select="xmml:name"/>, h_<xsl:value-of select="xmml:name"/>,sizeof(<xsl:value-of select="xmml:type"/>)<xsl:if test="xmml:arrayLength">*<xsl:value-of select="xmml:arrayLength"/></xsl:if>);
 }
 
-<!-- Getter disabled for array environmental constants.-->
-<xsl:if test="not(xmml:arrayLength)">
 //constant getter
 const <xsl:value-of select="xmml:type"/>* get_<xsl:value-of select="xmml:name"/>(){
-    return &amp;h_env_<xsl:value-of select="xmml:name"/>;
+    return <xsl:if test="not(xmml:arrayLength)">&amp;</xsl:if>h_env_<xsl:value-of select="xmml:name"/>;
 }
-</xsl:if>
+
 </xsl:for-each>
 <!-- -->
 
