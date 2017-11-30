@@ -28,7 +28,10 @@
 #include &lt;cmath&gt;
 #include &lt;limits.h&gt;
 
+// Only check directory under linux. it is not an issue on windows. 
+#if !defined(_MSC_VER)
 #include &lt;sys/stat.h&gt;
+#endif
 
 // include header
 #include "header.h"
@@ -179,18 +182,20 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     </xsl:otherwise></xsl:choose></xsl:for-each>
 	
 	/* Open config file to read-only */
-	// Use Stat to check if the inputpath is a directory or not.	
-	struct stat s = {0};
-	if(!stat(inputpath, &amp;s)){
-		bool inputpathIsDirectory = S_ISDIR(s.st_mode);
-		if(inputpathIsDirectory){
-			printf("Error: input path `%s` is a directory\n", inputpath);
-			exit(EXIT_FAILURE);
-		}
-	} else {
-		printf("Error checking input path. Aborting.\n");
-		exit(EXIT_FAILURE);
-	}
+	// Under linux, use Stat to check if the inputpath is a directory or not.
+    #if !defined(_MSC_VER)
+    struct stat st = {0};
+    if(!stat(inputpath, &amp;st)){
+        bool inputpathIsDirectory = S_ISDIR(st.st_mode);
+        if(inputpathIsDirectory){
+            printf("Error: input path `%s` is a directory\n", inputpath);
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        printf("Error checking input path. Aborting.\n");
+        exit(EXIT_FAILURE);
+    }
+    #endif
 	// Attempt to open the non-directory input path
 	file = fopen(inputpath, "r");
 	// If the input path does not exist, exit failure.
