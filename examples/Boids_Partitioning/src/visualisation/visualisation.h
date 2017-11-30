@@ -1,7 +1,8 @@
 #ifndef __VISUALISATION_H
 #define __VISUALISATION_H
 
-#define PAUSE_ON_START
+//#define PAUSE_ON_START
+
 // constants
 const unsigned int WINDOW_WIDTH = 512;
 const unsigned int WINDOW_HEIGHT = 512;
