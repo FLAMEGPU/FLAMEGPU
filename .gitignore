@@ -10,6 +10,7 @@ examples/**/x64
 **/iterations/**
 **/dynamic/*.cu
 **/dynamic/*.h
+**/dynamic/*.c
 *.zip
 *.png
 *.dat
