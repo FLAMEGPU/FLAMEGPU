@@ -127,4 +127,4 @@ static const char navmap_vshader_source[] =
     "}																				\n"
 };
 
-#endif _NAVMAP_POPULATION
+#endif //_NAVMAP_POPULATION

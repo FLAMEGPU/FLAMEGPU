@@ -45,4 +45,4 @@ void toggleMenuDisplayOnOff();
 void setMenuDisplayOnOff(int state);
 void updateAllEmmsionRatesTexts(char* text);
 
-#endif __MENU_DISPLAY
+#endif //__MENU_DISPLAY
