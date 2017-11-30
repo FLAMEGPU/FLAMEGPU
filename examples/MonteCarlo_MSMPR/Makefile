@@ -1,11 +1,11 @@
 ################################################################################
 #
-# FLAME GPU Script for CUDA 7.5, CUDA 8.0
+# FLAME GPU Makefile for CUDA 7.5 and above
 #
 # Copyright 2017 University of Sheffield.  All rights reserved.
 #
-# Authors : Dr Mozhgan Kabiri Chimeh, Dr Paul Richmond
-# Contact : {m.kabiri-chimeh,p.richmond}@sheffield.ac.uk
+# Authors : Dr Mozhgan Kabiri Chimeh, Peter Heywood, Dr Paul Richmond
+# Contact : {m.kabiri-chimeh,p.heywood,p.richmond}@sheffield.ac.uk
 #
 # NOTICE TO USER:
 #
@@ -21,197 +21,28 @@
 ################################################################################
 # USAGE : make help
 ################################################################################
-#
-# Makefile project only supported on Linux Platforms
-#
-################################################################################
-# Folders containing FLAMEGPU example files and templates
-BIN_DIR := ../../bin/linux-x64/
- 
-IDIR := ../../include/
-# For now this will only work for x64 linux. 32x is uninportant as deprecated in CUDA 8.0 Other systems are currently not possible to test.
-LDIR := ../../lib/x86_64-linux-gnu/
-TEMPLATE := ../../FLAMEGPU/templates/
-XSD_SCHEMA := ../../FLAMEGPU/schemas/
 
-INPUT_DATA:=iterations/0.xml
+# The name of the example (i.e. the name of the parent directory.)
+EXAMPLE := MonteCarlo_MSMPR
 
-SRC_ := src/model/
-SRC_VIZ := src/visualisation/
-SRC_CUDA := src/dynamic/
+# Flag indicating if a visualistion target should exist
+HAS_VISUALISATION := 0
 
-OPENGL_FLAGS := -lglut -lGLEW -lGLU -lGL
-FLAMELIB := -I $(IDIR) -I $(SRC_) -I $(SRC_CUDA) -I $(SRC_VIZ) -I $(IDIR)GL/
+# Flag indicating if a custom visulisation is used. 0 = no, 1 = yes.
+CUSTOM_VISUALISATION := 0
 
-################################################################################
-#Generating Dynamic Code from FLAMEGPU Templates
+# Relative path to the root FLAME GPU directory. Must end with a trainling slash.
+FLAMEGPU_ROOT := ../../
 
-XML_MODEL:=$(SRC_)XMLModelFile.xml
+# Parent directory for generated executable files.
+EXAMPLE_BIN_DIR := $(FLAMEGPU_ROOT)bin
 
-all: XSLTPREP build
+# Directory for temprorary files
+EXAMPLE_BUILD_DIR := ./build
 
-XML_Validate:
-	xmllint --noout $(XML_MODEL) --schema $(XSD_SCHEMA)XMMLGPU.xsd 
+# Custom gencode arguments for this model (if any), otherwise the defaults for FALME GPU are used from common.mk
+# SMS ?= 30 35 37 50 60
 
-XSLTPREP: XML_Validate
-XSLTPREP:
-	xsltproc $(TEMPLATE)header.xslt  $(XML_MODEL)> $(SRC_CUDA)header.h 
-	xsltproc $(TEMPLATE)FLAMEGPU_kernals.xslt $(XML_MODEL) > $(SRC_CUDA)FLAMEGPU_kernals.cu
-	xsltproc $(TEMPLATE)io.xslt $(XML_MODEL) > $(SRC_CUDA)io.cu 
-	xsltproc $(TEMPLATE)simulation.xslt $(XML_MODEL) > $(SRC_CUDA)simulation.cu 
-	xsltproc $(TEMPLATE)main.xslt $(XML_MODEL) > $(SRC_CUDA)main.cu
-
-################################################################################
-#Generating initial states
-
-input_Gen: 
-	cd iterations && chmod +x generate_charge.sh 
-	cd iterations && ./generate_charge.sh
-	
-################################################################################
-
-HOST_COMPILER ?= g++
-NVCC          := nvcc -ccbin $(HOST_COMPILER)
-
-# internal flags
-NVCCFLAGS   := -m64
-CCFLAGS     :=
-LDFLAGS     := -L$(LDIR)
-
-# Debug build flags
-ifeq ($(dbg),1)
-      NVCCFLAGS += -g -G
-      Mode_TYPE := Debug
-else
-      Mode_TYPE := Release
-endif
-
-ALL_CCFLAGS :=
-ALL_CCFLAGS += $(NVCCFLAGS)
-ALL_CCFLAGS += $(EXTRA_NVCCFLAGS)
-ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
-ALL_CCFLAGS += $(addprefix -Xcompiler ,$(EXTRA_CCFLAGS))
-
-ALL_LDFLAGS :=
-ALL_LDFLAGS += $(ALL_CCFLAGS)
-ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
-ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
-
-# Common includes and paths for CUDA
-INCLUDES  := -I../../common/inc
-
-################################################################################
-
-SAMPLE_ENABLED := 1
-
-# Gencode arguments
-SMS ?= 30 35 37 50 60
-
-ifeq ($(SMS),)
-$(info >>> WARNING - no SM architectures have been specified - waiving sample <<<)
-SAMPLE_ENABLED := 0
-endif
-
-ifeq ($(GENCODE_FLAGS),)
-# Generate SASS code for each SM architecture listed in $(SMS)
-$(foreach sm,$(SMS),$(eval GENCODE_FLAGS += -gencode arch=compute_$(sm),code=sm_$(sm)))
-
-# Generate PTX code from the highest SM architecture in $(SMS) to guarantee forward-compatibility
-HIGHEST_SM := $(lastword $(sort $(SMS)))
-ifneq ($(HIGHEST_SM),)
-GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM)
-endif
-endif
-
-ifeq ($(SAMPLE_ENABLED),0)
-EXEC ?= @echo "[@]"
-endif
-
-################################################################################
-
-# Target rules
-help:
-	@echo "************************************************************************"
-	@echo "*  Copyright 2017 University of Sheffield.  All rights reserved.       *"
-	@echo "************************************************************************"
-	@echo "make all -> validate &processes XSL model and generates all .cu files  *" 
-	@echo "                                                                       *"  
-	@echo "           ------------------------------------------------            *"
-	@echo "make XSLTPREP -> Validate and preprocesses the xml model               *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"
-	@echo "make XML_Validate -> To validate the XML file                          *"
-	@echo "run "sudo apt install libxml2-utils" to install xmllint                *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"
-	@echo "make build -> builds executables in either release or debug            *"
-	@echo "                   -Debug_Console                                      *"
-	@echo "                          OR                                           *"
-	@echo "                   -Release_Console                                    *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"
-	@echo "                                                                       *"
-	@echo "make Console_mode -> builds executables in console mode                *"
-	@echo "                                                                       *"
-	@echo "make < .. > dbg='arg' -> builds in Release/Debug only                  *"
-	@echo "                                'arg' -> 0 or 1 value                  *"
-	@echo "                                                                       *"
-	@echo "To run executables for console mode, run below command:                *"
-	@echo "make run_console iter='arg'                                            *"
-	@echo "           Note that without the 'arg', it only runs for 1 iteration   *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *" 
-	@echo "To run executables for charge generation, run below command:           *"
-	@echo "make input_Gen                                                         *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"                
-	@echo "Alternatively, run the bash script stored in bin/linux-x64.            *"
-	@echo "The iteration default value in console mode is 10. You can simple      *"
-	@echo "change it by entering a new value while running the ./*.sh file.       *"
-	@echo "                                                                       *"
-	@echo "           ------------------------------------------------            *"
-	@echo "Note: You can manualy change the location/name of the INPUT_DATA       *"
-	@echo "                                                                       *" 
-	@echo "************************************************************************"
- 
-build: Console_mode 
-
-Console_mode:  Montecarlo_MSMPR_console
-
-check.deps:
-ifeq ($(SAMPLE_ENABLED),0)
-	@echo "Sample will be waived due to the above missing dependencies"
-else
-	@echo "Sample is ready - all dependencies have been met"
-endif
-
-io.o: $(SRC_CUDA)io.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
-
-simulation.o: $(SRC_CUDA)simulation.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
-
-main.o: $(SRC_CUDA)main.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(DEBUG) $(GENCODE_FLAGS) $(FLAMELIB) -o $@ -c $<
-
-
-Montecarlo_MSMPR_console: BUILD_TYPE=$(Mode_TYPE)_Console
-Montecarlo_MSMPR_console: io.o simulation.o  main.o 
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
-	$(EXEC) mkdir -p $(BIN_DIR)$(BUILD_TYPE)
-	$(EXEC) mv $@ $(BIN_DIR)$(BUILD_TYPE)
-	@echo ./$(BUILD_TYPE)/Montecarlo_MSMPR_console ../../examples/Montecarlo_MSMPR/$(INPUT_DATA) '$$'{1:-1}> $(BIN_DIR)Montecarlo_MSMPR_console.sh
-	chmod +x $(BIN_DIR)Montecarlo_MSMPR_console.sh
-
-
-run_console: Montecarlo_MSMPR_console
-	cd $(BIN_DIR) && ./Montecarlo_MSMPR_console.sh $(iter)
-
-clean:
-	find . -name '*.o' -delete
-
-clobber: clean 
-	find . -name '*.cu' -delete
-	find . -name '*.png' -delete
-	rm -rf $(BIN_DIR)
-
+# Include the comman makefile from the tools directory.
+# If you wish to make a standalone project, you can simply replace this line with the contents of the common.mk file
+include $(FLAMEGPU_ROOT)tools/common.mk
