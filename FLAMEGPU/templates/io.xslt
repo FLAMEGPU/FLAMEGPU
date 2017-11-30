@@ -27,7 +27,8 @@
 #include &lt;string.h&gt;
 #include &lt;cmath&gt;
 #include &lt;limits.h&gt;
-	
+
+#include &lt;sys/stat.h&gt;
 
 // include header
 #include "header.h"
@@ -178,7 +179,22 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     </xsl:otherwise></xsl:choose></xsl:for-each>
 	
 	/* Open config file to read-only */
-	if((file = fopen(inputpath, "r"))==NULL)
+	// Use Stat to check if the inputpath is a directory or not.	
+	struct stat s = {0};
+	if(!stat(inputpath, &amp;s)){
+		bool inputpathIsDirectory = S_ISDIR(s.st_mode);
+		if(inputpathIsDirectory){
+			printf("Error: input path `%s` is a directory\n", inputpath);
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		printf("Error checking input path. Aborting.\n");
+		exit(EXIT_FAILURE);
+	}
+	// Attempt to open the non-directory input path
+	file = fopen(inputpath, "r");
+	// If the input path does not exist, exit failure.
+	if(file==nullptr)
 	{
 		printf("Error opening initial states\n");
 		exit(EXIT_FAILURE);
