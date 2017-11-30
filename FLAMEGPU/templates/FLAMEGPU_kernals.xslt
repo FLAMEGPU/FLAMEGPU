@@ -138,7 +138,7 @@ __inline__ __device__ double tex1DfetchDouble(texture&lt;int2, 1, cudaReadModeEl
  * @param relative_cell pointer to the relative cell position
  * @return boolean if there is a next cell. True unless relative_Cell value was 1,1,1
  */
-__device__ int next_cell3D(glm::ivec3* relative_cell)
+__device__ bool next_cell3D(glm::ivec3* relative_cell)
 {
 	if (relative_cell->x &lt; 1)
 	{
@@ -170,7 +170,7 @@ __device__ int next_cell3D(glm::ivec3* relative_cell)
  * @param relative_cell pointer to the relative cell position
  * @return boolean if there is a next cell. True unless relative_Cell value was 1,1
  */
-__device__ int next_cell2D(glm::ivec3* relative_cell)
+__device__ bool next_cell2D(glm::ivec3* relative_cell)
 {
 	if (relative_cell->x &lt; 1)
 	{
@@ -477,9 +477,9 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	//wrap size is the number of tiles required to load all messages
 	int wrap_size = (ceil((float)d_message_<xsl:value-of select="xmml:name"/>_count/ blockDim.x)* blockDim.x);
 
-	//if no messages then return false
+	//if no messages then return a null pointer (false)
 	if (wrap_size == 0)
-		return false;
+		return nullptr;
 
 	//global thread index
 	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
@@ -519,7 +519,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 
 	//Check if back to start position of first message
 	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
-		return false;
+		return nullptr;
 
 	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
 	i = i % blockDim.x;						 //mod i for shared memory index
@@ -618,7 +618,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 	//exit if at (range, range)
 	if (previous_relative.x == (range))
         if (previous_relative.y == (range))
-		    return false;
+		    return nullptr;
 
 	//calculate next message relative position
 	glm::ivec2 next_relative = previous_relative;
@@ -823,7 +823,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 	//exit if at (range, range)
 	if (previous_relative.x == range)
         if (previous_relative.y == range)
-		    return false;
+		    return nullptr;
 
 	//calculate next message relative position
 	glm::ivec2 next_relative = previous_relative;
@@ -1063,7 +1063,7 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(glm::ive
  * @param cell_index the current cell index in agent_grid_cell+relative_cell
  * @return true if a message has been loaded into sm false otherwise
  */
-__device__ int load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix, glm::ivec3 relative_cell, int cell_index_max, glm::ivec3 agent_grid_cell, int cell_index)
+__device__ bool load_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix, glm::ivec3 relative_cell, int cell_index_max, glm::ivec3 agent_grid_cell, int cell_index)
 {
 	extern __shared__ int sm_data [];
 	char* message_share = (char*)&amp;sm_data[0];
@@ -1144,7 +1144,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 
 	// If there are no messages, do not load any messages
 	if(d_message_<xsl:value-of select="xmml:name"/>_count == 0){
-		return false;
+		return nullptr;
 	}
 
 	glm::ivec3 relative_cell = glm::ivec3(-2, -1, -1);
@@ -1160,7 +1160,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	}
 	else
 	{
-		return false;
+		return nullptr;
 	}
 }
 
@@ -1174,7 +1174,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 	
 	// If there are no messages, do not load any messages
 	if(d_message_<xsl:value-of select="xmml:name"/>_count == 0){
-		return false;
+		return nullptr;
 	}
 	
 	if (load_next_<xsl:value-of select="xmml:name"/>_message(messages, partition_matrix, message->_relative_cell, message->_cell_index_max, message->_agent_grid_cell, message->_cell_index))
@@ -1184,7 +1184,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 		return ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
 	}
 	else
-		return false;
+		return nullptr;
 	
 }
 
