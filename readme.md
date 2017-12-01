@@ -181,7 +181,7 @@ The primary author is [Dr Paul Richmond](http://paulrichmond.shef.ac.uk/).
 ## Copyright and Software Licence
 
 FLAME GPU is copyright the University of Sheffield 2009 - 2017.
-The Library, examples and all source code are covered by the [LICENCE](LICENCE).
+The Library, examples and all source code are covered by the [LICENSE](LICENSE).
 
 
 ## Release Notes
