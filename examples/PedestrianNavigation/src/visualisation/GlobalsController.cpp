@@ -416,7 +416,7 @@ void toggleStateExit1()
 	exitState1 = !exitState1;
 	set_EXIT1_STATE(&exitState1);
 }
-float getStateExit1()
+int getStateExit1()
 {
 	return exitState1;
 }
@@ -434,7 +434,7 @@ void toggleStateExit2()
 	exitState2 = !exitState2;
 	set_EXIT2_STATE(&exitState2);
 }
-float getStateExit2()
+int getStateExit2()
 {
 	return exitState2;
 }
@@ -452,7 +452,7 @@ void toggleStateExit3()
 	exitState3 = !exitState3;
 	set_EXIT3_STATE(&exitState3);
 }
-float getStateExit3()
+int getStateExit3()
 {
 	return exitState3;
 }
@@ -470,7 +470,7 @@ void toggleStateExit4()
 	exitState4 = !exitState4;
 	set_EXIT4_STATE(&exitState4);
 }
-float getStateExit4()
+int getStateExit4()
 {
 	return exitState4;
 }
@@ -488,7 +488,7 @@ void toggleStateExit5()
 	exitState5 = !exitState5;
 	set_EXIT5_STATE(&exitState5);
 }
-float getStateExit5()
+int getStateExit5()
 {
 	return exitState5;
 }
@@ -506,7 +506,7 @@ void toggleStateExit6()
 	exitState6 = !exitState6;
 	set_EXIT6_STATE(&exitState6);
 }
-float getStateExit6()
+int getStateExit6()
 {
 	return exitState6;
 }
@@ -524,7 +524,7 @@ void toggleStateExit7()
 	exitState7 = !exitState7;
 	set_EXIT7_STATE(&exitState7);
 }
-float getStateExit7()
+int getStateExit7()
 {
 	return exitState7;
 }

@@ -130,25 +130,25 @@ void setProbabilityExit7Text(char* text);
 
 //exit states
 void toggleStateExit1();
-float getStateExit1();
+int getStateExit1();
 void setStateExit1Text(char* text);
 void toggleStateExit2();
-float getStateExit2();
+int getStateExit2();
 void setStateExit2Text(char* text);
 void toggleStateExit3();
-float getStateExit3();
+int getStateExit3();
 void setStateExit3Text(char* text);
 void toggleStateExit4();
-float getStateExit4();
+int getStateExit4();
 void setStateExit4Text(char* text);
 void toggleStateExit5();
-float getStateExit5();
+int getStateExit5();
 void setStateExit5Text(char* text);
 void toggleStateExit6();
-float getStateExit6();
+int getStateExit6();
 void setStateExit6Text(char* text);
 void toggleStateExit7();
-float getStateExit7();
+int getStateExit7();
 void setStateExit7Text(char* text);
 
 //time
