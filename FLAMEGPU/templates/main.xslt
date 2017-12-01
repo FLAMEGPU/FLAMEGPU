@@ -32,8 +32,8 @@
 char inputfile[100];          /**&lt; Input path char buffer*/
 char outputpath[1000];         /**&lt; Output path char buffer*/
 
+// Define the default value indicating if XML output should be produced or not.
 #define OUTPUT_TO_XML 1
-
 
 /** checkUsage
  * Function to check the correct number of arguments
@@ -54,7 +54,7 @@ int checkUsage( int argc, char** argv){
 	printf("FLAMEGPU Console mode\n");
 	if(argc &lt; 3)
 	{
-		printf("Usage: main [XML model data] [Iterations] [Optional CUDA device ID]\n");
+		printf("Usage: main [XML model data] [Iterations] [Optional CUDA device ID] [Optional XML Output Override]\n");
 		return false;
 	}
 #endif
@@ -92,6 +92,26 @@ void setFilePaths(char* input){
 }
 
 
+bool getOutputXML(int argc, char**argv){
+	// Initialise to #defined default
+	
+
+#ifdef VISUALISATION
+	// If visualisation mode is set, we do not output.
+	return false;
+#else
+	// If console mode is set and we have the right number of arguments, use the relevant index.
+	if (argc &gt;= 5){
+		// Return the value from the argument.
+		return (bool)atoi(argv[4]);
+	} else {
+		// Return the default value.
+		return (bool) OUTPUT_TO_XML;
+	}
+#endif
+
+}
+
 void initCUDA(int argc, char** argv){
 	cudaError_t cudaStatus;
 	int device;
@@ -111,11 +131,11 @@ void initCUDA(int argc, char** argv){
 	}
 
 #ifdef VISUALISATION
-	if (argc == 3){
+	if (argc &gt;= 3){
 		device = atoi(argv[2]);
 	}
 #else
-	if (argc == 4){
+	if (argc &gt;= 4){
 		device = atoi(argv[3]);
 	}
 #endif
@@ -133,6 +153,31 @@ void initCUDA(int argc, char** argv){
 	}
 }
 
+void runConsoleWithoutXMLOutput(int iterations){
+	// Iteratively tun the correct number of iterations.
+	for (int i=0; i&lt; iterations; i++)
+	{
+		printf("Processing Simulation Step %i\n", i+1);
+		//single simulation iteration
+		singleIteration();
+	}
+}
+
+void runConsoleWithXMLOutput(int iterations){
+	// Iteratively tun the correct number of iterations.
+	for (int i=0; i&lt; iterations; i++)
+	{
+		printf("Processing Simulation Step %i\n", i+1);
+		//single simulation iteration
+		singleIteration();
+		// Save the iteration data to disk
+		saveIterationData(outputpath, i+1, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
+			<!--<xsl:value-of select="xmml:name"/> state <xsl:value-of select="../../xmml:name"/> agents -->
+			get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose>
+			</xsl:for-each>
+			printf("Iteration %i Saved to XML\n", i+1);
+	}
+}
 
 /**
  * Program main (Handles arguments)
@@ -146,6 +191,9 @@ int main( int argc, char** argv)
 
 	//get the directory paths
 	setFilePaths(argv[1]);
+
+	//determine if we want to output to xml.
+	bool outputXML = getOutputXML(argc, argv);
 
 	//initialise CUDA
 	initCUDA(argc, argv);
@@ -173,33 +221,22 @@ int main( int argc, char** argv)
 	
 	//Get the number of iterations
 	int iterations = atoi(argv[2]);
-	if (iterations == 0)
+	if (iterations &lt;= 0)
 	{
-		printf("Second argument must be an integer (Number of Iterations)\n");
+		printf("Second argument must be a positive integer (Number of Iterations)\n");
 		exit(EXIT_FAILURE);
 	}
   
 	//start timing
 	cudaEventRecord(start);
 
-	for (int i=0; i&lt; iterations; i++)
-	{
-		printf("Processing Simulation Step %i\n", i+1);
-
-		//single simulation iteration
-		singleIteration();
-
-		if (OUTPUT_TO_XML)
-		{
-			saveIterationData(outputpath, i+1, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-				//<xsl:value-of select="xmml:name"/> state <xsl:value-of select="../../xmml:name"/> agents
-				get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose>
-				</xsl:for-each>
-			
-				printf("Iteration %i Saved to XML\n", i+1);
-		}
-
+	// Launch the main loop with / without xml output.
+	if(outputXML){
+		runConsoleWithXMLOutput(iterations);
+	} else {
+		runConsoleWithoutXMLOutput(iterations);	
 	}
+	
 
 	//CUDA stop timing
 	cudaEventRecord(stop);
