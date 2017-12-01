@@ -32,8 +32,8 @@
 char inputfile[100];          /**&lt; Input path char buffer*/
 char outputpath[1000];         /**&lt; Output path char buffer*/
 
-#define OUTPUT_TO_XML 1
-
+// Define the default value indicating if XML output should be produced or not.
+#define OUTPUT_TO_XML 0
 
 /** checkUsage
  * Function to check the correct number of arguments
@@ -47,14 +47,14 @@ int checkUsage( int argc, char** argv){
 	printf("FLAMEGPU Visualisation mode\n");
 	if(argc &lt; 2)
 	{
-		printf("Usage: main [XML model data] [Optional CUDA device ID]\n");
+		printf("Usage: main [XML model data] [Optional CUDA device ID] [Optional XML Output Override]\n");
 		return false;
 	}
 #else
 	printf("FLAMEGPU Console mode\n");
 	if(argc &lt; 3)
 	{
-		printf("Usage: main [XML model data] [Iterations] [Optional CUDA device ID]\n");
+		printf("Usage: main [XML model data] [Iterations] [Optional CUDA device ID] [Optional XML Output Override]\n");
 		return false;
 	}
 #endif
@@ -91,6 +91,26 @@ void setFilePaths(char* input){
 	printf("Output dir: %s\n", outputpath);
 }
 
+
+bool getOutputXML(int argc, char**argv){
+	// Initialise to #defined default
+	bool outputXML = OUTPUT_TO_XML;
+
+#ifdef VISUALISATION
+	// If visualisation mode is set and we have the right number of arguments, use the relavant index.
+	if (argc == 4){
+		outputXML = (bool)atoi(argv[3]);
+	}
+#else
+	// If console mode is set and we have the right number of arguments, use the relevant index.
+	if (argc == 5){
+		outputXML = (bool)atoi(argv[4]);
+	}
+#endif
+
+	// Return the value.
+	return outputXML;
+}
 
 void initCUDA(int argc, char** argv){
 	cudaError_t cudaStatus;
@@ -132,7 +152,29 @@ void initCUDA(int argc, char** argv){
 		exit(EXIT_FAILURE);
 	}
 }
+template &lt;bool OUTPUT_XML&gt;
+void runConsole(int iterations){
+	// Iteratively tun the correct number of iterations.
+	for (int i=0; i&lt; iterations; i++)
+	{
+		printf("Processing Simulation Step %i\n", i+1);
 
+		//single simulation iteration
+		singleIteration();
+
+		if (OUTPUT_TO_XML)
+		// if (OUTPUT_XML)
+		{
+			saveIterationData(outputpath, i+1, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
+				//<xsl:value-of select="xmml:name"/> state <xsl:value-of select="../../xmml:name"/> agents
+				get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose>
+				</xsl:for-each>
+			
+				printf("Iteration %i Saved to XML\n", i+1);
+		}
+
+	}
+}
 
 /**
  * Program main (Handles arguments)
@@ -146,6 +188,11 @@ int main( int argc, char** argv)
 
 	//get the directory paths
 	setFilePaths(argv[1]);
+
+	//determine if we want to output to xml.
+	bool outputXML = getOutputXML(argc, argv);
+	printf("outputXML %d\n", outputXML);
+	fflush(stdout);
 
 	//initialise CUDA
 	initCUDA(argc, argv);
@@ -182,24 +229,8 @@ int main( int argc, char** argv)
 	//start timing
 	cudaEventRecord(start);
 
-	for (int i=0; i&lt; iterations; i++)
-	{
-		printf("Processing Simulation Step %i\n", i+1);
-
-		//single simulation iteration
-		singleIteration();
-
-		if (OUTPUT_TO_XML)
-		{
-			saveIterationData(outputpath, i+1, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-				//<xsl:value-of select="xmml:name"/> state <xsl:value-of select="../../xmml:name"/> agents
-				get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose>
-				</xsl:for-each>
-			
-				printf("Iteration %i Saved to XML\n", i+1);
-		}
-
-	}
+	runConsole&lt;outputXML&gt;(iterations);
+	// runConsole(iterations);
 
 	//CUDA stop timing
 	cudaEventRecord(stop);
