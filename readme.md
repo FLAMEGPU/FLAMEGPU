@@ -5,30 +5,51 @@ http://www.flamegpu.com
 Current version: `1.5.0` for CUDA 8.0
 
 FLAME GPU (Flexible Large-scale Agent Modelling Environment for Graphics Processing Units) is a high performance Graphics Processing Unit (GPU) extension to the FLAME framework. 
+
 It provides a mapping between a formal agent specifications with C based scripting and optimised CUDA code. 
 This includes a number of key ABM building blocks such as multiple agent types, agent communication and birth and death allocation. 
 The advantages of our contribution are three fold. 
-Firstly Agent Based (AB) modellers are able to focus on specifying agent behaviour and run simulations without explicit understanding of CUDA programming or GPU optimisation strategies. 
-Secondly simulation performance is significantly increased in comparison with desktop CPU alternatives. This allows simulation of far larger model sizes with high performance at a fraction of the cost of grid based alternatives. 
-Finally massive agent populations can be visualised in real time as agent data is already located on the GPU hardware.
+
+1. Agent Based (AB) modellers are able to focus on specifying agent behaviour and run simulations without explicit understanding of CUDA programming or GPU optimisation strategies. 
+2. Simulation performance is significantly increased in comparison with desktop CPU alternatives. This allows simulation of far larger model sizes with high performance at a fraction of the cost of grid based alternatives. 
+3. Massive agent populations can be visualised in real time as agent data is already located on the GPU hardware.
 
 ## Documentation
 
-The FLAME GPU technical report and users guide is available at [docs/TechReportAndUserGuide.pdf](https://github.com/FLAMEGPU/FLAMEGPU/blob/master/doc/TechReportAndUserGuide.pdf) and, with the source of this documentation in the [FLAMEGPU/FLAMEGPU_TechnicalReport](https://github.com/FLAMEGPU/FLAMEGPU_TechnicalReport) repository
+The FLAME GPU Documentation and User Guide can be found at [http://dpcs.flamegpu.com](http://dpcs.flamegpu.com), with source hosted on github at [FLAMEGPU/docs](https://github.com/FLAMEGPU/docs).
 
 
 ## Compiling FLAME GPU
 
-### Windows
+### Windows using Visual Studio
 
 For windows, Visual Studio 2015 solutions are provided for the example projects, and requires CUDA 8.0.
-The relevant example can be built using Visual Studio, with *debug* and *release* configurations available in each solution.
+Example can be built using Visual Studio, with *debug* and *release* configurations available in each solution, for console mode and (optionally) visualisation mode simulations.
 
-Pre-compiled Windows binaries are available for the example projects in the [FLAME-PGU-SDK](https://github.com/FLAMEGPU/FLAMEGPU/releases), available for each release.
+Pre-compiled Windows binaries are available for the example projects in the [FLAME-GPU-SDK](https://github.com/FLAMEGPU/FLAMEGPU/releases), available as an archive for each release.
 
-## Linux
+#### Dependencies 
++ CUDA 8.0 or later
++ Visual Studio 2015 or later
 
-Linux compilation is controlled using `make`, with makefiles provided for each example.
+### `make` for Linux and Windows
+
+`make` can be used to build FLAME GPU under linux and windows (via a windows implementation of `make`).
+
+Makefiles are provided for each example project, and for batch building all examples.
+
+
+#### Dependencies 
+
++ CUDA 8.0 or later
++ g++ 4.8 or later (Linux)
++ Make (Linux, OSX, optional for Windows)
++ `xsltproc` (linux, OSX)
++ `xmllint` (optional)
+
+
+
+<!-- Replace / update the following
 
 ## How to setup, build, and run FLAMEGPU examples on Linux
 
@@ -106,6 +127,7 @@ valgrind --tool=memcheck ../../bin/x64/Debug_Console/{folder name}_console itera
 8\. For more details on how to build specific targets for each example, run
 `make help`
 
+-->
 
 ## Usage
 
@@ -114,14 +136,14 @@ Please see the documentation for further details.
 
 ```
 # Console mode
-executable_console <path/to/0.xml> <iterations> <device_id>
+executable_console <path/to/0.xml> <iterations> [device_id] [output_XML_to_disk]
 
 # Interactive visualisation
-executable_visualistion <path/to/0.xml> <device_id>
+executable_visualistion <path/to/0.xml> [device_id]
 ```
 
 
-## Contributing
+## How to Contribute
 
 To report FLAME GPU bugs or request features, please [file an issue directly using Github](http://github.com/FLAMEGPU/FLAMEGPU/issues).
 If you wish to make any contributions, please [issue a Pull Request on Github](https://github.com/FLAMEGPU/FLAMEGPU/pulls).
@@ -144,12 +166,12 @@ Please cite FLAME GPU using
 }
 ```
 
-**@todo**
+For an up to date list of publications related to FLAME GPU and it's use, [visit the flamegpu.com website](http://flamegpu.com).
 
 
 ## Authors
 
-FLAMNE GPU is developed as an open-source project by the Visual Computing research group in the Department of Computer Science at the University of Sheffield.
+FLAME GPU is developed as an open-source project by the [Visual Computing research group](https://www.sheffield.ac.uk/dcs/research/groups/visual-computing/home) in the [Department of Computer Science](https://www.sheffield.ac.uk/dcs/) at the [University of Sheffield](https://www.sheffield.ac.uk/).
 The primary author is [Dr Paul Richmond](http://paulrichmond.shef.ac.uk/).
 
 ## Acknowledgements
@@ -159,17 +181,34 @@ The primary author is [Dr Paul Richmond](http://paulrichmond.shef.ac.uk/).
 ## Copyright and Software Licence
 
 FLAME GPU is copyright the University of Sheffield 2009 - 2017.
-The Library, examples and all source code are covered by the Licence in [LICENCE.txt](LICENCE.txt)
+The Library, examples and all source code are covered by the [LICENCE](LICENCE).
 
 
 ## Release Notes
 
 ### [1.5.0](https://github.com/FLAMEGPU/FLAMEGPU/releases/tag/v1.5.0)
 
-+ CUDA 8.0 and SM60 support
-+ Removed SM20 support
++ Supports CUDA 8.0
++ Removed SM20 and SM21
 + Visual Studio 2015
-+ **@todo**
++ Improved Linux Support via makefiles
++ **@todo - all other changes**
++ Adds Step-functions executed between subsequent iterations
++ Adds parallel reduction for use in Init, Step and Exit functions
++ Additional Command line options
++ Documentation now hosted on readthedocs
++ Additional example projects
++ Deprecates the use of `state` as an agent variable to control colour in the default visualisation
++ Adds the use of `colour` agent variable to control agent colour in the default visualisation
++ Adds the abillity to pause the default visualisation, and increment one step at a time
++ Various additional macros defined to improve quality of life
++ Various bugfixes
++ `Template` example has been renamed `EmptyExample`
++ `tools/new_example.py` to quickly create a new example project.
++ Adds instrumentation for simple performance measurement
++ Environmental variables can now be loaded from 0.xml
++ Improved `functions.xslt` output
++ Improved state model diagram generator
 
 
 ### [1.4.3](https://github.com/FLAMEGPU/FLAMEGPU/releases/tag/v1.4.3)
@@ -179,7 +218,7 @@ The Library, examples and all source code are covered by the Licence in [LICENCE
 + Updated Visual Studio Project files to 2013
 + Improved Visual Studio build customisation
 + Fixed double precision support within spatial partitioning
-+ Compile-time spatial partition config validation
++ Compile-time spatial partition configuration validation
 
 ### [1.4.2](https://github.com/FLAMEGPU/FLAMEGPU/releases/tag/v1.4.2)
 
