@@ -251,11 +251,20 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     </xsl:for-each>
     
 	/* Read file until end of xml */
+    size_t bytesRead = 0;
     i = 0;
 	while(reading==1)
 	{
 		/* Get the next char from the file */
 		c = (char)fgetc(file);
+
+        // Check if we reached the end of the file.
+        if(c == EOF){
+            // Break out of the loop. This allows for empty files(which may or may not be)
+            break;
+        }
+        // Increment byte counter.
+        bytesRead++;
 		
 		/* If the end of a tag */
 		if(c == '&gt;')
@@ -389,6 +398,12 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 			i++;
 		}
 	}
+    // If no bytes were read, raise a warning.
+    if(bytesRead == 0){
+        fprintf(stdout, "Warning: %s is an empty file\n", inputpath);
+        fflush(stdout);
+    }
+
 	/* Close the file */
 	fclose(file);
 }
