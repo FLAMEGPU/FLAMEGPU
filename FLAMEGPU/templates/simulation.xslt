@@ -881,12 +881,14 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 
 	
 	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
-	<xsl:if test="../../gpu:type='continuous'">
+	<!-- This check has been removed so that we do net get unspecified launch failures when a population of 0 discrete agents is used.
+	Alternatively this should be expanded to elseif, with an error message and a graceful exit of the simulator.
+	<xsl:if test="../../gpu:type='continuous'"> -->
 	if (h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:currentState"/>_count == 0)
 	{
 		return;
 	}
-	</xsl:if>
+	<!-- </xsl:if> -->
 	
 	//SET SM size to 0 and save state list size for occupancy calculations
 	sm_size = SM_START;
