@@ -166,9 +166,9 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     int in_env_<xsl:value-of select="xmml:name"/>;
     </xsl:for-each>
     
-
-	/* for continuous agents: set agent count to zero */<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:if test="gpu:type='continuous'">	
-	*h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count = 0;</xsl:if></xsl:for-each>
+    <!-- initialise the population of all agent types to 0, to avoid launch failures -->
+	/* set agent count to zero */<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><!--<xsl:if test="gpu:type='continuous'">-->
+	*h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count = 0;<!--</xsl:if>--></xsl:for-each>
 	
 	/* Variables for initial state data */<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength"><xsl:text>
     </xsl:text><xsl:value-of select="xmml:type"/><xsl:text> </xsl:text><xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>[<xsl:value-of select="xmml:arrayLength"/>];</xsl:when><xsl:otherwise><xsl:text>
