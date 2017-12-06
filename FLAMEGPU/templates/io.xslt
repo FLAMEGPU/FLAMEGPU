@@ -103,6 +103,10 @@ void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each sel
 	sprintf(data, "%s%i.xml", outputpath, iteration_number);
 	//printf("Writing iteration %i data to %s\n", iteration_number, data);
 	file = fopen(data, "w");
+    if(file == nullptr){
+        printf("Error: Could not open file `%s` for output. Aborting.\n", data);
+        exit(EXIT_FAILURE);
+    }
 	fputs("&lt;states&gt;\n&lt;itno&gt;", file);
 	sprintf(data, "%i", iteration_number);
 	fputs(data, file);
