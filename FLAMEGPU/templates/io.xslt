@@ -28,11 +28,6 @@
 #include &lt;cmath&gt;
 #include &lt;limits.h&gt;
 
-// Only check directory under linux. it is not an issue on windows. 
-#if !defined(_MSC_VER)
-#include &lt;sys/stat.h&gt;
-#endif
-
 // include header
 #include "header.h"
 
@@ -227,33 +222,24 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     </xsl:otherwise></xsl:choose>
     </xsl:for-each>
     
-	/* Open config file to read-only */
-	// Under linux, use Stat to check if the inputpath is a directory or not.
-    #if !defined(_MSC_VER)
-    struct stat st = {0};
-    if(!stat(inputpath, &amp;st)){
-        bool inputpathIsDirectory = S_ISDIR(st.st_mode);
-        if(inputpathIsDirectory){
-            printf("Error: input path `%s` is a directory\n", inputpath);
-            return;
-        }
-    } else {
-        printf("Error checking input path. Aborting.\n");
-        exit(EXIT_FAILURE);
+    // If no input path was specified, issue a message and return.
+    if(inputpath[0] == '\0'){
+        printf("No initial states file specified. Using default values.\n");
+        return;
     }
-    #endif
-	// Attempt to open the non-directory input path
+    
+    // Otherwise an input path was specified, and we have previously checked that it is (was) not a directory. 
+    
+	// Attempt to open the non directory path as read only.
 	file = fopen(inputpath, "r");
-
-	
-    /* If inputfile is empty or not found then we initialise only */
-    if(inputpath == NULL || file == nullptr)
+    
+    // If the file could not be opened, issue a message and return.
+    if(file == nullptr)
     {
-      printf("Initial states file not specifed or does not exist, parameters are initialised to default values\n");
+      printf("Could not open input file %s. Continuing with default values\n", inputpath);
       return;
     }
-
-	/* Read file until end of xml */
+    // Otherwise we can iterate the file until the end of XML is reached.
     size_t bytesRead = 0;
     i = 0;
 	while(reading==1)
