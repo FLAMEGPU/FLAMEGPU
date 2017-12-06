@@ -1,0 +1,1 @@
+./Release_Console/sugarscape "../../examples/Sugarscape/iterations/0.xml" 1
