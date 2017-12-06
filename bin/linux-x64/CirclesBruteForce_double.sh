@@ -1,0 +1,1 @@
+./Release_Console/CirclesBruteForce_double "../../examples/CirclesBruteForce_double/iterations/1024.xml" 1
