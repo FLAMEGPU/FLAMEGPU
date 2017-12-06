@@ -298,6 +298,20 @@ void initCUDA(int argc, char** argv){
 		fprintf(stderr, "Error setting CUDA device!\n");
 		exit(EXIT_FAILURE);
 	}
+	// Get device properties.
+	cudaDeviceProp props;
+	cudaStatus = cudaGetDeviceProperties(&amp;props, device);
+	if(cudaStatus == cudaSuccess){
+	#ifdef _MSC_VER
+		const char * driverMode = props.tccDriver ? "TCC" : "WDDM";
+	#else
+		const char * driverMode = "Linux"
+	#endif
+		fprintf(stdout, "GPU %d: %s, SM%d%d, %s, pciBusId %d\n", device, props.name, props.major, props.minor, driverMode, props.pciBusID);
+	} else {
+		fprintf(stderr, "Error Accessing Cuda Device properties for GPU %d\n", device);
+	}
+
 }
 
 void runConsoleWithoutXMLOutput(int iterations){
