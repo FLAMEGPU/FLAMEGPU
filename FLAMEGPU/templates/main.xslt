@@ -24,6 +24,7 @@
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;sys/stat.h&gt;
+#include &lt;errno.h&gt;
 #ifdef VISUALISATION
 #include &lt;GL/glew.h&gt;
 #include &lt;GL/glut.h&gt;
@@ -153,8 +154,8 @@ bool getPathProperties(char * path, bool * isFile, bool * isDir) {
 	// If stat was successfull
 	if (statResult == 0) {
 		// Update return values indicating if the path is a file or a directory.
-		*isDir = (statBuf.st_mode &amp; _S_IFDIR) != 0;
-		*isFile = (statBuf.st_mode &amp; _S_IFREG) != 0;
+		*isDir = (statBuf.st_mode &amp; S_IFDIR) != 0;
+		*isFile = (statBuf.st_mode &amp; S_IFREG) != 0;
 		fileExists = *isDir || *isFile;
 	} 
 	// Otherwise if stat did report an errr.
