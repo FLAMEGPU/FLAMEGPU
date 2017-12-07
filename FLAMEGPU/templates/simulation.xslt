@@ -4,36 +4,36 @@
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
 <xsl:template match="/">
-/*
- * FLAME GPU v 1.4.0 for CUDA 6
- * Copyright 2015 University of Sheffield.
- * Author: Dr Paul Richmond 
- * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
- *
- * University of Sheffield retain all intellectual property and 
- * proprietary rights in and to this software and related documentation. 
- * Any use, reproduction, disclosure, or distribution of this software 
- * and related documentation without an express license agreement from
- * University of Sheffield is strictly prohibited.
- *
- * For terms of licence agreement please attached licence or view licence 
- * on www.flamegpu.com website.
- * 
- */
+  /*
+  * FLAME GPU v 1.5.X for CUDA 9
+  * Copyright University of Sheffield.
+  * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+  *
+  * University of Sheffield retain all intellectual property and
+  * proprietary rights in and to this software and related documentation.
+  * Any use, reproduction, disclosure, or distribution of this software
+  * and related documentation without an express license agreement from
+  * University of Sheffield is strictly prohibited.
+  *
+  * For terms of licence agreement please attached licence or view licence
+  * on www.flamegpu.com website.
+  *
+  */
 
-//Disable internal thrust warnings about conversions
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning (disable : 4267)
-#pragma warning (disable : 4244)
-#endif
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
+  //Disable internal thrust warnings about conversions
+  #ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning (disable : 4267)
+  #pragma warning (disable : 4244)
+  #endif
+  #ifdef __GNUC__
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wunused-parameter"
+  #endif
 
-// includes
-#include &lt;cuda_runtime.h&gt;
+  // includes
+  #include &lt;cuda_runtime.h&gt;
 #include &lt;device_launch_parameters.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
@@ -817,7 +817,7 @@ void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$s
 </xsl:if>
 
 <xsl:if test="not(xmml:arrayLength)"> <!-- Disable agent array reductions -->
-<xsl:if test="xmml:type='int'">
+<xsl:if test="contains(xmml:type, 'int')">
 <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>),  thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>) + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, count_value);

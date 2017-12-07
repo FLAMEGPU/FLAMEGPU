@@ -42,31 +42,31 @@
 <!--Main template-->
 <xsl:template match="/">
 
-/*
-* FLAME GPU v 1.4.0 for CUDA 6
-* Copyright 2015 University of Sheffield.
-* Author: Dr Paul Richmond
-* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
-*
-* University of Sheffield retain all intellectual property and
-* proprietary rights in and to this software and related documentation.
-* Any use, reproduction, disclosure, or distribution of this software
-* and related documentation without an express license agreement from
-* University of Sheffield is strictly prohibited.
-*
-* For terms of licence agreement please attached licence or view licence
-* on www.flamegpu.com website.
-*
-*/
+  /*
+  * FLAME GPU v 1.5.X for CUDA 9
+  * Copyright University of Sheffield.
+  * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+  *
+  * University of Sheffield retain all intellectual property and
+  * proprietary rights in and to this software and related documentation.
+  * Any use, reproduction, disclosure, or distribution of this software
+  * and related documentation without an express license agreement from
+  * University of Sheffield is strictly prohibited.
+  *
+  * For terms of licence agreement please attached licence or view licence
+  * on www.flamegpu.com website.
+  *
+  */
 
-#ifndef _FLAMEGPU_KERNELS_H_
-#define _FLAMEGPU_KERNELS_H_
+  #ifndef _FLAMEGPU_KERNELS_H_
+  #define _FLAMEGPU_KERNELS_H_
 
-#include "header.h"
+  #include "header.h"
 
 
-/* Agent count constants */
-<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+  /* Agent count constants */
+  <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
 __constant__ int d_xmachine_memory_<xsl:value-of select="xmml:name"/>_count;
 </xsl:for-each>
 /* Agent state count constants */
