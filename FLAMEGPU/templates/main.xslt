@@ -305,7 +305,7 @@ void initCUDA(int argc, char** argv){
 	#ifdef _MSC_VER
 		const char * driverMode = props.tccDriver ? "TCC" : "WDDM";
 	#else
-		const char * driverMode = "Linux"
+		const char * driverMode = "Linux";
 	#endif
 		fprintf(stdout, "GPU %d: %s, SM%d%d, %s, pciBusId %d\n", device, props.name, props.major, props.minor, driverMode, props.pciBusID);
 	} else {
