@@ -17,22 +17,46 @@
         <xsl:when test="$type='long long int'">%lld</xsl:when>
         <xsl:when test="$type='unsigned long long int'">%llu</xsl:when>
         
-        <xsl:when test="$type='int2'">%d, %d</xsl:when>
-        <xsl:when test="$type='uint2'">%u, %u</xsl:when>
-        <xsl:when test="$type='float2'">%f, %f</xsl:when>
-        <xsl:when test="$type='double2'">%f, %f</xsl:when>
+        <xsl:when test="$type='ivec2'">%d, %d</xsl:when>
+        <xsl:when test="$type='uvec2'">%u, %u</xsl:when>
+        <xsl:when test="$type='fvec2'">%f, %f</xsl:when>
+        <xsl:when test="$type='dvec2'">%f, %f</xsl:when>
         
-        <xsl:when test="$type='int3'">%d, %d, %d</xsl:when>
-        <xsl:when test="$type='uint3'">%u, %u, %u</xsl:when>
-        <xsl:when test="$type='float3'">%f, %f, %f</xsl:when>
-        <xsl:when test="$type='double3'">%f, %f, %f</xsl:when>
+        <xsl:when test="$type='ivec3'">%d, %d, %d</xsl:when>
+        <xsl:when test="$type='uvec3'">%u, %u, %u</xsl:when>
+        <xsl:when test="$type='fvec3'">%f, %f, %f</xsl:when>
+        <xsl:when test="$type='dvec3'">%f, %f, %f</xsl:when>
         
-        <xsl:when test="$type='int4'">%d, %d, %d, %d</xsl:when>
-        <xsl:when test="$type='uint4'">%u, %u, %u, %u</xsl:when>
-        <xsl:when test="$type='float4'">%f, %f, %f, %f</xsl:when>
-        <xsl:when test="$type='double4'">%f, %f, %f, %f</xsl:when>
+        <xsl:when test="$type='ivec3'">%d, %d, %d, %d</xsl:when>
+        <xsl:when test="$type='uvec4'">%u, %u, %u, %u</xsl:when>
+        <xsl:when test="$type='fvec4'">%f, %f, %f, %f</xsl:when>
+        <xsl:when test="$type='dvec4'">%f, %f, %f, %f</xsl:when>
         
         <xsl:otherwise>%f</xsl:otherwise> <!-- default output format is float -->
+    </xsl:choose>
+</xsl:template>
+  
+  
+<!-- default initialiser -->
+<xsl:template name="defaultInitialiser">
+    <xsl:param name="type"/>
+    <xsl:choose>
+        <xsl:when test="$type='ivec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='uvec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='fvec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='dvec2'">{0, 0}</xsl:when>
+        
+        <xsl:when test="$type='ivec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='uvec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='fvec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='dvec3'">{0, 0, 0}</xsl:when>
+        
+        <xsl:when test="$type='ivec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='uvec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='fvec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='dvec4'">{0, 0, 0, 0}</xsl:when>
+        
+        <xsl:otherwise>0</xsl:otherwise> <!-- default output format is float -->
     </xsl:choose>
 </xsl:template>
 
@@ -60,7 +84,7 @@
         <xsl:when test="contains($variable_type, '2')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].y</xsl:when>
         <xsl:when test="contains($variable_type, '3')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].y, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].z</xsl:when>
         <xsl:when test="contains($variable_type, '3')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].y, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].z, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].w</xsl:when>
-        <xsl:otherwise>h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i]</xsl:otherwise> <!-- default output format is scalar type -->
+        <xsl:otherwise>h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i]</xsl:otherwise> <!-- default output format is scalar type -->
     </xsl:choose>
 </xsl:template>
   
@@ -78,22 +102,22 @@
         <xsl:when test="$type='long long int'">fpgu_strtoll</xsl:when>
         <xsl:when test="$type='unsigned long long int'">fpgu_strtoull</xsl:when> 
         <xsl:when test="$type='double'">fpgu_strtod</xsl:when>
-        <xsl:when test="$type='float'">atof</xsl:when>
+        <xsl:when test="$type='float'">fgpu_atof</xsl:when>
       
-        <xsl:when test="$type='int2'">fpgu_strtol</xsl:when>
-        <xsl:when test="$type='uint2'">fpgu_strtoul</xsl:when>
-        <xsl:when test="$type='float2'">atof</xsl:when>
-        <xsl:when test="$type='double2'">fpgu_strtod</xsl:when>
+        <xsl:when test="$type='ivec2'">fpgu_strtol</xsl:when>
+        <xsl:when test="$type='uvec2'">fpgu_strtoul</xsl:when>
+        <xsl:when test="$type='fvec2'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='dvec2'">fpgu_strtod</xsl:when>
         
-        <xsl:when test="$type='int3'">fpgu_strtol</xsl:when>
-        <xsl:when test="$type='uint3'">fpgu_strtoul</xsl:when>
-        <xsl:when test="$type='float3'">atof</xsl:when>
-        <xsl:when test="$type='double3'">fpgu_strtod</xsl:when>
+        <xsl:when test="$type='ivec3'">fpgu_strtol</xsl:when>
+        <xsl:when test="$type='uvec3'">fpgu_strtoul</xsl:when>
+        <xsl:when test="$type='fvec3'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='dvec3'">fpgu_strtod</xsl:when>
       
-        <xsl:when test="$type='int3'">fpgu_strtol</xsl:when>
-        <xsl:when test="$type='uint3'">fpgu_strtoul</xsl:when>
-        <xsl:when test="$type='float3'">atof</xsl:when>
-        <xsl:when test="$type='double3'">fpgu_strtod</xsl:when>
+        <xsl:when test="$type='ivec3'">fpgu_strtol</xsl:when>
+        <xsl:when test="$type='uvec3'">fpgu_strtoul</xsl:when>
+        <xsl:when test="$type='fvec3'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='dvec3'">fpgu_strtod</xsl:when>
       
         <xsl:otherwise>atof</xsl:otherwise> <!-- default parse function as float -->
     </xsl:choose>
@@ -103,20 +127,20 @@
 <xsl:template name="vectorBaseType">
     <xsl:param name="type"/>
     <xsl:choose>        
-        <xsl:when test="$type='int2'">int</xsl:when>
-        <xsl:when test="$type='uint2'">unsigned int</xsl:when>
-        <xsl:when test="$type='float2'">float</xsl:when>
-        <xsl:when test="$type='double2'">double</xsl:when>
+        <xsl:when test="$type='ivec2'">int</xsl:when>
+        <xsl:when test="$type='uvec2'">unsigned int</xsl:when>
+        <xsl:when test="$type='fvec2'">float</xsl:when>
+        <xsl:when test="$type='dvec2'">double</xsl:when>
         
-        <xsl:when test="$type='int3'">int</xsl:when>
-        <xsl:when test="$type='uint3'">unsigned int</xsl:when>
-        <xsl:when test="$type='float3'">float</xsl:when>
-        <xsl:when test="$type='double3'">double</xsl:when>
+        <xsl:when test="$type='ivec3'">int</xsl:when>
+        <xsl:when test="$type='uvec3'">unsigned int</xsl:when>
+        <xsl:when test="$type='fvec3'">float</xsl:when>
+        <xsl:when test="$type='dvec3'">double</xsl:when>
       
-        <xsl:when test="$type='int4'">int</xsl:when>
-        <xsl:when test="$type='uint4'">unsigned int</xsl:when>
-        <xsl:when test="$type='float4'">float</xsl:when>
-        <xsl:when test="$type='double4'">double</xsl:when>
+        <xsl:when test="$type='ivec4'">int</xsl:when>
+        <xsl:when test="$type='uvec4'">unsigned int</xsl:when>
+        <xsl:when test="$type='fvec4'">float</xsl:when>
+        <xsl:when test="$type='dvec 4'">double</xsl:when>
       
         <xsl:otherwise>float</xsl:otherwise> <!-- default base type of float -->
     </xsl:choose>
@@ -148,14 +172,18 @@
 #include &lt;cmath&gt;
 #include &lt;limits.h&gt;
 
+#ifdef _WIN32
+#define strtok_r strtok_s
+#endif
+
 // include header
 #include "header.h"
 
 glm::vec3 agent_maximum;
 glm::vec3 agent_minimum;
 
-long int fpgu_strtol(const char* str){
-    return strtol(str, NULL, 0);
+int fpgu_strtol(const char* str){
+    return (int)strtol(str, NULL, 0);
 }
 
 unsigned long int fpgu_strtoul(const char* str){
@@ -174,6 +202,10 @@ double fpgu_strtod(const char* str){
     return strtod(str, NULL);
 }
 
+float fgpu_atof(const char* str){
+    return (float)atof(str);
+}
+
 
 //templated class function to read array inputs from supported types
 template &lt;class T&gt;
@@ -181,17 +213,18 @@ void readArrayInput( T (*parseFunc)(const char*), char* buffer, T *array, unsign
     unsigned int i = 0;
     const char s[2] = ",";
     char * token;
+    char * end_str;
 
-    token = strtok(buffer, s);
+    token = strtok_r(buffer, s, &amp;end_str);
     while (token != NULL){
         if (i>=expected_items){
             printf("Error: Agent memory array has too many items, expected %d!\n", expected_items);
             exit(EXIT_FAILURE);
         }
         
-        array[i++] = (T)parseFunc(token, NULL, 0);
+        array[i++] = (T)parseFunc(token);
         
-        token = strtok(NULL, s);
+        token = strtok_r(NULL, s, &amp;end_str);
     }
     if (i != expected_items){
         printf("Error: Agent memory array has %d items, expected %d!\n", i, expected_items);
@@ -201,12 +234,13 @@ void readArrayInput( T (*parseFunc)(const char*), char* buffer, T *array, unsign
 
 //templated class function to read array inputs from supported types
 template &lt;class T, class BASE_T, unsigned int D&gt;
-void readArrayInputVectorType( T (*parseFunc)(const char*), char* buffer, T *array, unsigned int expected_items){
+void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T *array, unsigned int expected_items){
     unsigned int i = 0;
     const char s[2] = "|";
     char * token;
+    char * end_str;
 
-    token = strtok(buffer, s);
+    token = strtok_r(buffer, s, &amp;end_str);
     while (token != NULL){
         if (i>=expected_items){
             printf("Error: Agent memory array has too many items, expected %d!\n", expected_items);
@@ -215,10 +249,10 @@ void readArrayInputVectorType( T (*parseFunc)(const char*), char* buffer, T *arr
         
         //read vector type as an array
         T vec;
-        readArrayInputVectorType&lt;BASE_T&gt;(parseFunc, token, &amp;vec, D);
+        readArrayInput&lt;BASE_T&gt;(parseFunc, token, (BASE_T*) &amp;vec, D);
         array[i++] = vec;
         
-        token = strtok(NULL, s);
+        token = strtok_r(NULL, s, &amp;end_str);
     }
     if (i != expected_items){
         printf("Error: Agent memory array has %d items, expected %d!\n", i, expected_items);
@@ -358,24 +392,24 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 	for (int k=0; k&lt;xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX; k++)
 	{	<xsl:for-each select="xmml:memory/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength">
         for (i=0;i&lt;<xsl:value-of select="xmml:arrayLength"/>;i++){
-            h_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>[(i*xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX)+k] = 0;
+            h_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>[(i*xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX)+k] = <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>;
         }</xsl:when><xsl:otherwise>
-		h_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>[k] = 0;</xsl:otherwise></xsl:choose></xsl:for-each>
+		h_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>[k] = <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>;</xsl:otherwise></xsl:choose></xsl:for-each>
 	}
 	</xsl:for-each>
 
 	/* Default variables for memory */<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength">
     for (i=0;i&lt;<xsl:value-of select="xmml:arrayLength"/>;i++){
-        <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>[i] = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose>;
+        <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>[i] = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise><xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template></xsl:otherwise></xsl:choose>;
     }</xsl:when><xsl:otherwise><xsl:text>
-    </xsl:text><xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/> = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose>;</xsl:otherwise></xsl:choose></xsl:for-each>
+    </xsl:text><xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/> = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise><xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template></xsl:otherwise></xsl:choose>;</xsl:otherwise></xsl:choose></xsl:for-each>
 
     /* Default variables for environment variables */
     <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength">
     for (i=0;i&lt;<xsl:value-of select="xmml:arrayLength"/>;i++){
-        env_<xsl:value-of select="xmml:name"/>[i] = 0;
+        env_<xsl:value-of select="xmml:name"/>[i] = <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>;
     }
-    </xsl:when><xsl:otherwise>env_<xsl:value-of select="xmml:name"/> = 0;
+    </xsl:when><xsl:otherwise>env_<xsl:value-of select="xmml:name"/> = <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>;
     </xsl:otherwise></xsl:choose>
     </xsl:for-each>
     
@@ -443,31 +477,71 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
                         h_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>[(k*xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX)+(*h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count)] = <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>[k];
                     }</xsl:when><xsl:otherwise>
 					h_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>[*h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count] = <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;</xsl:otherwise></xsl:choose>
-                    <xsl:if test="xmml:name='x'">//Check maximum x value
+                    
+                    <xsl:choose>
+                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check maximum x value
+                    if(agent_maximum.x &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.x)
+                        agent_maximum.x = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.x;
+                    </xsl:when>
+                    <xsl:when test="xmml:name='x'">//Check maximum x value
                     if(agent_maximum.x &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_maximum.x = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:if>
-                    <xsl:if test="xmml:name='y'">//Check maximum y value
+                    </xsl:when>
+                    </xsl:choose>
+                    <xsl:choose>
+                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check maximum y value
+                    if(agent_maximum.y &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.y)
+                        agent_maximum.y = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.y;
+                    </xsl:when>
+                    <xsl:when test="xmml:name='y'">//Check maximum y value
                     if(agent_maximum.y &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_maximum.y = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:if>
-                    <xsl:if test="xmml:name='z'">//Check maximum z value
+                    </xsl:when>
+                    </xsl:choose>
+                    <xsl:choose>
+                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check maximum z value
+                    if(agent_maximum.z &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.z)
+                        agent_maximum.z = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.z;
+                    </xsl:when>
+                    <xsl:when test="xmml:name='z'">//Check maximum y value
                     if(agent_maximum.z &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_maximum.z = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:if>
-                    <xsl:if test="xmml:name='x'">//Check minimum x value
-                    if(agent_minimum.x &gt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
+                    </xsl:when>
+                    </xsl:choose>    
+                    
+                    <xsl:choose>
+                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check minimum x value
+                    if(agent_minimum.x &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.x)
+                        agent_minimum.x = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.x;
+                    </xsl:when>
+                    <xsl:when test="xmml:name='x'">//Check minimum x value
+                    if(agent_minimum.x &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_minimum.x = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:if>
-                    <xsl:if test="xmml:name='y'">//Check minimum y value
-                    if(agent_minimum.y &gt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
+                    </xsl:when>
+                    </xsl:choose>
+                    <xsl:choose>
+                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check minimum y value
+                    if(agent_minimum.y &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.y)
+                        agent_minimum.y = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.y;
+                    </xsl:when>
+                    <xsl:when test="xmml:name='y'">//Check minimum y value
+                    if(agent_minimum.y &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_minimum.y = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:if>
-                    <xsl:if test="xmml:name='z'">//Check minimum z value
-                    if(agent_minimum.z &gt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
+                    </xsl:when>
+                    </xsl:choose>
+                    <xsl:choose>
+                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check minimum z value
+                    if(agent_minimum.z &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.z)
+                        agent_minimum.z = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.z;
+                    </xsl:when>
+                    <xsl:when test="xmml:name='z'">//Check minimum y value
+                    if(agent_minimum.z &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_minimum.z = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:if></xsl:for-each>
-					(*h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count) ++;
+                    </xsl:when>
+                    </xsl:choose> 
+                    
+                    </xsl:for-each>
+					(*h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count) ++;	
 				}
 				</xsl:for-each>else
 				{
@@ -478,10 +552,10 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 
 				/* Reset xagent variables */<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength">
                 for (i=0;i&lt;<xsl:value-of select="xmml:arrayLength"/>;i++){
-                    <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>[i] = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose>;
+                    <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>[i] = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise><xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template></xsl:otherwise></xsl:choose>;
                 }</xsl:when><xsl:otherwise><xsl:text>
-                </xsl:text><xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/> = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose>;</xsl:otherwise></xsl:choose></xsl:for-each>
-
+                </xsl:text><xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/> = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise><xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template></xsl:otherwise></xsl:choose>;</xsl:otherwise></xsl:choose></xsl:for-each>
+                
                 in_xagent = 0;
 			}
 			<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable">if(strcmp(buffer, "<xsl:value-of select="xmml:name"/>") == 0) in_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/> = 1;
@@ -523,16 +597,13 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
                         <!-- Specialise input reads for vector types -->
                         <xsl:choose>
                         <xsl:when test="contains(xmml:type, '2')">
-                          <xsl:value-of select="xmml:type"/> <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_vec;
-                          readArrayInput&lt;<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>&gt;(&amp;<xsl:call-template name="typeParserFunc"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>, buffer, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_vec, 2); 
+                          readArrayInput&lt;<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>&gt;(&amp;<xsl:call-template name="typeParserFunc"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>, buffer, (<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>*)&amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>, 2); 
                         </xsl:when>
                         <xsl:when test="contains(xmml:type, '3')">
-                          <xsl:value-of select="xmml:type"/> <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_vec;
-                          readArrayInput&lt;<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>&gt;(&amp;<xsl:call-template name="typeParserFunc"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>, buffer, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_vec, 3); 
+                          readArrayInput&lt;<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>&gt;(&amp;<xsl:call-template name="typeParserFunc"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>, buffer, (<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>*)&amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>, 3); 
                         </xsl:when>
                         <xsl:when test="contains(xmml:type, '4')">
-                          <xsl:value-of select="xmml:type"/> <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_vec;
-                          readArrayInput&lt;<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>&gt;(&amp;<xsl:call-template name="typeParserFunc"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>, buffer, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_vec, 4); 
+                          readArrayInput&lt;<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>&gt;(&amp;<xsl:call-template name="typeParserFunc"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>, buffer, (<xsl:call-template name="vectorBaseType"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>*)&amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>, 4); 
                         </xsl:when>
                         <xsl:otherwise><xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/> = (<xsl:value-of select="xmml:type"/>) <xsl:call-template name="typeParserFunc"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>(buffer); </xsl:otherwise>
                         </xsl:choose>

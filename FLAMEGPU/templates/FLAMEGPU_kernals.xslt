@@ -5,7 +5,7 @@
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
 
   
-<!--Recursive template for function condititions-->
+<!--Recursive template for function conditions-->
 <xsl:template match="xmml:condition">(<xsl:choose>
 <xsl:when test="xmml:lhs/xmml:value"><xsl:value-of select="xmml:lhs/xmml:value"/>
 </xsl:when>
@@ -22,7 +22,7 @@
 </xsl:otherwise>
 </xsl:choose>)</xsl:template>
 
-<!--Recursive template for function global condititions-->
+<!--Recursive template for function global conditions-->
 <xsl:template match="gpu:globalCondition">(<xsl:choose>
 <xsl:when test="xmml:lhs/xmml:value"><xsl:value-of select="xmml:lhs/xmml:value"/>
 </xsl:when>
@@ -42,31 +42,31 @@
 <!--Main template-->
 <xsl:template match="/">
 
-  /*
-  * FLAME GPU v 1.5.X for CUDA 9
-  * Copyright University of Sheffield.
-  * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
-  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
-  *
-  * University of Sheffield retain all intellectual property and
-  * proprietary rights in and to this software and related documentation.
-  * Any use, reproduction, disclosure, or distribution of this software
-  * and related documentation without an express license agreement from
-  * University of Sheffield is strictly prohibited.
-  *
-  * For terms of licence agreement please attached licence or view licence
-  * on www.flamegpu.com website.
-  *
-  */
+/*
+* FLAME GPU v 1.5.X for CUDA 9
+* Copyright University of Sheffield.
+* Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+*
+* University of Sheffield retain all intellectual property and
+* proprietary rights in and to this software and related documentation.
+* Any use, reproduction, disclosure, or distribution of this software
+* and related documentation without an express license agreement from
+* University of Sheffield is strictly prohibited.
+*
+* For terms of licence agreement please attached licence or view licence
+* on www.flamegpu.com website.
+*
+*/
 
-  #ifndef _FLAMEGPU_KERNELS_H_
-  #define _FLAMEGPU_KERNELS_H_
+#ifndef _FLAMEGPU_KERNELS_H_
+#define _FLAMEGPU_KERNELS_H_
 
-  #include "header.h"
+#include "header.h"
 
 
-  /* Agent count constants */
-  <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+/* Agent count constants */
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
 __constant__ int d_xmachine_memory_<xsl:value-of select="xmml:name"/>_count;
 </xsl:for-each>
 /* Agent state count constants */
@@ -929,8 +929,10 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(glm::ive
 
 		if (index >= agent_count)
 			return;
-
-		glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
+        <xsl:choose>
+        <xsl:when test="xmml:variables/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">glm::vec3 position = glm::vec3(messages->position[index].x, messages->position[index].y, messages->position[index].z);</xsl:when>
+        <xsl:otherwise>glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);</xsl:otherwise>
+        </xsl:choose>
 		glm::ivec3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 		unsigned int hash = message_<xsl:value-of select="xmml:name"/>_hash(grid_position);
 		unsigned int bin_idx = atomicInc((unsigned int*) &amp;global_bin_count[hash], 0xFFFFFFFF);
@@ -972,8 +974,10 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(glm::ive
 	__global__ void hash_<xsl:value-of select="xmml:name"/>_messages(uint* keys, uint* values, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages)
 	{
 		unsigned int index = (blockIdx.x * blockDim.x) + threadIdx.x;
-
-		glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
+        <xsl:choose>
+        <xsl:when test="xmml:variables/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">glm::vec3 position = glm::vec3(messages->position[index].x, messages->position[index].y, messages->position[index].z);</xsl:when>
+        <xsl:otherwise>glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);</xsl:otherwise>
+        </xsl:choose>
 		glm::ivec3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 		unsigned int hash = message_<xsl:value-of select="xmml:name"/>_hash(grid_position);
 
