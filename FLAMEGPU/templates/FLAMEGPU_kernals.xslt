@@ -929,10 +929,7 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(glm::ive
 
 		if (index >= agent_count)
 			return;
-        <xsl:choose>
-        <xsl:when test="xmml:variables/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">glm::vec3 position = glm::vec3(messages->position[index].x, messages->position[index].y, messages->position[index].z);</xsl:when>
-        <xsl:otherwise>glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);</xsl:otherwise>
-        </xsl:choose>
+        glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
 		glm::ivec3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 		unsigned int hash = message_<xsl:value-of select="xmml:name"/>_hash(grid_position);
 		unsigned int bin_idx = atomicInc((unsigned int*) &amp;global_bin_count[hash], 0xFFFFFFFF);
@@ -974,10 +971,7 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(glm::ive
 	__global__ void hash_<xsl:value-of select="xmml:name"/>_messages(uint* keys, uint* values, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages)
 	{
 		unsigned int index = (blockIdx.x * blockDim.x) + threadIdx.x;
-        <xsl:choose>
-        <xsl:when test="xmml:variables/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">glm::vec3 position = glm::vec3(messages->position[index].x, messages->position[index].y, messages->position[index].z);</xsl:when>
-        <xsl:otherwise>glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);</xsl:otherwise>
-        </xsl:choose>
+        glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
 		glm::ivec3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 		unsigned int hash = message_<xsl:value-of select="xmml:name"/>_hash(grid_position);
 

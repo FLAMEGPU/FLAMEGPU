@@ -69,7 +69,7 @@ __FLAME_GPU_FUNC__ fvec3 boundPosition(fvec3 agent_position){
 //Agent Output: 
 __FLAME_GPU_FUNC__ int outputdata(xmachine_memory_Boid* xmemory, xmachine_message_location_list* location_messages) 
 {
-	add_location_message(location_messages, xmemory->id, xmemory->position, xmemory->velocity);
+	add_location_message(location_messages, xmemory->id, xmemory->position.x, xmemory->position.y, xmemory->position.z, xmemory->velocity.x, xmemory->velocity.y, xmemory->velocity.z);
 
 	return 0;
 }
@@ -97,21 +97,26 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
     while(location_message)
 	{
 		count++;
+		//create some vector types
+		fvec3 message_position = fvec3(location_message->x, location_message->y, location_message->z);
+		fvec3 message_velocity = fvec3(location_message->vx, location_message->vy, location_message->vz);
+
 		
 		if (location_message->id != xmemory->id){
-			float separation = length(xmemory->position - location_message->position);
+			float separation = length(xmemory->position - message_position);
 			if (separation < (INTERACTION_RADIUS)){
 
-				//Update Percieved global center
-				global_centre += location_message->position;
+				//Update Perceived global centre
+
+				global_centre += message_position;
 				global_centre_count += 1;
 
 				//Update global velocity matching
-				global_velocity += location_message->velocity;
+				global_velocity += message_velocity;
 
-				//Update collision center
+				//Update collision centre
 				if (separation < (SEPARATION_RADIUS)){ //dependant on model size
-					collision_centre += location_message->position;
+					collision_centre += message_position;
 					collision_count += 1;
 				}
 
