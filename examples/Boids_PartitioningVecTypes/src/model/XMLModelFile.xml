@@ -77,12 +77,28 @@
 					<name>id</name>
 				</gpu:variable>
 				<gpu:variable>
-					<type>fvec3</type>
-					<name>position</name>
+					<type>float</type>
+					<name>x</name>
+				</gpu:variable>
+                <gpu:variable>
+					<type>float</type>
+					<name>y</name>
+				</gpu:variable>
+                <gpu:variable>
+					<type>float</type>
+					<name>z</name>
 				</gpu:variable>
 				<gpu:variable>
-					<type>fvec3</type>
-					<name>velocity</name>
+					<type>float</type>
+					<name>vx</name>
+				</gpu:variable>
+                <gpu:variable>
+					<type>float</type>
+					<name>vy</name>
+				</gpu:variable>
+                <gpu:variable>
+					<type>float</type>
+					<name>vz</name>
 				</gpu:variable>
 			</variables>
 			<gpu:partitioningSpatial>

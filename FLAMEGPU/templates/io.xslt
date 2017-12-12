@@ -477,70 +477,30 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
                         h_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>[(k*xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX)+(*h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count)] = <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>[k];
                     }</xsl:when><xsl:otherwise>
 					h_<xsl:value-of select="../../xmml:name"/>s-><xsl:value-of select="xmml:name"/>[*h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count] = <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;</xsl:otherwise></xsl:choose>
-                    
-                    <xsl:choose>
-                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check maximum x value
-                    if(agent_maximum.x &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.x)
-                        agent_maximum.x = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.x;
-                    </xsl:when>
-                    <xsl:when test="xmml:name='x'">//Check maximum x value
+                    <xsl:if test="xmml:name='x'">//Check maximum x value
                     if(agent_maximum.x &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_maximum.x = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:when>
-                    </xsl:choose>
-                    <xsl:choose>
-                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check maximum y value
-                    if(agent_maximum.y &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.y)
-                        agent_maximum.y = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.y;
-                    </xsl:when>
-                    <xsl:when test="xmml:name='y'">//Check maximum y value
+                    </xsl:if>
+                    <xsl:if test="xmml:name='y'">//Check maximum y value
                     if(agent_maximum.y &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_maximum.y = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:when>
-                    </xsl:choose>
-                    <xsl:choose>
-                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check maximum z value
-                    if(agent_maximum.z &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.z)
-                        agent_maximum.z = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.z;
-                    </xsl:when>
-                    <xsl:when test="xmml:name='z'">//Check maximum y value
+                    </xsl:if>
+                    <xsl:if test="xmml:name='z'">//Check maximum z value
                     if(agent_maximum.z &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_maximum.z = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:when>
-                    </xsl:choose>    
-                    
-                    <xsl:choose>
-                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check minimum x value
-                    if(agent_minimum.x &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.x)
-                        agent_minimum.x = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.x;
-                    </xsl:when>
-                    <xsl:when test="xmml:name='x'">//Check minimum x value
-                    if(agent_minimum.x &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
+                    </xsl:if>
+                    <xsl:if test="xmml:name='x'">//Check minimum x value
+                    if(agent_minimum.x &gt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_minimum.x = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:when>
-                    </xsl:choose>
-                    <xsl:choose>
-                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check minimum y value
-                    if(agent_minimum.y &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.y)
-                        agent_minimum.y = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.y;
-                    </xsl:when>
-                    <xsl:when test="xmml:name='y'">//Check minimum y value
-                    if(agent_minimum.y &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
+                    </xsl:if>
+                    <xsl:if test="xmml:name='y'">//Check minimum y value
+                    if(agent_minimum.y &gt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_minimum.y = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:when>
-                    </xsl:choose>
-                    <xsl:choose>
-                    <xsl:when test="xmml:name='position' and contains(xmml:type, '3')">//Check minimum z value
-                    if(agent_minimum.z &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.z)
-                        agent_minimum.z = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>.z;
-                    </xsl:when>
-                    <xsl:when test="xmml:name='z'">//Check minimum y value
-                    if(agent_minimum.z &lt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
+                    </xsl:if>
+                    <xsl:if test="xmml:name='z'">//Check minimum z value
+                    if(agent_minimum.z &gt; <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>)
                         agent_minimum.z = (float)<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;
-                    </xsl:when>
-                    </xsl:choose> 
-                    
-                    </xsl:for-each>
+                    </xsl:if></xsl:for-each>
 					(*h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count) ++;	
 				}
 				</xsl:for-each>else
