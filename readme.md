@@ -129,9 +129,6 @@ For an up to date list of publications related to FLAME GPU and it's use, [visit
 FLAME GPU is developed as an open-source project by the [Visual Computing research group](https://www.sheffield.ac.uk/dcs/research/groups/visual-computing/home) in the [Department of Computer Science](https://www.sheffield.ac.uk/dcs/) at the [University of Sheffield](https://www.sheffield.ac.uk/).
 The primary author is [Dr Paul Richmond](http://paulrichmond.shef.ac.uk/).
 
-<!-- ## Acknowledgements
-
-**@todo** -->
 
 ## Copyright and Software Licence
 
@@ -143,11 +140,11 @@ The Library, examples and all source code are covered by the [LICENSE](LICENSE).
 
 ### [1.5.0](https://github.com/FLAMEGPU/FLAMEGPU/releases/tag/v1.5.0)
 
++ **@todo - Final Changelog.**
 + Supports CUDA 8.0
 + Removed SM20 and SM21
 + Visual Studio 2015
 + Improved Linux Support via makefiles
-+ **@todo - all other changes**
 + Adds Step-functions executed between subsequent iterations
 + Adds parallel reduction for use in Init, Step and Exit functions
 + Additional Command line options
