@@ -110,6 +110,14 @@ int checkUsage(int argc, char** argv) {
 	return retval;
 }
 
+/** getOutputDir
+ * Function which gets the global char array contianign the path for output
+ * @return char array containing relative path to output locaiton
+ */
+const char* getOutputDir(){
+    return outputpath;
+}
+
 
 /** parentDirectoryOfPath
 * Function which given a path removes the last segment, copying into a pre-defined buffer.
