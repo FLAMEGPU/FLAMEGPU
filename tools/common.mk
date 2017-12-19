@@ -125,7 +125,7 @@ override SMS = $(TMP_SMS)
 
 # Flags used for compilation.
 # NVCC compiler flags
-NVCCFLAGS   := -m64 -lineinfo
+NVCCFLAGS   := -m64
 # Host compiler flags (gcc/cicc etc), passed to nvcc using -Xcompiler
 CCFLAGS     := 
 # NVCC linker flags
@@ -136,10 +136,12 @@ LDFLAGS     :=
 # By default, the mode type is relase and build director
 Mode_TYPE := Release
 
-# Debug specific build flags and variables
+# Release/Debug specific build flags and variables
 ifeq ($(debug),1)
-	  NVCCFLAGS += -g -G -DDEBIG -D_DEBUG
-	  Mode_TYPE := Debug
+	NVCCFLAGS += -g -G -DDEBIG -D_DEBUG
+	Mode_TYPE := Debug
+else
+	NVCCFLAGS += -lineinfo
 endif
 
 # Compute the actual build directory, by appending the mode type.
