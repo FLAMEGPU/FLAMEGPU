@@ -38,6 +38,9 @@ char outputpath[1000];         /**&lt; Output path char buffer*/
 // Define the default value indicating if XML output should be produced or not.
 #define OUTPUT_TO_XML 1
 
+#define HELP_OPTION_SHORT "-h"
+#define HELP_OPTION_LONG "--help"
+
 /** checkUsage
  * Function to check the correct number of arguments
  * @param arc	main argument count
@@ -68,33 +71,43 @@ int checkUsage(int argc, char** argv) {
 		strncpy(executable, argv[0] + last, substrLen);
 	}
 
+	// Iterate each argument, looking for the help flag.
+	bool helpFlagFound = false;
+	for(int index = 1; index &lt; argc; index++){
+		if(strcmp(HELP_OPTION_SHORT, argv[index]) == 0 || strcmp(HELP_OPTION_LONG, argv[index]) == 0){
+			helpFlagFound = true;
+			break;
+		}
+	}
 
 	//Check usage
 #ifdef VISUALISATION
 	printf("FLAMEGPU Visualisation mode\n");
-	if(argc &lt; 2)
+	if(helpFlagFound || argc &lt; 2 || argc &gt; 3)
 	{
-		printf("\nusage: %s input_path [cuda_device_id]\n", executable != nullptr ? executable : "main");
+		printf("\nusage: %s [-h] [--help] input_path [cuda_device_id]\n", executable != nullptr ? executable : "main");
 		printf("\n");
 		printf("required arguments:\n");
 		printf("  input_path           Path to initial states XML file OR path to output XML directory\n");
 		printf("\n");
 		printf("options arguments:\n");
-		printf("  cuda_device_id       CUDA device ID to be used. Default is 0.\n");
+		printf("  -h, --help           Output this help message.\n");
+		printf("  cuda_device_id       CUDA device ID to be used. Default is 0\n");
 		// Set the appropriate return value
 		retval = false;
 	}
 #else
 	printf("FLAMEGPU Console mode\n");
-	if(argc &lt; 3)
+	if(helpFlagFound || argc &lt; 3 || argc &gt; 5)
 	{
-		printf("\nusage: %s input_path num_iterations [cuda_device_id] [XML_output_override]\n", executable != nullptr ? executable : "main");
+		printf("\nusage: %s [-h] [--help] input_path num_iterations [cuda_device_id] [XML_output_override]\n", executable != nullptr ? executable : "main");
 		printf("\n");
 		printf("required arguments:\n");
 		printf("  input_path           Path to initial states XML file OR path to output XML directory\n");
 		printf("  num_iterations       Number of simulation iterations\n");
 		printf("\n");
 		printf("options arguments:\n");
+		printf("  -h, --help           Output this help message.\n");
 		printf("  cuda_device_id       CUDA device ID to be used. Default is 0.\n");
 		printf("  XML_output_override  Flag indicating if iteration data should be output as XML\n");
 		printf("                       0 = false, 1 = true. Default %d\n", OUTPUT_TO_XML);
