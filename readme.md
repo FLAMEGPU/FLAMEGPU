@@ -78,7 +78,7 @@ cd examples/EmptyExample/
 make Visualisation
 ```
 
-*Debug* mode executables can be built by specifying *dbg=1* to make, `make all dbg=1`.
+*Debug* mode executables can be built by specifying *debug=1* to make, `make all debug=1`.
 
 For more information on building FLAME GPU via make, run `make help` in an example directory.
 
