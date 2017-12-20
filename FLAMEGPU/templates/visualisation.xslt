@@ -4,25 +4,25 @@
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
 <xsl:template match="/">
-/*
-* FLAME GPU v 1.4.0 for CUDA 6
-* Copyright 2015 University of Sheffield.
-* Author: Dr Paul Richmond
-* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
-*
-* University of Sheffield retain all intellectual property and
-* proprietary rights in and to this software and related documentation.
-* Any use, reproduction, disclosure, or distribution of this software
-* and related documentation without an express license agreement from
-* University of Sheffield is strictly prohibited.
-*
-* For terms of licence agreement please attached licence or view licence
-* on www.flamegpu.com website.
-*
-*/
+  /*
+  * FLAME GPU v 1.5.X for CUDA 9
+  * Copyright University of Sheffield.
+  * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+  *
+  * University of Sheffield retain all intellectual property and
+  * proprietary rights in and to this software and related documentation.
+  * Any use, reproduction, disclosure, or distribution of this software
+  * and related documentation without an express license agreement from
+  * University of Sheffield is strictly prohibited.
+  *
+  * For terms of licence agreement please attached licence or view licence
+  * on www.flamegpu.com website.
+  *
+  */
 
-// includes, project
-#include &lt;cuda_runtime.h&gt;
+  // includes, project
+  #include &lt;cuda_runtime.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
@@ -191,25 +191,29 @@ __global__ void output_<xsl:value-of select="xmml:name"/>_agent_to_VBO(xmachine_
 	vbo[index].y = 0.0;
 	vbo[index].z = 0.0;
 	
-	<xsl:choose>
-		<xsl:when test="xmml:memory/gpu:variable/xmml:name='x'">vbo[index].x = agents->x[index] - centralise.x;</xsl:when>
+    <xsl:choose>
+    <xsl:when test="xmml:memory/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">vbo[index].x = agents->position[index].x - centralise.x;</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='x'">vbo[index].x = agents->x[index] - centralise.x;</xsl:when>
     <xsl:when test="gpu:type='discrete' and xmml:memory/gpu:variable/xmml:name='location_id'">vbo[index].x = (agents->location_id[index] % population_width) - centralise.x;</xsl:when>
-		<xsl:otherwise>vbo[index].x = 0.0;</xsl:otherwise>
-	</xsl:choose><xsl:text>
-	</xsl:text><xsl:choose>
-		<xsl:when test="xmml:memory/gpu:variable/xmml:name='y'">vbo[index].y = agents->y[index] - centralise.y;</xsl:when>
+    <xsl:otherwise>vbo[index].x = 0.0;</xsl:otherwise>
+    </xsl:choose><xsl:text>
+    </xsl:text><xsl:choose>
+    <xsl:when test="xmml:memory/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">vbo[index].y = agents->position[index].y - centralise.x;</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='y'">vbo[index].y = agents->y[index] - centralise.y;</xsl:when>
     <xsl:when test="gpu:type='discrete' and xmml:memory/gpu:variable/xmml:name='location_id'">vbo[index].y = floor((float)agents->location_id[index] / (float)population_width) - centralise.y;</xsl:when>
-		<xsl:otherwise>vbo[index].y = 0.0;</xsl:otherwise>
-	</xsl:choose><xsl:text>
-	</xsl:text><xsl:choose>
-		<xsl:when test="xmml:memory/gpu:variable/xmml:name='z'">vbo[index].z = agents->z[index] - centralise.z;</xsl:when>
-		<xsl:otherwise>vbo[index].z = 0.0;</xsl:otherwise>
-	</xsl:choose><xsl:text>
-	</xsl:text><xsl:choose>
-		<xsl:when test="xmml:memory/gpu:variable/xmml:name='state'">vbo[index].w = agents->state[index];</xsl:when>
-        <xsl:when test="xmml:memory/gpu:variable/xmml:name='type'">vbo[index].w = agents->type[index];</xsl:when>
-		<xsl:otherwise>vbo[index].w = 1.0;</xsl:otherwise>
-	</xsl:choose>
+    <xsl:otherwise>vbo[index].y = 0.0;</xsl:otherwise>
+    </xsl:choose><xsl:text>
+    </xsl:text><xsl:choose>
+    <xsl:when test="xmml:memory/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">vbo[index].z = agents->position[index].z - centralise.x;</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='z'">vbo[index].z = agents->z[index] - centralise.z;</xsl:when>
+    <xsl:otherwise>vbo[index].z = 0.0;</xsl:otherwise>
+    </xsl:choose><xsl:text>
+    </xsl:text><xsl:choose>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='colour'">vbo[index].w = agents->colour[index];</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='state'">vbo[index].w = agents->state[index];</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='type'">vbo[index].w = agents->type[index];</xsl:when>
+    <xsl:otherwise>vbo[index].w = 1.0;</xsl:otherwise>
+    </xsl:choose>
 }
 </xsl:for-each>
 

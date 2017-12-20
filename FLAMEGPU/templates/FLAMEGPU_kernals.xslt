@@ -5,7 +5,7 @@
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
 
   
-<!--Recursive template for function condititions-->
+<!--Recursive template for function conditions-->
 <xsl:template match="xmml:condition">(<xsl:choose>
 <xsl:when test="xmml:lhs/xmml:value"><xsl:value-of select="xmml:lhs/xmml:value"/>
 </xsl:when>
@@ -22,7 +22,7 @@
 </xsl:otherwise>
 </xsl:choose>)</xsl:template>
 
-<!--Recursive template for function global condititions-->
+<!--Recursive template for function global conditions-->
 <xsl:template match="gpu:globalCondition">(<xsl:choose>
 <xsl:when test="xmml:lhs/xmml:value"><xsl:value-of select="xmml:lhs/xmml:value"/>
 </xsl:when>
@@ -43,9 +43,9 @@
 <xsl:template match="/">
 
 /*
-* FLAME GPU v 1.4.0 for CUDA 6
-* Copyright 2015 University of Sheffield.
-* Author: Dr Paul Richmond
+* FLAME GPU v 1.5.X for CUDA 9
+* Copyright University of Sheffield.
+* Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
 * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
 *
 * University of Sheffield retain all intellectual property and
@@ -929,8 +929,7 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(glm::ive
 
 		if (index >= agent_count)
 			return;
-
-		glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
+        glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
 		glm::ivec3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 		unsigned int hash = message_<xsl:value-of select="xmml:name"/>_hash(grid_position);
 		unsigned int bin_idx = atomicInc((unsigned int*) &amp;global_bin_count[hash], 0xFFFFFFFF);
@@ -972,8 +971,7 @@ __device__ unsigned int message_<xsl:value-of select="xmml:name"/>_hash(glm::ive
 	__global__ void hash_<xsl:value-of select="xmml:name"/>_messages(uint* keys, uint* values, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages)
 	{
 		unsigned int index = (blockIdx.x * blockDim.x) + threadIdx.x;
-
-		glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
+        glm::vec3 position = glm::vec3(messages->x[index], messages->y[index], messages->z[index]);
 		glm::ivec3 grid_position = message_<xsl:value-of select="xmml:name"/>_grid_position(position);
 		unsigned int hash = message_<xsl:value-of select="xmml:name"/>_hash(grid_position);
 

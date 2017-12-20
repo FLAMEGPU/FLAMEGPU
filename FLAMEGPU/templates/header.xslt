@@ -4,22 +4,22 @@
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
 <xsl:template match="/">
-	/*
-	* FLAME GPU v 1.4.0 for CUDA 6
-	* Copyright 2015 University of Sheffield.
-	* Author: Dr Paul Richmond
-	* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
-	*
-	* University of Sheffield retain all intellectual property and
-	* proprietary rights in and to this software and related documentation.
-	* Any use, reproduction, disclosure, or distribution of this software
-	* and related documentation without an express license agreement from
-	* University of Sheffield is strictly prohibited.
-	*
-	* For terms of licence agreement please attached licence or view licence
-	* on www.flamegpu.com website.
-	*
-	*/
+/*
+* FLAME GPU v 1.5.X for CUDA 9
+* Copyright University of Sheffield.
+* Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+*
+* University of Sheffield retain all intellectual property and
+* proprietary rights in and to this software and related documentation.
+* Any use, reproduction, disclosure, or distribution of this software
+* and related documentation without an express license agreement from
+* University of Sheffield is strictly prohibited.
+*
+* For terms of licence agreement please attached licence or view licence
+* on www.flamegpu.com website.
+*
+*/
 
 #ifndef __HEADER
 #define __HEADER
@@ -41,6 +41,19 @@
 
 typedef unsigned int uint;
 
+//FLAME GPU vector types float, (i)nteger, (u)nsigned integer, (d)ouble
+typedef glm::vec2 fvec2;
+typedef glm::vec3 fvec3;
+typedef glm::vec4 fvec4;
+typedef glm::ivec2 ivec2;
+typedef glm::ivec3 ivec3;
+typedef glm::ivec4 ivec4;
+typedef glm::uvec2 uvec2;
+typedef glm::uvec3 uvec3;
+typedef glm::uvec4 uvec4;
+typedef glm::dvec2 dvec2;
+typedef glm::dvec3 dvec3;
+typedef glm::dvec4 dvec4;
 
 	<xsl:if test="gpu:xmodel/xmml:messages/gpu:message/xmml:variables/gpu:variable/xmml:type='double' or gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable/xmml:type='double'">
 //if this is defined then the project must be built with sm_13 or later
@@ -498,12 +511,12 @@ typedef enum {
 </xsl:if>
 
 
-<xsl:if test="xmml:type='int'">
-<xsl:if test="not(xmml:arrayLength)"> <!-- Disable agent array reductions -->
+<xsl:if test="contains(xmml:type, 'int')"> <!-- Any datatype based of int including vector types can perform counts -->
+<xsl:if test="not(xmml:arrayLength)"> <!-- Disable agent array reductions (vector types ok) -->
 /** <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
- * @return The number of unique values of the count_value found in the agent state varaible list
+ * @return The number of unique values of the count_value found in the agent state variable list
  */
 <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value);
 </xsl:if>
