@@ -27,7 +27,7 @@
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
-          <name>state</name>
+          <name>colour</name>
         </gpu:variable>
       </memory>
       <functions>
