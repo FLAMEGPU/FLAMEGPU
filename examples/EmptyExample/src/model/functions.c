@@ -36,32 +36,32 @@ __FLAME_GPU_FUNC__ int output_example(xmachine_memory_example_agent* agent, xmac
     // This is not how these values should be used, as they map to the case variable.
     switch(index){
         case 0:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_BLACK;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_BLACK;
             break;
         case 1:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_RED;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_RED;
             break;
         case 2:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_GREEN;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_GREEN;
             break;
         case 3:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_BLUE;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_BLUE;
             break;
         case 4:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_YELLOW;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_YELLOW;
             break;
         case 5:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_CYAN;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_CYAN;
             break;
         case 6:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_MAGENTA;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_MAGENTA;
             break;
         case 7:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_WHITE;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_WHITE;
             break;
         case 8:
         default:
-            agent->state = FLAME_GPU_VISUALISATION_COLOUR_BROWN;
+            agent->colour = FLAME_GPU_VISUALISATION_COLOUR_BROWN;
             break;
     }
 
