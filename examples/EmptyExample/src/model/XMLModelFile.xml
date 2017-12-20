@@ -14,12 +14,20 @@
       <name>example_agent</name>
       <memory>
         <gpu:variable>
+          <type>int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
           <type>float</type>
           <name>x</name>
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
           <name>y</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>colour</name>
         </gpu:variable>
       </memory>
       <functions>
