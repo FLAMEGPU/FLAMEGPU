@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{34AFE3CE-9AAE-4A46-B7C2-9CF569D43A8C}</ProjectGuid>
+    <ProjectGuid>{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}</ProjectGuid>
     <RootNamespace>Boids_PartitioningVecTypes_</RootNamespace>
     <ProjectName>Boids_PartitioningVecTypes</ProjectName>
   </PropertyGroup>
