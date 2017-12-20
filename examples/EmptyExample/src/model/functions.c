@@ -31,13 +31,6 @@
 __FLAME_GPU_FUNC__ int output_example(xmachine_memory_example_agent* agent, xmachine_message_example_message_list* example_message_messages){
 
     
-    /* //Template for message output function use 
-     * 
-     * float x = 0;
-     * float y = 0;
-     * add_example_message_message(example_message_messages, x, y);
-     */
-     
     // Arbitrary colour selection, as an example.
     int index = ((int)agent->id) % NUM_COLOURS;
     // This is not how these values should be used, as they map to the case variable.
@@ -72,8 +65,6 @@ __FLAME_GPU_FUNC__ int output_example(xmachine_memory_example_agent* agent, xmac
             break;
     }
 
-     
-  
     return 0;
 }
 
