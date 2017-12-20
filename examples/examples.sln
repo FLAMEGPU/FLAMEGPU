@@ -29,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sugarscape", "Sugarscape\Su
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Analytics", "Analytics\Analytics.vcxproj", "{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Boids_PartitioningVecTypes", "Boids_PartitioningVecTypes\Boids_PartitioningVecTypes.vcxproj", "{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Console|x64 = Debug_Console|x64
@@ -141,6 +143,14 @@ Global
 		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Release_Console|x64.Build.0 = Release_Console|x64
 		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Release_Visualisation|x64.ActiveCfg = Release_Console|x64
 		{E031A94A-DF28-431A-BFC9-7C0C3F10B8FC}.Release_Visualisation|x64.Build.0 = Release_Console|x64
+		{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
+		{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}.Debug_Console|x64.Build.0 = Debug_Console|x64
+		{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
+		{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}.Debug_Visualisation|x64.Build.0 = Debug_Visualisation|x64
+		{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}.Release_Console|x64.ActiveCfg = Release_Console|x64
+		{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}.Release_Console|x64.Build.0 = Release_Console|x64
+		{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}.Release_Visualisation|x64.ActiveCfg = Release_Visualisation|x64
+		{1A93EB98-2C9B-477A-B0E5-AE9B53E2CE12}.Release_Visualisation|x64.Build.0 = Release_Visualisation|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
