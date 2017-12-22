@@ -186,6 +186,27 @@ TARGET_CONSOLE := $(BIN_DIR)/$(Mode_TYPE)_Console/$(EXAMPLE)$(BIN_EXT)
 # Dependancies for the targets
 CONSOLE_DEPENDANCIES := $(BUILD_DIR)/io.cu$(OBJ_EXT) $(BUILD_DIR)/simulation.cu$(OBJ_EXT) $(BUILD_DIR)/main_console.cu$(OBJ_EXT)
 
+DISABLED_XSLT_TRANSFORMS :=
+
+ifeq ($(TRANSFORM_HEADER_XSLT_DISABLED),1)
+DISABLED_XSLT_TRANSFORMS += $(SRC_DYNAMIC)/header.h
+endif
+ifeq ($(TRANSFORM_FLAMEGPU_KERNALS_XSLT_DISABLED),1)
+DISABLED_XSLT_TRANSFORMS += $(SRC_DYNAMIC)/FLAMEGPU_kernals.cu
+endif
+ifeq ($(TRANSFORM_IO_XSLT_DISABLED),1)
+DISABLED_XSLT_TRANSFORMS += $(SRC_DYNAMIC)/io.cu
+endif
+ifeq ($(TRANSFORM_SIMULATION_XSLT_DISABLED),1)
+DISABLED_XSLT_TRANSFORMS += $(SRC_DYNAMIC)/simulation.cu
+endif
+ifeq ($(TRANSFORM_MAIN_XSLT_DISABLED),1)
+DISABLED_XSLT_TRANSFORMS += $(SRC_DYNAMIC)/main.cu
+endif
+ifeq ($(TRANSFORM_VISUALISTION_XSLT_DISABLED),1)
+DISABLED_XSLT_TRANSFORMS += $(SRC_DYNAMIC)/visualistion.cu
+endif
+
 # If this is not a custom visualistaion
 ifeq ($(CUSTOM_VISUALISATION), 0)
 # List of Dynamic FLAME GPU files
@@ -225,7 +246,7 @@ CUSTOM_VISUALISATION_OBJECTS := $(CUSTOM_VISUALISATION_C_OBJECTS) $(CUSTOM_VISUA
 VISUALISATION_DEPENDANCIES := $(BUILD_DIR)/io.cu$(OBJ_EXT) $(BUILD_DIR)/simulation.cu$(OBJ_EXT) $(BUILD_DIR)/main_visualisation.cu$(OBJ_EXT) $(CUSTOM_VISUALISATION_OBJECTS)
 endif
 
-XLST_FUNCTIONS_C := $(SRC_DYNAMIC)/functions.c
+XSLT_FUNCTIONS_C := $(SRC_DYNAMIC)/functions.c
 
 # Verify that atleast one SM value has been specified.
 ifeq ($(SMS),)
@@ -267,7 +288,7 @@ endif
 xslt: validate $(XSLT_OUTPUT_FILES)
 
 # Create functions.c prototypes as a differently named file, to avoid overwriting user code.
-functions.c: validate $(XLST_FUNCTIONS_C)
+functions.c: validate $(XSLT_FUNCTIONS_C)
 
 # Create the console version of this application, inlcuding directory creation and validation of the XML Model
 console: makedirs validate $(TARGET_CONSOLE)
@@ -279,35 +300,65 @@ endif
 
 # Rule to create header.h from XSLT. Depends upon both header.xslt and the XML file, so if either is changed a re-build will occur.
 $(SRC_DYNAMIC)/%.h: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
+# Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
 endif
+# If the target file is not in the list of disabled targets, use the platform dependant method of generating the xlst or not. 
 ifeq ($(OS),Windows_NT)
-	$(XSLTPROC) $(XML_MODEL_FILE) $< $@
+	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
+		$(XSLTPROC) $(XML_MODEL_FILE) $< $@ ;\
+	else \
+		echo "  Transformation of $@ is disabled.";\
+    fi;
 else
-	$(XSLTPROC) $< $(XML_MODEL_FILE) > $@
+	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
+		$(XSLTPROC) $< $(XML_MODEL_FILE) > $@ ;\
+	else \
+		echo "  Transformation of $@ is disabled.";\
+    fi;
 endif
 
 # Rule to create *.cu files in the dynamic folder, as requested by build dependencies.
 $(SRC_DYNAMIC)/%.cu: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
+# Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
 endif
+# If the target file is not in the list of disabled targets, use the platform dependant method of generating the xlst or not. 
 ifeq ($(OS),Windows_NT)
-	$(XSLTPROC) $(XML_MODEL_FILE) $< $@
+	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
+		$(XSLTPROC) $(XML_MODEL_FILE) $< $@ ;\
+	else \
+		echo "  Transformation of $@ is disabled.";\
+    fi;
 else
-	$(XSLTPROC) $< $(XML_MODEL_FILE) > $@
+	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
+		$(XSLTPROC) $< $(XML_MODEL_FILE) > $@ ;\
+	else \
+		echo "  Transformation of $@ is disabled.";\
+    fi;
 endif
 
 # Rule to create functsion.c file in the dynamic folder.
 $(SRC_DYNAMIC)/%.c: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
+# Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
 endif
+# If the target file is not in the list of disabled targets, use the platform dependant method of generating the xlst or not. 
 ifeq ($(OS),Windows_NT)
-	$(XSLTPROC) $(XML_MODEL_FILE) $< $@
+	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
+		$(XSLTPROC) $(XML_MODEL_FILE) $< $@ ;\
+	else \
+		echo "  Transformation of $@ is disabled.";\
+    fi;
 else
-	$(XSLTPROC) $< $(XML_MODEL_FILE) > $@
+	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
+		$(XSLTPROC) $< $(XML_MODEL_FILE) > $@ ;\
+	else \
+		echo "  Transformation of $@ is disabled.";\
+    fi;
 endif
 
 # Explicit rules for object files in the dynamic folder.

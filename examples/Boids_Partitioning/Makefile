@@ -40,8 +40,16 @@ EXAMPLE_BIN_DIR := $(FLAMEGPU_ROOT)bin
 # Directory for temprorary files
 EXAMPLE_BUILD_DIR := ./build
 
-# Custom gencode arguments for this model (if any), otherwise the defaults for FALME GPU are used from common.mk
-# SMS ?= 30 35 37 50 60
+# Custom gencode arguments for this model (if any), otherwise the defaults for FLAME GPU are used from common.mk
+# SMS ?= 50 60
+
+# Optionally Disable XSLT generation of certain files. 
+# TRANSFORM_HEADER_XSLT_DISABLED := 1
+# TRANSFORM_FLAMEGPU_KERNALS_XSLT_DISABLED := 1
+# TRANSFORM_IO_XSLT_DISABLED := 1
+# TRANSFORM_SIMULATION_XSLT_DISABLED := 1
+# TRANSFORM_MAIN_XSLT_DISABLED := 1
+# TRANSFORM_VISUALISTION_XSLT_DISABLED := 1
 
 # Include the comman makefile from the tools directory.
 # If you wish to make a standalone project, you can simply replace this line with the contents of the common.mk file
