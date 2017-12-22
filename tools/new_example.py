@@ -66,7 +66,7 @@ def update_files(target_dir, target_name, base_name):
                         newline = line.replace(base_name, target_name)
                         file.write(newline)
             except Exception as e:
-                print("Exception whilst writing {:}\n > {:}".format(fpathe))
+                print("Exception whilst writing {:}\n > {:}".format(fpath, e))
                 return False
     return True
 
