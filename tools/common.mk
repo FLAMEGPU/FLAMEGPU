@@ -38,7 +38,6 @@ BIN_EXT :=
 ifeq ($(OS),Windows_NT)
 	OS_BIN_DIR := x64
 	OS_BUILD_DIR := x64
-	OS_LIB_DIR :=
 	# Override default values for windows.
 	BIN_EXT := .exe
 	OBJ_EXT := .obj
@@ -47,7 +46,6 @@ else
 	ifeq ($(UNAME_S),Linux)
 		OS_BIN_DIR := linux-x64
 		OS_BUILD_DIR := linux-x64
-		OS_LIB_DIR := x86_64-linux-gnu
 	endif
 endif
 
@@ -59,7 +57,7 @@ BUILD_DIR := $(EXAMPLE_BUILD_DIR)/$(OS_BUILD_DIR)
 # Path to FLAME GPU include directory
 INCLUDE_DIR := $(FLAMEGPU_ROOT)include
 # Path to FLAME GPU Lib directory (OS specific)
-LIB_DIR := $(FLAMEGPU_ROOT)lib/$(OS_LIB_DIR)
+LIB_DIR := $(FLAMEGPU_ROOT)lib/
 
 # Path to the FLAME GPU Templates directory
 TEMPLATES_DIR := $(FLAMEGPU_ROOT)FLAMEGPU/templates
@@ -153,11 +151,8 @@ else
 		# Pass specific nvcc flags for linux
 		NVCCFLAGS += -std=c++11
 		CCFLAGS += -Wall
-		# Pass directory to lib files
-		NVCCLDFLAGS += -L$(LIB_DIR)
-		# Path to the library shard object files relative to the final bin directory location.
-		#@todo - this needs to be a path from the user specified bin directory, to the LIB directory for the OS.
-		LD_RUN_PATH := LD_RUN_PATH='LD_RUN_PATH=$$ORIGIN/../$(LIB_DIR)'
+		# On linux, we assume users have the required files available on their system rather than requring explcit linking.
+		# NVCCLDFLAGS += -L$(LIB_DIR)
 		# Specify linux specific shared libraries to link against
 		LINK_ARCHIVES_VISUALISATION := -lglut -lGLEW -lGLU -lGL
 	endif
