@@ -145,25 +145,25 @@ The Library, examples and all source code are covered by the [LICENSE](LICENSE).
 
 ### [1.5.0](https://github.com/FLAMEGPU/FLAMEGPU/releases/tag/v1.5.0)
 
-+ **@todo - Final Changelog.**
-+ Supports CUDA 8.0
-+ Removed SM20 and SM21
-+ Visual Studio 2015
-+ Improved Linux Support via makefiles
-+ Adds Step-functions executed between subsequent iterations
-+ Adds parallel reduction for use in Init, Step and Exit functions
-+ Additional Command line options
-+ Documentation now hosted on readthedocs
++ Documentation now hosted on readthedocs, http://docs.flamegpu.com and https://github.com/flamegpu/docs
++ Supports CUDA 8 and CUDA 9
+    + Removed SM20 and SM21 support from the default build settings (Deprecated / Removed by CUDA 8.0 / 9.0)
++ Updated Visual Studio version to 2015
++ Improved linux support by upgraded Makefiles
 + Additional example projects
-+ Deprecates the use of `state` as an agent variable to control colour in the default visualisation
-+ Adds the use of `colour` agent variable to control agent colour in the default visualisation
-+ Adds the abillity to pause the default visualisation, and increment one step at a time
-+ Various additional macros defined to improve quality of life
-+ Various bugfixes
 + `Template` example has been renamed `EmptyExample`
 + `tools/new_example.py` to quickly create a new example project.
-+ Adds instrumentation for simple performance measurement
++ Various bugfixes
++ Adds step-functions
++ Adds host-based agent creation for init and step functions
++ Adds parallel reductions for use in init, step and exit functions
++ Additional command line options
 + Environmental variables can now be loaded from 0.xml
++ Adds the use of `colour` agent variable to control agent colour in the default visualisation
++ Additional controls for the default visualisation
++ Macro definitions for default visualisation colours
++ Macro definitions for message partitioning strategy
++ Adds instrumentation for simple performance measurement via preprocessor macros
 + Improved `functions.xslt` output
 + Improved state model diagram generator
 
