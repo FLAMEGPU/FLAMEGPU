@@ -1,7 +1,6 @@
 ################################################################################
 #
-# FLAME GPU Makefile for CUDA 7.5 and above
-#
+# FLAME GPU Makefile for batch compilation of all examples 
 # Copyright 2017 University of Sheffield.  All rights reserved.
 #
 # Authors : Dr Mozhgan Kabiri Chimeh, Dr Paul Richmond
@@ -38,6 +37,8 @@ help:
 	@echo "    clobber       -> Deletes all generated files including executables"
 	@echo ""
 	@echo "  Arguments":
+	@echo "    On first modifcation of values using this method ensure that files are"
+	@echo "    rebuilt by using 'make'."
 	@echo ""
 	@echo "    debug=<arg> -> Builds target in 'Release' or 'Debug' mode"
 	@echo "                     0 : Release (Default)"
@@ -45,8 +46,6 @@ help:
 	@echo "                     I.e. 'make all debug=1'"
 	@echo "    SMS=<arg>   -> Builds target for the specified CUDA architectures"
 	@echo "                     I.e. 'make all SMS=60 61'"
-	@echo "                     Defaults to: '$(SMS)'"
-	@echo "                     Note: 'make clean' is required prior to using new values"
 	@echo "************************************************************************"
 
 
