@@ -43,13 +43,18 @@ FLAME GPU can be built for Windows and Linux. MacOS *should* work, but is unsupp
     + Compute Capability 3.0 or greater GPU (CUDA 9)
 + Windows
     + Microsoft Visual Studio 2015 or later
-    + *Visualisation*: **@todo**
+    + *Visualisation*:
+        + `freeglut` and `glew` are included with FLAME GPU.
     + *Optional*: make
 + Linux
     + `make`
     + `g++` (which supports the cuda version used)
     + `xsltproc`
-    + *Visualistion*: **@todo**
+    + *Visualistion*:
+        + `GL` (deb: `libgl1-mesa-dev`, yum: `mesa-libGL-devel`)
+        + `GLU` (deb: `libglu1-mesa-dev`, yum: `mesa-libGLU-devel`)
+        + `GLEW` (deb: `libglew-dev`, yum: `glew-devel`)
+        + `GLUT` (deb: `freeglut3-dev`, yum: `freeglut-devel`)
     + *Optional*: `xmllint`
 
 
