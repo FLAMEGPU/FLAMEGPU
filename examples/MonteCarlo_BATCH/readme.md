@@ -24,7 +24,7 @@ git clone https://github.com/FLAMEGPU/FLAMEGPU.git
 
 Going forward, you will want to pull from the _master_ branch, which will always contain the last known release.
 
-4\. Build the SDK in Release mode (this is the default mode)
+4\. Build the example in Release mode (this is the default mode)
 
 - Batch Simulation
 ```bash
@@ -69,6 +69,60 @@ gnuplot plot_cs2.plt
 ```
 
 8\. For the detailed information and the performance results, please view this [document](FLAMEGPU/doc/Notes_on_Monte_Carlo_Simulation.pdf).
+
+
+## How to setup, build, and run MonteCarlo examples on Windows
+
+1\. Download and install the windows dependancies for FLAME GPU, and these Montecarlo exmaples
+
+- Microsoft Visual Studio 2015 or later.
+- CUDA 8.0 or Later
+- git
+- gnuplot
+
+3\. Clone the project using Git (it will be stored in the folder "FLAMEGPU"):  
+
+```bash
+git clone https://github.com/FLAMEGPU/FLAMEGPU.git
+```
+
+4\. Open the visual studio solution for the relevant exampl, `MCBatch` or `MC_MSMPR`.
+
+5\. Build both projects within the visual studio solution - both the FLAME GPU model, and `InputGenerator`.
+
+5\. To generate charge using the `InputGenerator`, simply run the script `generate_charge.bat` (or `generate_charge.sh` using bash) in `iterations` folder.
+
+6\. After building the executable and generating charge, run the example. The following command will run a single iteration. 
+
+
+```batch
+cd examples\MonteCarlo_BATCH
+..\..\bin\x64\Release_Console\MonteCarlo_MSMPR iterations\0.xml 1
+```
+
+or
+
+```bash
+cd examples/MonteCarlo_BATCH
+../../bin/x64/Release_Console/MonteCarlo_MSMPR iterations/0.xml 1
+```
+
+
+7\. Plotting the histogram results for the simulation and the input charge.
+
+- Batch Simulation
+```bash
+cd examples/MonteCarlo_BATCH/iterations
+gnuplot plot_cs1.plt
+```
+- MSMPR Steady State Simulation
+```bash
+cd examples/MonteCarlo_MSMPR/iterations
+gnuplot plot_cs2.plt
+```
+
+8\. For the detailed information and the performance results, please view this [document](FLAMEGPU/doc/Notes_on_Monte_Carlo_Simulation.pdf).
+
 
 ## Bug reports
 
