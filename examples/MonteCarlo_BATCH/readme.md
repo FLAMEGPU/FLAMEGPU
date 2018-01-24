@@ -1,13 +1,15 @@
-# Introduction
+# FLAME GPU Example: MonteCarlo
+
+## Introduction
 
 Monte Carlo simulation is a method of solving deterministic problems by repeated random sampling. The purpose of this example is to show how multi-agent approach can be applied to Monte Carlo crystallization. We present a general method for implementing Monte Carlo simulation in both batch and continuous systems through two case studies (Batch and MSMPR) implemented within the FLAMEGPU simulation framework. The two case studies have been replicated through parallel implementation of GPU. The examples can be found in `examples/MonteCarlo_MSMPR` and `examples/MonteCarlo_BATCH`. We used the base concepts similar to Gooch and Hounslow’s paper [^1].
 
-# How to setup, build, and run MonteCarlo examples on Linux
+## How to setup, build, and run MonteCarlo examples on Linux
 
-1\. Install all the needed build tools and libraries  
+1\. Install all the needed build tools and libraries. Note that the version of GCC must be suitable for the installed version of CUDA.
 
 ```bash
-sudo apt-get install g++ git make libxml2-utils gnuplot
+sudo apt-get install g++ git make libxml2-utils xsltproc gnuplot
 ```
 
 Minimum versions:
@@ -49,7 +51,7 @@ g++ InputGenerator/inpGen.cpp -o inputGen
 
 ```bash
 cd examples/MonteCarlo_BATCH
-../../bin/linux-x64/Release_Console/MonteCarlo_BATCH iterations/0.xml 1
+../../bin/linux-x64/Release_Console/MonteCarlo_MSMPR iterations/0.xml 1
 ```
 
 
@@ -68,7 +70,7 @@ gnuplot plot_cs2.plt
 
 8\. For the detailed information and the performance results, please view this [document](FLAMEGPU/doc/Notes_on_Monte_Carlo_Simulation.pdf).
 
-# Bug reports
+## Bug reports
 
 To report a bug in this documentation or in the software or propose an improvement, please use the FLAMEGPU github issue tracker.
 [^1]: John R. van Peborgh Gooch and Michael J. Hounslow. Monte carlo simulation of size-enlargement mechanisms in crystallization.
