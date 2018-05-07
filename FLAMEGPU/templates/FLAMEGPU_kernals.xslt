@@ -1151,7 +1151,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:v
 	}
 	else
 	{
-		return false;
+		return NULL;
 	}
 }
 
@@ -1172,7 +1172,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 		return ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
 	}
 	else
-		return false;
+		return NULL;
 	
 }
 
