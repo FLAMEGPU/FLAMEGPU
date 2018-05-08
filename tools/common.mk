@@ -443,7 +443,7 @@ help:
 	@echo ""
 	@echo "  Arguments":
 	@echo "    On first modifcation of values using this method ensure that files are"
-	@echo "    rebuilt by using 'make'."
+	@echo "    rebuilt by using 'make -B <target> <args>'."
 	@echo ""
 	@echo "   debug=<arg>   Builds target in 'Release' or 'Debug' mode"
 	@echo "                   0 : Release (Default)"
