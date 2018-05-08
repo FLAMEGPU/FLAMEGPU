@@ -45,7 +45,7 @@ help:
 	@echo "                     1 : Debug"
 	@echo "                     I.e. 'make all debug=1'"
 	@echo "    SMS=<arg>   -> Builds target for the specified CUDA architectures"
-	@echo "                     I.e. 'make all SMS=60 61'"
+	@echo "                     I.e. 'make all SMS=\"60 61\"'"
 	@echo "************************************************************************"
 
 

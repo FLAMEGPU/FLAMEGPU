@@ -450,6 +450,6 @@ help:
 	@echo "                   1 : Debug"
 	@echo "                   I.e. 'make console debug=1'"
 	@echo "   SMS=<arg>     Builds target for the specified CUDA architectures"
-	@echo "                   I.e. 'make console SMS=60 61'"
+	@echo "                   I.e. 'make console SMS=\"60 61\"'"
 	@echo "                   Defaults to: '$(SMS)'"
 	@echo "************************************************************************"
