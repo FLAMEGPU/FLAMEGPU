@@ -101,6 +101,14 @@ NVCC_GE_9_0 = $(shell [ $(NVCC_MAJOR) -ge 9 ] && echo true)
 NVCC_GE_8_0 = $(shell [ $(NVCC_MAJOR) -ge 8 ] && echo true)
 
 
+# If SM has been specified in place of SMS, set the value appropriately.
+ifneq ($(SM),)
+ifeq ($(SMS),)
+SMS = $(SM)
+$(warning "Warning - 'SMS' should be specified rather than 'SM'. Using '$(SM)'.")
+endif
+endif
+
 # For the appropriate CUDA version, assign default SMS if required.
 ifeq ($(NVCC_GE_9_0),true)
 SMS ?= $(DEFAULT_SMS_CUDA_9)
