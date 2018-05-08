@@ -401,15 +401,15 @@ $(TARGET_CONSOLE): $(CONSOLE_DEPENDANCIES)
 
 # Clean object files, but do not regenerate xslt. `|| true` is used to support the case where dirs do not exist.
 clean:
-	find $(EXAMPLE_BUILD_DIR)/ -name '*$(OBJ_EXT)' -delete || true
-	find $(EXAMPLE_BUILD_DIR)/ -name '*.cu$(OBJ_EXT)' -delete || true
+	@find $(EXAMPLE_BUILD_DIR)/ -name '*$(OBJ_EXT)' -delete 2> /dev/null || true
+	@find $(EXAMPLE_BUILD_DIR)/ -name '*.cu$(OBJ_EXT)' -delete 2> /dev/null || true
 
 # Clobber all temporary files, including dynamic files and the target executable. `|| true` is used to support the case where dirs do not exist.
 clobber: clean
-	find $(SRC_DYNAMIC)/ -name '*.c' -delete || true
-	find $(SRC_DYNAMIC)/ -name '*.cu' -delete || true
-	find $(SRC_DYNAMIC)/ -name '*.h' -delete || true
-	find $(BIN_DIR)/ -name '$(EXAMPLE)$(BIN_EXT)' -delete || true
+	@find $(SRC_DYNAMIC)/ -name '*.c' -delete 2> /dev/null || true
+	@find $(SRC_DYNAMIC)/ -name '*.cu' -delete 2> /dev/null || true
+	@find $(SRC_DYNAMIC)/ -name '*.h' -delete 2> /dev/null || true
+	@find $(BIN_DIR)/ -name '$(EXAMPLE)$(BIN_EXT)' -delete 2> /dev/null || true
 
 # Create any required directories.
 makedirs:
