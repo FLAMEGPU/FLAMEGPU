@@ -1,5 +1,5 @@
 ################################################################################
-# FLAME GPU common Makefile rules for CUDA 7.5 and above
+# FLAME GPU common Makefile rules
 #
 # Copyright 2017 University of Sheffield.  All rights reserved.
 #
@@ -99,6 +99,14 @@ NVCC_GE_9_0 = $(shell [ $(NVCC_MAJOR) -ge 9 ] && echo true)
 NVCC_GE_8_0 = $(shell [ $(NVCC_MAJOR) -ge 8 ] && echo true)
 
 
+# If SM has been specified in place of SMS, set the value appropriately.
+ifneq ($(SM),)
+ifeq ($(SMS),)
+SMS = $(SM)
+$(warning "Warning - 'SMS' should be specified rather than 'SM'. Using '$(SM)'.")
+endif
+endif
+
 # For the appropriate CUDA version, assign default SMS if required.
 ifeq ($(NVCC_GE_9_0),true)
 SMS ?= $(DEFAULT_SMS_CUDA_9)
@@ -107,6 +115,13 @@ SMS ?= $(DEFAULT_SMS_CUDA_8)
 else
 SMS ?= $(DEFAULT_SMS_CUDA_6)
 endif
+
+# Incase SMS is comma separated, split the commas.
+comma:= ,
+empty:=
+space:= $(empty) $(empty)
+TMP_SMS:= $(subst $(comma),$(space),$(SMS))
+override SMS = $(TMP_SMS)
 
 # Flags used for compilation.
 # NVCC compiler flags
@@ -283,7 +298,7 @@ endif
 xslt: validate $(XSLT_OUTPUT_FILES)
 
 # Create functions.c prototypes as a differently named file, to avoid overwriting user code.
-functions.c: validate $(XSLT_FUNCTIONS_C)
+functions.c: validate $(XSLT_FUNCTIONS_C) $(MAKEFILE_LIST)
 
 # Create the console version of this application, inlcuding directory creation and validation of the XML Model
 console: makedirs validate $(TARGET_CONSOLE)
@@ -294,7 +309,7 @@ visualisation: makedirs validate $(TARGET_VISUALISATION)
 endif
 
 # Rule to create header.h from XSLT. Depends upon both header.xslt and the XML file, so if either is changed a re-build will occur.
-$(SRC_DYNAMIC)/%.h: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
+$(SRC_DYNAMIC)/%.h: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)  $(MAKEFILE_LIST)
 # Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
@@ -315,7 +330,7 @@ else
 endif
 
 # Rule to create *.cu files in the dynamic folder, as requested by build dependencies.
-$(SRC_DYNAMIC)/%.cu: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
+$(SRC_DYNAMIC)/%.cu: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(MAKEFILE_LIST)
 # Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
@@ -336,7 +351,7 @@ else
 endif
 
 # Rule to create functsion.c file in the dynamic folder.
-$(SRC_DYNAMIC)/%.c: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)
+$(SRC_DYNAMIC)/%.c: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(MAKEFILE_LIST)
 # Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
@@ -358,30 +373,30 @@ endif
 
 # Explicit rules for object files in the dynamic folder.
 # Explicit rules are used (rather than generic) as the dependancis are non-trivial (currently)
-$(BUILD_DIR)/io.cu$(OBJ_EXT): $(SRC_DYNAMIC)/io.cu $(SRC_DYNAMIC)/header.h
+$(BUILD_DIR)/io.cu$(OBJ_EXT): $(SRC_DYNAMIC)/io.cu $(SRC_DYNAMIC)/header.h $(MAKEFILE_LIST)
 	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
-$(BUILD_DIR)/simulation.cu$(OBJ_EXT): $(SRC_DYNAMIC)/simulation.cu $(SRC_DYNAMIC)/FLAMEGPU_kernals.cu $(FUNCTIONS_FILES) $(SRC_DYNAMIC)/header.h
+$(BUILD_DIR)/simulation.cu$(OBJ_EXT): $(SRC_DYNAMIC)/simulation.cu $(SRC_DYNAMIC)/FLAMEGPU_kernals.cu $(FUNCTIONS_FILES) $(SRC_DYNAMIC)/header.h $(MAKEFILE_LIST)
 	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
-$(BUILD_DIR)/main_console.cu$(OBJ_EXT): $(SRC_DYNAMIC)/main.cu $(SRC_DYNAMIC)/header.h
+$(BUILD_DIR)/main_console.cu$(OBJ_EXT): $(SRC_DYNAMIC)/main.cu $(SRC_DYNAMIC)/header.h $(MAKEFILE_LIST)
 	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
 ifeq ($(HAS_VISUALISATION), 1)
 # Visualisation specific dynamic file rules.
-$(BUILD_DIR)/main_visualisation.cu$(OBJ_EXT): $(SRC_DYNAMIC)/main.cu $(SRC_DYNAMIC)/header.h
+$(BUILD_DIR)/main_visualisation.cu$(OBJ_EXT): $(SRC_DYNAMIC)/main.cu $(SRC_DYNAMIC)/header.h $(MAKEFILE_LIST)
 	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
 # Only build visualistion$(OBJ_EXT) if not a custom visuations
 ifeq ($(CUSTOM_VISUALISATION), 0)
-$(BUILD_DIR)/visualisation.cu$(OBJ_EXT): $(SRC_DYNAMIC)/visualisation.cu $(SRC_VISUALISATION)/visualisation.h $(SRC_DYNAMIC)/header.h
+$(BUILD_DIR)/visualisation.cu$(OBJ_EXT): $(SRC_DYNAMIC)/visualisation.cu $(SRC_VISUALISATION)/visualisation.h $(SRC_DYNAMIC)/header.h $(MAKEFILE_LIST)
 	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
 else
 # Rules for custom visualistion compilation of c files
-$(BUILD_DIR)/%$(OBJ_EXT): $(SRC_VISUALISATION)/%.c
+$(BUILD_DIR)/%$(OBJ_EXT): $(SRC_VISUALISATION)/%.c $(MAKEFILE_LIST)
 	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
 # Rules for custom visualistion compilation of cpp files
-$(BUILD_DIR)/%$(OBJ_EXT): $(SRC_VISUALISATION)/%.cpp
+$(BUILD_DIR)/%$(OBJ_EXT): $(SRC_VISUALISATION)/%.cpp $(MAKEFILE_LIST)
 	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
 # Rules for custom visualistion compilation of cu files
-$(BUILD_DIR)/%.cu$(OBJ_EXT): $(SRC_VISUALISATION)/%.cu
+$(BUILD_DIR)/%.cu$(OBJ_EXT): $(SRC_VISUALISATION)/%.cu $(MAKEFILE_LIST)
 	$(EXEC) $(NVCC) $(CONSOLE_INCLUDES) $(VISUALISATION_INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -DVISUALISATION $<
 endif
 
@@ -396,15 +411,15 @@ $(TARGET_CONSOLE): $(CONSOLE_DEPENDANCIES)
 
 # Clean object files, but do not regenerate xslt. `|| true` is used to support the case where dirs do not exist.
 clean:
-	find $(EXAMPLE_BUILD_DIR)/ -name '*$(OBJ_EXT)' -delete || true
-	find $(EXAMPLE_BUILD_DIR)/ -name '*.cu$(OBJ_EXT)' -delete || true
+	@find $(EXAMPLE_BUILD_DIR)/ -name '*$(OBJ_EXT)' -delete 2> /dev/null || true
+	@find $(EXAMPLE_BUILD_DIR)/ -name '*.cu$(OBJ_EXT)' -delete 2> /dev/null || true
 
 # Clobber all temporary files, including dynamic files and the target executable. `|| true` is used to support the case where dirs do not exist.
 clobber: clean
-	find $(SRC_DYNAMIC)/ -name '*.c' -delete || true
-	find $(SRC_DYNAMIC)/ -name '*.cu' -delete || true
-	find $(SRC_DYNAMIC)/ -name '*.h' -delete || true
-	find $(BIN_DIR)/ -name '$(EXAMPLE)$(BIN_EXT)' -delete || true
+	@find $(SRC_DYNAMIC)/ -name '*.c' -delete 2> /dev/null || true
+	@find $(SRC_DYNAMIC)/ -name '*.cu' -delete 2> /dev/null || true
+	@find $(SRC_DYNAMIC)/ -name '*.h' -delete 2> /dev/null || true
+	@find $(BIN_DIR)/ -name '$(EXAMPLE)$(BIN_EXT)' -delete 2> /dev/null || true
 
 # Create any required directories.
 makedirs:
@@ -436,14 +451,15 @@ help:
 	@echo "   functions.c   Generates functions.c in the dynamic folder using xslt"
 	@echo "                   This file is for reference only. Not used in build."
 	@echo ""
-	@echo " Arguments:"
+	@echo "  Arguments":
+	@echo "    On first modifcation of values using this method ensure that files are"
+	@echo "    rebuilt by using 'make -B <target> <args>'."
 	@echo ""
 	@echo "   debug=<arg>   Builds target in 'Release' or 'Debug' mode"
 	@echo "                   0 : Release (Default)"
 	@echo "                   1 : Debug"
 	@echo "                   I.e. 'make console debug=1'"
 	@echo "   SMS=<arg>     Builds target for the specified CUDA architectures"
-	@echo "                   I.e. 'make console SMS=60 61'"
+	@echo "                   I.e. 'make console SMS=\"60 61\"'"
 	@echo "                   Defaults to: '$(SMS)'"
-	@echo "                   'make clean' is required prior to using new values"
 	@echo "************************************************************************"

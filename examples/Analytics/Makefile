@@ -1,6 +1,6 @@
 ################################################################################
 #
-# FLAME GPU Makefile for CUDA 7.5 and above
+# FLAME GPU Makefile
 #
 # Copyright 2017 University of Sheffield.  All rights reserved.
 #
