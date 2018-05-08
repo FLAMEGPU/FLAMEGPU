@@ -110,6 +110,13 @@ else
 SMS ?= $(DEFAULT_SMS_CUDA_6)
 endif
 
+# Incase SMS is comma separated, split the commas.
+comma:= ,
+empty:=
+space:= $(empty) $(empty)
+TMP_SMS:= $(subst $(comma),$(space),$(SMS))
+override SMS = $(TMP_SMS)
+
 # Flags used for compilation.
 # NVCC compiler flags
 NVCCFLAGS   := -m64 -lineinfo
