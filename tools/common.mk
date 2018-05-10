@@ -296,7 +296,7 @@ validate: $(XML_MODEL_FILE) $(XSD_SCHEMA_DIR)/XMMLGPU.xsd
 ifndef XMLLINT
 	$(warning "Warning: xmllint is not available, please install libxml2-utils to enable validation")
 else
-	@$(XMLLINT) --noout $(XML_MODEL_FILE) --schema $(XSD_SCHEMA_DIR)/XMMLGPU.xsd
+	$(XMLLINT) --noout $(XML_MODEL_FILE) --schema $(XSD_SCHEMA_DIR)/XMMLGPU.xsd
 endif
 
 # Target to use xsltproc to generate all dynamic files.
@@ -319,16 +319,18 @@ $(SRC_DYNAMIC)/%.h: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)  $(MAKEFILE_LIST)
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
 endif
-# If the target file is not in the list of disabled targets, use the platform dependant method of generating the xlst or not. 
+# If the target file is not in the list of disabled targets, use the platform dependant method of generating the xlst or not.
 ifeq ($(OS),Windows_NT)
 	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
 		$(XSLTPROC) $(XML_MODEL_FILE) $< $@ ;\
+		echo "$(XSLTPROC) $(XML_MODEL_FILE) $< $@";\
 	else \
 		echo "  Transformation of $@ is disabled.";\
     fi;
 else
 	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
 		$(XSLTPROC) $< $(XML_MODEL_FILE) > $@ ;\
+		echo "$(XSLTPROC) $< $(XML_MODEL_FILE) > $@";\
 	else \
 		echo "  Transformation of $@ is disabled.";\
     fi;
@@ -344,12 +346,14 @@ endif
 ifeq ($(OS),Windows_NT)
 	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
 		$(XSLTPROC) $(XML_MODEL_FILE) $< $@ ;\
+		echo "$(XSLTPROC) $(XML_MODEL_FILE) $< $@";\
 	else \
 		echo "  Transformation of $@ is disabled.";\
     fi;
 else
 	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
 		$(XSLTPROC) $< $(XML_MODEL_FILE) > $@ ;\
+		echo "$(XSLTPROC) $< $(XML_MODEL_FILE) > $@";\
 	else \
 		echo "  Transformation of $@ is disabled.";\
     fi;
@@ -365,12 +369,14 @@ endif
 ifeq ($(OS),Windows_NT)
 	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
 		$(XSLTPROC) $(XML_MODEL_FILE) $< $@ ;\
+		echo "$(XSLTPROC) $(XML_MODEL_FILE) $< $@";\
 	else \
 		echo "  Transformation of $@ is disabled.";\
     fi;
 else
 	@if [ ! $(findstring $@, $(DISABLED_XSLT_TRANSFORMS)) ]; then \
 		$(XSLTPROC) $< $(XML_MODEL_FILE) > $@ ;\
+		echo "$(XSLTPROC) $< $(XML_MODEL_FILE) > $@";\
 	else \
 		echo "  Transformation of $@ is disabled.";\
     fi;
