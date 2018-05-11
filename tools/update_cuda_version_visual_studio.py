@@ -112,7 +112,7 @@ def main():
     parser.add_argument(
         "--name",
         type=str,
-        help="Name of the new project, which should not already exist"
+        help="Name of a single example to update. If omitted, all examples will be modified."
     )
 
     parser.add_argument(
