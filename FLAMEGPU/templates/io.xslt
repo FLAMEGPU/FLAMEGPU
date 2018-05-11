@@ -27,7 +27,7 @@
         <xsl:when test="$type='fvec3'">%f, %f, %f</xsl:when>
         <xsl:when test="$type='dvec3'">%f, %f, %f</xsl:when>
         
-        <xsl:when test="$type='ivec3'">%d, %d, %d, %d</xsl:when>
+        <xsl:when test="$type='ivec4'">%d, %d, %d, %d</xsl:when>
         <xsl:when test="$type='uvec4'">%u, %u, %u, %u</xsl:when>
         <xsl:when test="$type='fvec4'">%f, %f, %f, %f</xsl:when>
         <xsl:when test="$type='dvec4'">%f, %f, %f, %f</xsl:when>
@@ -59,7 +59,6 @@
         <xsl:otherwise>0</xsl:otherwise> <!-- default output format is float -->
     </xsl:choose>
 </xsl:template>
-
 <!-- argument list generator for agent variable outputs -->
 <xsl:template name="outputVariable">
     <xsl:param name="agent_name"/>
@@ -69,7 +68,7 @@
     <xsl:choose>      
         <xsl:when test="contains($variable_type, '2')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].y</xsl:when>
         <xsl:when test="contains($variable_type, '3')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].y, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].z</xsl:when>
-        <xsl:when test="contains($variable_type, '3')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].y, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].z, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].w</xsl:when>
+        <xsl:when test="contains($variable_type, '4')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].y, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].z, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i].w</xsl:when>
         <xsl:otherwise>h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[i]</xsl:otherwise> <!-- default output format is scalar type -->
     </xsl:choose>
 </xsl:template>
@@ -83,12 +82,37 @@
     <xsl:choose>      
         <xsl:when test="contains($variable_type, '2')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].y</xsl:when>
         <xsl:when test="contains($variable_type, '3')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].y, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].z</xsl:when>
-        <xsl:when test="contains($variable_type, '3')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].y, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].z, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].w</xsl:when>
+        <xsl:when test="contains($variable_type, '4')">h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].x, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].y, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].z, h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i].w</xsl:when>
         <xsl:otherwise>h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state_name"/>-><xsl:value-of select="$variable_name"/>[(j*xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)+i]</xsl:otherwise> <!-- default output format is scalar type -->
     </xsl:choose>
 </xsl:template>
-  
-  
+
+<!-- argument list generator for agent variable outputs -->
+<xsl:template name="outputEnvironmentConstant">
+    <xsl:param name="constant_name"/>
+    <xsl:param name="constant_type"/>
+    <xsl:choose>      
+        <xsl:when test="contains($constant_type, '2')">*get_<xsl:value-of select="$constant_name"/>().x, *get_<xsl:value-of select="$constant_name"/>().y</xsl:when>
+        <xsl:when test="contains($constant_type, '3')">*get_<xsl:value-of select="$constant_name"/>().x, *get_<xsl:value-of select="$constant_name"/>().y, *get_<xsl:value-of select="$constant_name"/>().z</xsl:when>
+        <xsl:when test="contains($constant_type, '4')">*get_<xsl:value-of select="$constant_name"/>().x, *get_<xsl:value-of select="$constant_name"/>().y, *get_<xsl:value-of select="$constant_name"/>().z, *get_<xsl:value-of select="$constant_name"/>().w</xsl:when>
+        <xsl:otherwise>*get_<xsl:value-of select="$constant_name"/>()</xsl:otherwise> <!-- default output format is scalar type -->
+    </xsl:choose>
+</xsl:template>
+
+
+
+<!-- argument list generator for environment constant array outputs --> 
+<xsl:template name="outputEnvironmentConstantArrayItem">
+    <xsl:param name="constant_name"/>
+    <xsl:param name="constant_type"/>
+    <xsl:choose>      
+        <xsl:when test="contains($constant_type, '2')">get_<xsl:value-of select="$constant_name"/>()[j].x, get_<xsl:value-of select="$constant_name"/>()[j].y</xsl:when>
+        <xsl:when test="contains($constant_type, '3')">get_<xsl:value-of select="$constant_name"/>()[j].x, get_<xsl:value-of select="$constant_name"/>()[j].y, get_<xsl:value-of select="$constant_name"/>()[j].z</xsl:when>
+        <xsl:when test="contains($constant_type, '4')">get_<xsl:value-of select="$constant_name"/>()[j].x, get_<xsl:value-of select="$constant_name"/>()[j].y, get_<xsl:value-of select="$constant_name"/>()[j].z, get_<xsl:value-of select="$constant_name"/>()[j].w</xsl:when>
+        <xsl:otherwise>get_<xsl:value-of select="$constant_name"/>()[j]</xsl:otherwise> <!-- default output format is scalar type -->
+    </xsl:choose>
+</xsl:template>
+
 <!-- function pointer for reading variable types from string --> 
 <xsl:template name="typeParserFunc">
     <xsl:param name="type"/>
@@ -114,10 +138,10 @@
         <xsl:when test="$type='fvec3'">fgpu_atof</xsl:when>
         <xsl:when test="$type='dvec3'">fpgu_strtod</xsl:when>
       
-        <xsl:when test="$type='ivec3'">fpgu_strtol</xsl:when>
-        <xsl:when test="$type='uvec3'">fpgu_strtoul</xsl:when>
-        <xsl:when test="$type='fvec3'">fgpu_atof</xsl:when>
-        <xsl:when test="$type='dvec3'">fpgu_strtod</xsl:when>
+        <xsl:when test="$type='ivec4'">fpgu_strtol</xsl:when>
+        <xsl:when test="$type='uvec4'">fpgu_strtoul</xsl:when>
+        <xsl:when test="$type='fvec4'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='dvec4'">fpgu_strtod</xsl:when>
       
         <xsl:otherwise>atof</xsl:otherwise> <!-- default parse function as float -->
     </xsl:choose>
@@ -140,7 +164,7 @@
         <xsl:when test="$type='ivec4'">int</xsl:when>
         <xsl:when test="$type='uvec4'">unsigned int</xsl:when>
         <xsl:when test="$type='fvec4'">float</xsl:when>
-        <xsl:when test="$type='dvec 4'">double</xsl:when>
+        <xsl:when test="$type='dvec4'">double</xsl:when>
       
         <xsl:otherwise>float</xsl:otherwise> <!-- default base type of float -->
     </xsl:choose>
@@ -284,11 +308,26 @@ void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each sel
         printf("Error: Could not open file `%s` for output. Aborting.\n", data);
         exit(EXIT_FAILURE);
     }
-	fputs("&lt;states&gt;\n&lt;itno&gt;", file);
-	sprintf(data, "%i", iteration_number);
-	fputs(data, file);
-	fputs("&lt;/itno&gt;\n", file);
-	fputs("&lt;environment&gt;\n" , file);
+    fputs("&lt;states&gt;\n&lt;itno&gt;", file);
+    sprintf(data, "%i", iteration_number);
+    fputs(data, file);
+    fputs("&lt;/itno&gt;\n", file);
+    fputs("&lt;environment&gt;\n" , file);
+    <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
+    fputs("\t&lt;<xsl:value-of select="xmml:name"/>&gt;", file);<xsl:choose><xsl:when test="xmml:arrayLength">
+    for (int j=0;j&lt;<xsl:value-of select="xmml:arrayLength"/>;j++){
+        fprintf(file, "<xsl:call-template name="formatSpecifier"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>", <xsl:call-template name="outputEnvironmentConstantArrayItem"><xsl:with-param name="constant_name" select="xmml:name"/><xsl:with-param name="constant_type" select="xmml:type"/></xsl:call-template>);
+        if(j!=(<xsl:value-of select="xmml:arrayLength"/>-1))
+            <xsl:choose>
+            <xsl:when test="contains(xmml:type, '2')">fprintf(file, "|");</xsl:when> 
+            <xsl:when test="contains(xmml:type, '3')">fprintf(file, "|");</xsl:when> 
+            <xsl:when test="contains(xmml:type, '4')">fprintf(file, "|");</xsl:when>
+            <xsl:otherwise>fprintf(file, ",");</xsl:otherwise>
+            </xsl:choose>
+    }</xsl:when><xsl:otherwise>
+    sprintf(data, "<xsl:call-template name="formatSpecifier"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>", <xsl:call-template name="outputEnvironmentConstant"><xsl:with-param name="constant_name" select="xmml:name"/><xsl:with-param name="constant_type" select="xmml:type"/></xsl:call-template>);
+    fputs(data, file);</xsl:otherwise></xsl:choose>
+    fputs("&lt;/<xsl:value-of select="xmml:name"/>&gt;\n", file);</xsl:for-each>
 	fputs("&lt;/environment&gt;\n" , file);
 
 	<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state"><xsl:variable name="stateName" select="xmml:name"/>//Write each <xsl:value-of select="../../xmml:name"/> agent to xml
