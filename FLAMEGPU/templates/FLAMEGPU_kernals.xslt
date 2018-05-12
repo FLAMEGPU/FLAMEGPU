@@ -39,6 +39,29 @@
 </xsl:otherwise>
 </xsl:choose>)</xsl:template>
 
+<xsl:template name="defaultInitialiser">
+    <xsl:param name="type"/>
+    <xsl:choose>
+        <xsl:when test="$type='ivec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='uvec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='fvec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='dvec2'">{0, 0}</xsl:when>
+        
+        <xsl:when test="$type='ivec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='uvec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='fvec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='dvec3'">{0, 0, 0}</xsl:when>
+        
+        <xsl:when test="$type='ivec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='uvec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='fvec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='dvec4'">{0, 0, 0, 0}</xsl:when>
+        
+        <xsl:otherwise>0</xsl:otherwise> <!-- default output format is float -->
+    </xsl:choose>
+</xsl:template> 
+
+
 <!--Main template-->
 <xsl:template match="/">
 
@@ -378,7 +401,13 @@ __global__ void reorder_<xsl:value-of select="xmml:name"/>_agents(unsigned int* 
  */
 template&lt;typename T&gt;
 __FLAME_GPU_FUNC__ T get_<xsl:value-of select="xmml:name"/>_agent_array_value(T *array, uint index){
-    return array[index*xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX];
+	// Null check for out of bounds agents (brute force communication. )
+	if(array != nullptr){
+	    return array[index*xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX];
+    } else {
+    	// Return the default value for this data type 
+	    return <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template>;
+    }
 }
 
 /** set_<xsl:value-of select="xmml:name"/>_agent_array_value
@@ -389,7 +418,10 @@ __FLAME_GPU_FUNC__ T get_<xsl:value-of select="xmml:name"/>_agent_array_value(T 
  */
 template&lt;typename T&gt;
 __FLAME_GPU_FUNC__ void set_<xsl:value-of select="xmml:name"/>_agent_array_value(T *array, uint index, T value){
-    array[index*xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX] = value;
+	// Null check for out of bounds agents (brute force communication. )
+	if(array != nullptr){
+	    array[index*xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX] = value;
+    }
 }
 </xsl:if>
 
@@ -1228,9 +1260,25 @@ __global__ void GPUFLAME_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl
 	</xsl:if>
 
 	//SoA to AoS - xmachine_memory_<xsl:value-of select="xmml:name"/> Coalesced memory read (arrays point to first item for agent index)
-	xmachine_memory_<xsl:value-of select="../../xmml:name"/> agent;<xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength">
+	xmachine_memory_<xsl:value-of select="../../xmml:name"/> agent;
+    <xsl:variable name="messageName" select="xmml:inputs/gpu:input/xmml:messageName"/>
+	<xsl:choose><xsl:when test="../../../../xmml:messages/gpu:message[xmml:name=$messageName]/gpu:partitioningNone">//No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index &lt; d_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count){
+    </xsl:when><xsl:otherwise>
+    // Thread bounds already checked, but the agent function will still execute. load default values?
+	</xsl:otherwise></xsl:choose>
+
+	<xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength">
     agent.<xsl:value-of select="xmml:name"/> = &amp;(agents-&gt;<xsl:value-of select="xmml:name"/>[index]);</xsl:when><xsl:otherwise>
 	agent.<xsl:value-of select="xmml:name"/> = agents-&gt;<xsl:value-of select="xmml:name"/>[index];</xsl:otherwise></xsl:choose></xsl:for-each>
+
+
+	<xsl:choose><xsl:when test="../../../../xmml:messages/gpu:message[xmml:name=$messageName]/gpu:partitioningNone">
+	} else {
+	<xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:choose><xsl:when test="xmml:arrayLength">
+    agent.<xsl:value-of select="xmml:name"/> = nullptr;</xsl:when><xsl:otherwise>
+	agent.<xsl:value-of select="xmml:name"/> = <xsl:choose><xsl:when test="xmml:defaultValue"><xsl:value-of select="xmml:defaultValue"/></xsl:when><xsl:otherwise><xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/></xsl:call-template></xsl:otherwise></xsl:choose>;</xsl:otherwise></xsl:choose></xsl:for-each>
+	}</xsl:when><xsl:otherwise></xsl:otherwise></xsl:choose>
 
 	//FLAME function call
 	<xsl:if test="../../gpu:type='continuous'">int dead = !</xsl:if><xsl:value-of select="xmml:name"/>(&amp;agent<xsl:if test="xmml:xagentOutputs/gpu:xagentOutput">, <xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_agents</xsl:if>
@@ -1238,11 +1286,18 @@ __global__ void GPUFLAME_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl
 	<xsl:if test="xmml:outputs/gpu:output">, <xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_messages	</xsl:if>
 	<xsl:if test="gpu:RNG='true'">, rand48</xsl:if>);
 	
+
+	<xsl:choose><xsl:when test="../../../../xmml:messages/gpu:message[xmml:name=$messageName]/gpu:partitioningNone">
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index &lt; d_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count){
+    </xsl:when><xsl:otherwise></xsl:otherwise></xsl:choose>
 	<xsl:if test="../../gpu:type='continuous'">//continuous agent: set reallocation flag
 	agents-&gt;_scan_input[index]  = dead; </xsl:if>
 
 	//AoS to SoA - xmachine_memory_<xsl:value-of select="xmml:name"/> Coalesced memory write (ignore arrays)<xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:if test="not(xmml:arrayLength)">
 	agents-&gt;<xsl:value-of select="xmml:name"/>[index] = agent.<xsl:value-of select="xmml:name"/>;</xsl:if></xsl:for-each>
+	<xsl:choose><xsl:when test="../../../../xmml:messages/gpu:message[xmml:name=$messageName]/gpu:partitioningNone">
+	}</xsl:when><xsl:otherwise></xsl:otherwise></xsl:choose>
 }
 </xsl:for-each>
 	
