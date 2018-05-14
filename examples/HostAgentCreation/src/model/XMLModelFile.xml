@@ -33,6 +33,9 @@
       <gpu:stepFunction>
         <gpu:name>generateAgentStep</gpu:name>
       </gpu:stepFunction>
+      <gpu:stepFunction>
+        <gpu:name>customOutputStepFunction</gpu:name>
+      </gpu:stepFunction>
     </gpu:stepFunctions>
 
   </gpu:environment>
@@ -40,6 +43,10 @@
     <gpu:xagent>
       <name>Agent</name>
       <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
           <name>time_alive</name>
@@ -50,6 +57,11 @@
           <name>example_array</name>
           <arrayLength>4</arrayLength>
           <defaultValue>1</defaultValue>
+        </gpu:variable>
+        <gpu:variable>
+          <type>ivec4</type>
+          <name>example_vector</name>
+          <!-- <defaultValue>0,1,2,3</defaultValue> Does not currently work-->
         </gpu:variable>
       </memory>
       <functions>
@@ -63,6 +75,7 @@
       </functions>
       <states>
         <gpu:state><name>default</name></gpu:state>
+        <gpu:state><name>s2</name></gpu:state>
         <initialState>default</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
