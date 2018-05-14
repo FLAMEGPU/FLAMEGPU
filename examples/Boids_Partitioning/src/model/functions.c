@@ -137,7 +137,7 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	glm::vec3 velocity_change = glm::vec3(0.0f, 0.0f, 0.0f);
 
 
-	//Rule 1) Steer towards perceived center of flock
+	//Rule 1) Steer towards perceived center of flock (Cohesion)
 	glm::vec3 steer_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	if (global_centre_count >0){
 		global_centre /= global_centre_count;
@@ -145,15 +145,15 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	}
 	velocity_change += steer_velocity; 
 
-	//Rule 2) Match neighbours speeds
+	//Rule 2) Match neighbours speeds (Alignment)
 	glm::vec3 match_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	if (collision_count > 0){
-		global_velocity /= collision_count;
-		match_velocity = match_velocity* MATCH_SCALE;
+		global_velocity /= global_centre_count;
+		match_velocity = global_velocity * MATCH_SCALE;
 	}
 	velocity_change += match_velocity; 
 
-	//Rule 3) Avoid close range neighbours
+	//Rule 3) Avoid close range neighbours (Separation)
 	glm::vec3 avoid_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	if (collision_count > 0){
 		collision_centre /= collision_count;
