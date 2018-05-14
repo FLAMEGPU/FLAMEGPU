@@ -80,14 +80,14 @@ __FLAME_GPU_FUNC__ int outputdata(xmachine_memory_Boid* xmemory, xmachine_messag
 //Agent Output: 
 __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message_location_list* location_messages, xmachine_message_location_PBM* partition_matrix) 
 {
-	//Boids perceived center
-	fvec3 global_centre = fvec3(0.0f, 0.0f, 0.0f);
-	int global_centre_count = 0;
+	//Boids perceived centre
+	fvec3 perceived_centre = fvec3(0.0f, 0.0f, 0.0f);
+	int perceived_count = 0;
 
-	//Boids global velocity matching
-	fvec3 global_velocity = fvec3(0.0f, 0.0f, 0.0f);
+	//Boids perceived velocity matching
+	fvec3 perceived_velocity = fvec3(0.0f, 0.0f, 0.0f);
 
-	//Boids short range avoidance center
+	//Boids short range avoidance centre
 	fvec3 collision_centre = fvec3(0.0f, 0.0f, 0.0f);
 	int collision_count = 0;
 
@@ -106,13 +106,12 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 			float separation = length(xmemory->position - message_position);
 			if (separation < (INTERACTION_RADIUS)){
 
-				//Update Perceived global centre
+				//Update perceived centre
+				perceived_centre += message_position;
+				perceived_count += 1;
 
-				global_centre += message_position;
-				global_centre_count += 1;
-
-				//Update global velocity matching
-				global_velocity += message_velocity;
+				//Update perceived velocity matching
+				perceived_velocity += message_velocity;
 
 				//Update collision centre
 				if (separation < (SEPARATION_RADIUS)){ //dependant on model size
@@ -134,19 +133,19 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	fvec3 velocity_change = fvec3(0.0f, 0.0f, 0.0f);
 
 
-	//Rule 1) Steer towards perceived center of flock (Cohesion)
+	//Rule 1) Steer towards perceived centre of flock (Cohesion)
 	fvec3 steer_velocity = fvec3(0.0f, 0.0f, 0.0f);
-	if (global_centre_count >0){
-		global_centre /= global_centre_count;
-		steer_velocity = (global_centre - xmemory->position)* STEER_SCALE;
+	if (perceived_count >0){
+		perceived_centre /= perceived_count;
+		steer_velocity = (perceived_centre - xmemory->position) * STEER_SCALE;
 	}
 	velocity_change += steer_velocity; 
 
 	//Rule 2) Match neighbours speeds (Alignment)
 	fvec3 match_velocity = fvec3(0.0f, 0.0f, 0.0f);
 	if (collision_count > 0){
-		global_velocity /= global_centre_count;
-		match_velocity = global_velocity * MATCH_SCALE;
+		perceived_velocity /= perceived_count;
+		match_velocity = perceived_velocity * MATCH_SCALE;
 	}
 	velocity_change += match_velocity; 
 
@@ -154,7 +153,7 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	fvec3 avoid_velocity = fvec3(0.0f, 0.0f, 0.0f);
 	if (collision_count > 0){
 		collision_centre /= collision_count;
-		avoid_velocity = (xmemory->position - collision_centre)* COLLISION_SCALE;
+		avoid_velocity = (xmemory->position - collision_centre) * COLLISION_SCALE;
 	}
 	velocity_change += avoid_velocity; 
 
