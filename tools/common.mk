@@ -263,7 +263,7 @@ CUSTOM_VISUALISATION_OBJECTS := $(CUSTOM_VISUALISATION_C_OBJECTS) $(CUSTOM_VISUA
 VISUALISATION_DEPENDANCIES := $(BUILD_DIR)/io.cu$(OBJ_EXT) $(BUILD_DIR)/simulation.cu$(OBJ_EXT) $(BUILD_DIR)/main_visualisation.cu$(OBJ_EXT) $(CUSTOM_VISUALISATION_OBJECTS)
 endif
 
-XSLT_FUNCTIONS_C := $(SRC_DYNAMIC)/functions.c
+XSLT_FUNCTIONS_C := $(SRC_DYNAMIC)/functions.c.tmp
 
 # Verify that atleast one SM value has been specified.
 ifeq ($(SMS),)
@@ -362,7 +362,7 @@ else
 endif
 
 # Rule to create functsion.c file in the dynamic folder.
-$(SRC_DYNAMIC)/%.c: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(MAKEFILE_LIST)
+$(SRC_DYNAMIC)/%.c.tmp: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(MAKEFILE_LIST)
 # Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
@@ -461,7 +461,7 @@ help:
 	@echo "   visualistion  Builds visualisation mode executable, if it exists"
 	@echo "   clean         Deletes generated object files"
 	@echo "   clobber       Deletes all generated files including executables"
-	@echo "   functions.c   Generates functions.c in the dynamic folder using xslt"
+	@echo "   functions.c   Generates functions.c.tmp in the dynamic folder using xslt"
 	@echo "                   This file is for reference only. Not used in build."
 	@echo ""
 	@echo "  Arguments":
