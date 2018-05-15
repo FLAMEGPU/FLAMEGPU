@@ -87,6 +87,16 @@ make Visualisation
 
 For more information on building FLAME GPU via make, run `make help` in an example directory.
 
+### Note on Linux Dependencies
+
+If you are using linux on a managed system (i.e you do not have root access to install packages) you can provide shared object files (`.so`) for the missing dependencies.
+
+I.e. `libglew` and `libglut`.
+
+Download the required shared object files specific to your system configuration, and place in the `lib` directory. This will be linked at compile time and the dynamic linker will check this directory at runtime.
+
+Alternatively, to package FLAME GPU executables with a different file structure, the `.so` files can be placed adjacent to the executable file. 
+
 ## Usage
 
 FLAME GPU can be executed as either a console application or as an interactive visualisation.
