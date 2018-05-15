@@ -151,8 +151,11 @@ else
 		# Pass specific nvcc flags for linux
 		NVCCFLAGS += -std=c++11
 		CCFLAGS += -Wall
-		# On linux, we assume users have the required files available on their system rather than requring explcit linking.
-		# NVCCLDFLAGS += -L$(LIB_DIR)
+		# On linux we generate a runpath via -rpath and --enable-new-dtags. This enables a simple location for users who cannot install system wide dependencies a sensible place to put lib files.
+		# Library files are looked for in LD_LIBRARY_PATH, the LIB_DIR, then system paths.
+		# .so's can also be placed next to the binary file at runtime (but not compilation)
+		NVCCLDFLAGS += -L$(LIB_DIR)
+		LDFLAGS += --enable-new-dtags,-rpath,"\$$ORIGIN/../$(LIB_DIR)",-rpath,"\$$ORIGIN"
 		# Specify linux specific shared libraries to link against
 		LINK_ARCHIVES_VISUALISATION := -lglut -lGLEW -lGLU -lGL
 	endif
@@ -387,12 +390,12 @@ endif
 
 # Rule to create the visualisation binary by linking the dependant object files.
 $(TARGET_VISUALISATION): $(VISUALISATION_DEPENDANCIES)
-	$(EXEC) $(LD_RUN_PATH) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(LINK_ARCHIVES_VISUALISATION) -o $@ $+
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) $(LINK_ARCHIVES_VISUALISATION) -o $@ $+
 endif
 
 # Rule to create the console binary by linking the dependant object files.
 $(TARGET_CONSOLE): $(CONSOLE_DEPENDANCIES)
-	$(EXEC) $(LD_RUN_PATH) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+
 
 # Clean object files, but do not regenerate xslt. `|| true` is used to support the case where dirs do not exist.
 clean:
