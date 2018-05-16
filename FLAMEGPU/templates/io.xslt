@@ -286,6 +286,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
 
 void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* h_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>, int h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>)
 {
+    PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
 	
 	//Device to host memory transfer
@@ -358,16 +359,21 @@ void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each sel
 	
 	/* Close the file */
 	fclose(file);
+
 }
 <xsl:if test="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable/xmml:defaultValue">
 void initEnvVars()
-{<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
+{
+PROFILE_SCOPED_RANGE("initEnvVars");
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:constants/gpu:variable">
 <xsl:if test="xmml:defaultValue"><!--We cast the variable, so we don't accidentally create 1f or similiar if user omits decimal--><xsl:text>
     </xsl:text><xsl:value-of select="xmml:type"/> t_<xsl:value-of select="xmml:name"/> = (<xsl:value-of select="xmml:type"/>)<xsl:value-of select="xmml:defaultValue"/>;
     set_<xsl:value-of select="xmml:name"/>(&amp;t_<xsl:value-of select="xmml:name"/>);</xsl:if></xsl:for-each>
-}</xsl:if>
+}
+</xsl:if>
 void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">xmachine_memory_<xsl:value-of select="xmml:name"/>_list* h_<xsl:value-of select="xmml:name"/>s, int* h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>)
 {
+    PROFILE_SCOPED_RANGE("readInitialStates");
 
 	int temp = 0;
 	int* itno = &amp;temp;
