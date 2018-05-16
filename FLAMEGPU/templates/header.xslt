@@ -583,6 +583,67 @@ extern void runVisualisation();
 
 #endif
 
+#if defined(PROFILE)
+#include "nvToolsExt.h"
+
+#define PROFILE_WHITE   0x00eeeeee
+#define PROFILE_GREEN   0x0000ff00
+#define PROFILE_BLUE    0x000000ff
+#define PROFILE_YELLOW  0x00ffff00
+#define PROFILE_MAGENTA 0x00ff00ff
+#define PROFILE_CYAN    0x0000ffff
+#define PROFILE_RED     0x00ff0000
+#define PROFILE_GREY    0x00999999
+#define PROFILE_LILAC   0xC8A2C8
+
+const uint32_t profile_colors[] = {
+  PROFILE_WHITE,
+  PROFILE_GREEN,
+  PROFILE_BLUE,
+  PROFILE_YELLOW,
+  PROFILE_MAGENTA,
+  PROFILE_CYAN,
+  PROFILE_RED,
+  PROFILE_GREY,
+  PROFILE_LILAC
+};
+const int num_profile_colors = sizeof(profile_colors) / sizeof(uint32_t);
+
+// Externed value containing colour information.
+extern unsigned int g_profile_colour_id;
+
+#define PROFILE_PUSH_RANGE(name) { \
+    unsigned int color_id = g_profile_colour_id % num_profile_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = profile_colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    nvtxRangePushEx(&amp;eventAttrib); \
+    g_profile_colour_id++; \
+}
+#define PROFILE_POP_RANGE() nvtxRangePop();
+
+// Class for simple fire-and-forget profile ranges (ie. functions with multiple return conditions.)
+class ProfileScopedRange {
+public:
+    ProfileScopedRange(const char * name){
+      PROFILE_PUSH_RANGE(name);
+    }
+    ~ProfileScopedRange(){
+      PROFILE_POP_RANGE();
+    }
+};
+#define PROFILE_SCOPED_RANGE(name) ProfileScopedRange uniq_name_using_macros(name);
+#else
+#define PROFILE_PUSH_RANGE(name)
+#define PROFILE_POP_RANGE()
+#define PROFILE_SCOPED_RANGE(name)
+#endif
+
+
 #endif //__HEADER
 
 </xsl:template>

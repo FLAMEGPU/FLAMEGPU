@@ -31,6 +31,10 @@
 #endif
 #include "header.h"
 
+#if defined(PROFILE)
+unsigned int g_profile_colour_id = 0;
+#endif
+
 /* IO Variables*/
 char inputfile[100];          /**&lt; Input path char buffer*/
 char outputpath[1000];         /**&lt; Output path char buffer*/
@@ -201,7 +205,7 @@ bool getPathProperties(char * path, bool * isFile, bool * isDir) {
  *@param input input path of model xml file
  */
 void setFilePaths(char* input){
-	
+	PROFILE_SCOPED_RANGE("setFilePaths");
 
 	// Get infomration about the inputpath file.
 	bool inputIsFile = false;
@@ -281,6 +285,7 @@ bool getOutputXML(int argc, char**argv){
 }
 
 void initCUDA(int argc, char** argv){
+	PROFILE_SCOPED_RANGE("initCUDA");
 	cudaError_t cudaStatus;
 	int device;
 	int device_count;
@@ -333,9 +338,12 @@ void initCUDA(int argc, char** argv){
 		fprintf(stderr, "Error Accessing Cuda Device properties for GPU %d\n", device);
 	}
 
+	cudaFree(0);
+
 }
 
 void runConsoleWithoutXMLOutput(int iterations){
+	PROFILE_SCOPED_RANGE("runConsoleWithoutXMLOutput");
 	// Iteratively tun the correct number of iterations.
 	for (int i=0; i&lt; iterations; i++)
 	{
@@ -346,6 +354,7 @@ void runConsoleWithoutXMLOutput(int iterations){
 }
 
 void runConsoleWithXMLOutput(int iterations){
+	PROFILE_SCOPED_RANGE("runConsoleWithXMLOutput");
 	// Iteratively tun the correct number of iterations.
 	for (int i=0; i&lt; iterations; i++)
 	{
@@ -429,7 +438,9 @@ int main( int argc, char** argv)
 #endif
 
 	cleanup();
+	PROFILE_PUSH_RANGE("cudaDeviceReset");
 	cudaStatus = cudaDeviceReset();
+	PROFILE_POP_RANGE();
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "Error resetting the device!\n");
 		return EXIT_FAILURE;
