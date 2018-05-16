@@ -78,6 +78,20 @@
 </xsl:if>
 </xsl:for-each>
 
+<!-- Compile time error if there are any discrete agent functions with function conditions -->
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:if test="gpu:type='discrete'">
+<xsl:for-each select="xmml:functions/gpu:function">
+<xsl:variable name="function_name" select="xmml:name"/>
+<xsl:if test="xmml:condition">
+#error "Discrete agent `<xsl:value-of select="$agent_name"/>` cannot have conditional agent function `<xsl:value-of select="$function_name"/>`"
+</xsl:if>
+</xsl:for-each>
+</xsl:if>
+</xsl:for-each>
+
+
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
