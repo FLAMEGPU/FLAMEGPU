@@ -43,6 +43,7 @@
 #include &lt;thrust/scan.h&gt;
 #include &lt;thrust/sort.h&gt;
 #include &lt;thrust/system/cuda/execution_policy.h&gt;
+#include &lt;cub/cub.cuh&gt;
 
 // include FLAME kernels
 #include "FLAMEGPU_kernals.cu"
@@ -121,6 +122,9 @@ int h_message_<xsl:value-of select="xmml:name"/>_output_type;   /**&lt; message 
 #ifdef FAST_ATOMIC_SORTING
 	uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index;	  /**&lt; index offset within the assigned bin */
 	uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index;		/**&lt; unsorted index (hash) value for message */
+    // Values for CUB exclusive scan of spatially partitioned variables
+    void * d_scan_tmp_memory_<xsl:value-of select="xmml:name" />;
+    size_t scan_tmp_bytes_<xsl:value-of select="xmml:name" />;
 #else
 	uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys;	  /**&lt; message sort identifier keys*/
 	uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_values;  /**&lt; message sort identifier values */
@@ -147,6 +151,13 @@ int h_tex_xmachine_message_<xsl:value-of select="xmml:name"/>_pbm_end_or_count_o
 <xsl:for-each select="gpu:layerFunction">
 cudaStream_t stream<xsl:value-of select="position()"/>;</xsl:for-each>
 </xsl:if>
+</xsl:for-each>
+
+/* Device memory and sizes for CUB values */
+<!-- @todo Only generate variables for agents which require CUB scan memory -->
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+void * d_temp_scan_storage_<xsl:value-of select="xmml:name" />;
+size_t temp_scan_storage_bytes_<xsl:value-of select="xmml:name" />;
 </xsl:for-each>
 
 /*Global condition counts*/<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function/gpu:globalCondition">
@@ -337,11 +348,37 @@ void initialise(char * inputfile){
 #ifdef FAST_ATOMIC_SORTING
 	gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
 	gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
+    /* Calculate and allocate CUB temporary memory for exclusive scans */
+    d_scan_tmp_memory_<xsl:value-of select="xmml:name"/> = nullptr;
+    scan_tmp_bytes_<xsl:value-of select="xmml:name"/> = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_scan_tmp_memory_<xsl:value-of select="xmml:name"/>, 
+        scan_tmp_bytes_<xsl:value-of select="xmml:name"/>, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size
+    );
+    gpuErrchk(cudaMalloc(&amp;d_scan_tmp_memory_<xsl:value-of select="xmml:name"/>, scan_tmp_bytes_<xsl:value-of select="xmml:name"/>));
 #else
 	gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
 	gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
 #endif</xsl:if><xsl:text>
 	</xsl:text></xsl:for-each>	
+
+    /* Calculate and allocate CUB temporary memory for exclusive scans */
+    <!-- @todo only do this for agents which require cub scan memory -->
+    <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+    d_temp_scan_storage_<xsl:value-of select="xmml:name"/> = nullptr;
+    temp_scan_storage_bytes_<xsl:value-of select="xmml:name"/> = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_<xsl:value-of select="xmml:name"/>, 
+        temp_scan_storage_bytes_<xsl:value-of select="xmml:name"/>, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_<xsl:value-of select="xmml:name"/>_MAX
+    );
+    gpuErrchk(cudaMalloc(&amp;d_temp_scan_storage_<xsl:value-of select="xmml:name"/>, temp_scan_storage_bytes_<xsl:value-of select="xmml:name"/>));
+    </xsl:for-each>
 
 	/*Set global condition counts*/<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function/gpu:condition">
 	h_<xsl:value-of select="../xmml:name"/>_condition_false_count = 0;
@@ -486,11 +523,22 @@ void cleanup(){
 #ifdef FAST_ATOMIC_SORTING
 	gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index));
 	gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index));
+    gpuErrchk(cudaFree(d_scan_tmp_memory_<xsl:value-of select="xmml:name"/>));
+    d_scan_tmp_memory_<xsl:value-of select="xmml:name"/> = nullptr;
+    scan_tmp_bytes_<xsl:value-of select="xmml:name"/> = 0;
 #else
 	gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys));
 	gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_values));
 #endif</xsl:if><xsl:text>
 	</xsl:text></xsl:for-each>
+
+    /* Free temporary CUB memory */
+    <!-- @todo only do this for agents which require cub scan memory -->
+    <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+    gpuErrchk(cudaFree(d_temp_scan_storage_<xsl:value-of select="xmml:name"/>));
+    d_temp_scan_storage_<xsl:value-of select="xmml:name"/> = nullptr;
+    temp_scan_storage_bytes_<xsl:value-of select="xmml:name"/> = 0;
+    </xsl:for-each>
   
   /* CUDA Streams for function layers */
   <xsl:for-each select="gpu:xmodel/xmml:layers/xmml:layer">
@@ -933,7 +981,15 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	
 	//COMPACT CURRENT STATE LIST
-	thrust::exclusive_scan(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_scan_input), thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_scan_input) + h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count, thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_position));
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_<xsl:value-of select="../../xmml:name"/>, 
+        temp_scan_storage_bytes_<xsl:value-of select="../../xmml:name"/>, 
+        d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_scan_input,
+        d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_position,
+        h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count, 
+        stream
+    );
+
 	//reset agent count
 	gpuErrchk( cudaMemcpy( &amp;scan_last_sum, &amp;d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_position[h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count-1], sizeof(int), cudaMemcpyDeviceToHost));
 	gpuErrchk( cudaMemcpy( &amp;scan_last_included, &amp;d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_scan_input[h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count-1], sizeof(int), cudaMemcpyDeviceToHost));
@@ -952,7 +1008,15 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:currentState"/>_count, &amp;h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:currentState"/>_count, sizeof(int)));	
 		
 	//COMPACT WORKING STATE LIST
-	thrust::exclusive_scan(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s->_scan_input), thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s->_scan_input) + h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count, thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s->_position));
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_<xsl:value-of select="../../xmml:name"/>, 
+        temp_scan_storage_bytes_<xsl:value-of select="../../xmml:name"/>, 
+        d_<xsl:value-of select="../../xmml:name"/>s->_scan_input,
+        d_<xsl:value-of select="../../xmml:name"/>s->_position,
+        h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count, 
+        stream
+    );
+
 	//reset agent count
 	gpuErrchk( cudaMemcpy( &amp;scan_last_sum, &amp;d_<xsl:value-of select="../../xmml:name"/>s->_position[h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count-1], sizeof(int), cudaMemcpyDeviceToHost));
 	gpuErrchk( cudaMemcpy( &amp;scan_last_included, &amp;d_<xsl:value-of select="../../xmml:name"/>s->_scan_input[h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count-1], sizeof(int), cudaMemcpyDeviceToHost));
@@ -1001,7 +1065,15 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	gpuErrchkLaunch();
 	
 	//GET CONDTIONS TRUE COUNT FROM CURRENT STATE LIST
-    thrust::exclusive_scan(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_scan_input),  thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_scan_input) + h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count, thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_position));
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_<xsl:value-of select="../../xmml:name"/>, 
+        temp_scan_storage_bytes_<xsl:value-of select="../../xmml:name"/>, 
+        d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_scan_input,
+        d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_position,
+        h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count, 
+        stream
+    );
+
 	//reset agent count
 	gpuErrchk( cudaMemcpy( &amp;scan_last_sum, &amp;d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_position[h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count-1], sizeof(int), cudaMemcpyDeviceToHost));
 	gpuErrchk( cudaMemcpy( &amp;scan_last_included, &amp;d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>->_scan_input[h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count-1], sizeof(int), cudaMemcpyDeviceToHost));
@@ -1159,7 +1231,15 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	d_<xsl:value-of select="xmml:name"/>s = d_<xsl:value-of select="xmml:name"/>s_swap;
 	d_<xsl:value-of select="xmml:name"/>s_swap = d_<xsl:value-of select="xmml:name"/>s_scanswap_temp;
 	<!-- end bug fix -->
-    thrust::exclusive_scan(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>s_swap->_scan_input), thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>s_swap->_scan_input) + h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count, thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>s_swap->_position));
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_<xsl:value-of select="$xagentName"/>, 
+        temp_scan_storage_bytes_<xsl:value-of select="$xagentName"/>, 
+        d_<xsl:value-of select="xmml:name"/>s_swap->_scan_input,
+        d_<xsl:value-of select="xmml:name"/>s_swap->_position,
+        h_xmachine_memory_<xsl:value-of select="$xagentName"/>_count, 
+        stream
+    );
+
 	//Scatter
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, scatter_optional_<xsl:value-of select="xmml:name"/>_messages, no_sm, state_list_size); 
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
@@ -1200,7 +1280,15 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	
 	<xsl:if test="../../gpu:type='continuous'"><xsl:if test="gpu:reallocate='true'">
 	//FOR CONTINUOUS AGENTS WITH REALLOCATION REMOVE POSSIBLE DEAD AGENTS	
-    thrust::exclusive_scan(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s->_scan_input), thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s->_scan_input) + h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count, thrust::device_pointer_cast(d_<xsl:value-of select="../../xmml:name"/>s->_position));
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_<xsl:value-of select="../../xmml:name"/>, 
+        temp_scan_storage_bytes_<xsl:value-of select="../../xmml:name"/>, 
+        d_<xsl:value-of select="../../xmml:name"/>s->_scan_input,
+        d_<xsl:value-of select="../../xmml:name"/>s->_position,
+        h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count, 
+        stream
+    );
+
 	//Scatter into swap
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, scatter_<xsl:value-of select="../../xmml:name"/>_Agents, no_sm, state_list_size); 
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
@@ -1224,7 +1312,16 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	<xsl:if test="xmml:xagentOutputs/gpu:xagentOutput"><xsl:for-each select="xmml:xagentOutputs/gpu:xagentOutput">
 	<xsl:variable name="xagent_output" select="xmml:xagentName"/><xsl:if test="../../../../../gpu:xagent[xmml:name=$xagent_output]/gpu:type='continuous'">
 	//FOR <xsl:value-of select="xmml:xagentName"/> AGENT OUTPUT SCATTER AGENTS 
-    thrust::exclusive_scan(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_<xsl:value-of select="xmml:xagentName"/>s_new->_scan_input), thrust::device_pointer_cast(d_<xsl:value-of select="xmml:xagentName"/>s_new->_scan_input) + <xsl:value-of select="../../../../xmml:name"/>s_pre_death_count, thrust::device_pointer_cast(d_<xsl:value-of select="xmml:xagentName"/>s_new->_position));
+
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_<xsl:value-of select="xmml:xagentName"/>, 
+        temp_scan_storage_bytes_<xsl:value-of select="xmml:xagentName"/>, 
+        d_<xsl:value-of select="xmml:xagentName"/>s_new->_scan_input, 
+        d_<xsl:value-of select="xmml:xagentName"/>s_new->_position, 
+        <xsl:value-of select="../../../../xmml:name"/>s_pre_death_count,
+        stream
+    );
+
 	//reset agent count
 	int <xsl:value-of select="xmml:xagentName"/>_after_birth_count;
 	gpuErrchk( cudaMemcpy( &amp;scan_last_sum, &amp;d_<xsl:value-of select="xmml:xagentName"/>s_new->_position[<xsl:value-of select="../../../../xmml:name"/>s_pre_death_count-1], sizeof(int), cudaMemcpyDeviceToHost));
@@ -1263,9 +1360,15 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	  hist_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_local_bin_index, d_xmachine_message_<xsl:value-of select="xmml:name"/>_unsorted_index, d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count, d_<xsl:value-of select="xmml:name"/>s, h_message_<xsl:value-of select="xmml:name"/>_count);
 	  gpuErrchkLaunch();
 	
-	  thrust::device_ptr&lt;int&gt; ptr_count = thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count);
-	  thrust::device_ptr&lt;int&gt; ptr_index = thrust::device_pointer_cast(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start);
-	  thrust::exclusive_scan(thrust::cuda::par.on(stream), ptr_count, ptr_count + xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size, ptr_index); // scan
+      // Scan
+      cub::DeviceScan::ExclusiveSum(
+          d_scan_tmp_memory_<xsl:value-of select="xmml:name"/>, 
+          scan_tmp_bytes_<xsl:value-of select="xmml:name"/>, 
+          d_<xsl:value-of select="xmml:name"/>_partition_matrix->end_or_count,
+          d_<xsl:value-of select="xmml:name"/>_partition_matrix->start,
+          xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size, 
+          stream
+      );
 	
 	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, no_sm, h_message_<xsl:value-of select="xmml:name"/>_count); 
 	  gridSize = (h_message_<xsl:value-of select="xmml:name"/>_count + blockSize - 1) / blockSize; 	// Round up according to array size 
