@@ -367,10 +367,14 @@ __FLAME_GPU_FUNC__ void set_<xsl:value-of select="xmml:name"/>_agent_array_value
 
   
 /* Simulation function prototypes implemented in simulation.cu */
+/** getIterationNumber
+ *  Get the iteration number (host)
+ */
+extern unsigned int getIterationNumber();
 
 /** initialise
  * Initialise the simulation. Allocated host and device memory. Reads the initial agent configuration from XML.
- * @param input	XML file path for agent initial configuration
+ * @param input        XML file path for agent initial configuration
  */
 extern void initialise(char * input);
 
@@ -455,6 +459,38 @@ void sort_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:n
 extern int get_<xsl:value-of select="xmml:name"/>_population_width();
 </xsl:if>
 </xsl:for-each>
+
+/* Host based access of agent variables*/
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:for-each select="xmml:states/gpu:state"><xsl:variable name="agent_state" select="xmml:name"/>
+<xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type" />
+<xsl:if test="not(xmml:arrayLength)">
+/** <xsl:value-of select="$variable_type"/> get_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(unsigned int index)
+ * Gets the value of the <xsl:value-of select="$variable_name"/> variable of an <xsl:value-of select="$agent_name"/> agent in the <xsl:value-of select="$agent_state"/> state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable <xsl:value-of select="$variable_name"/>
+ */
+__host__ <xsl:value-of select="$variable_type"/> get_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(unsigned int index);
+</xsl:if>
+<!-- Treat array variables differently -->
+<xsl:if test="xmml:arrayLength">
+/** <xsl:value-of select="$variable_type"/> get_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(unsigned int index, unsigned int element)
+ * Gets the element-th value of the <xsl:value-of select="$variable_name"/> variable array of an <xsl:value-of select="$agent_name"/> agent in the <xsl:value-of select="$agent_state"/> state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable <xsl:value-of select="$variable_name"/>
+ */
+__host__ <xsl:value-of select="$variable_type"/> get_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(unsigned int index, unsigned int element);
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
+</xsl:for-each>
+
+
 
 /* Host based agent creation functions */
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>

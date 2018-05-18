@@ -23,6 +23,13 @@
 // Declare global scope variables for host-based agent creation, so allocation of host data is only performed once.
 xmachine_memory_Agent ** h_agent_AoS;
 const unsigned int h_agent_AoS_MAX = 32;
+unsigned int h_nextID;
+
+__host__ unsigned int getNextID(){
+	unsigned int old = h_nextID;
+	h_nextID++;
+	return old;
+}
 
 
 /*
@@ -37,6 +44,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
 	// Seed the host random number generator.
 	srand(0);
+
+	// Set the global host new id tracker to 0.
+	h_nextID = 0;
 
 	/* 
 	  Allocate and initialise an array of agent structs to a global pointer.
@@ -61,10 +71,14 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
 	xmachine_memory_Agent * h_agent = h_allocate_agent_Agent();
 
 	// Set values as required for the single agent.
+	h_agent->id = getNextID();
 	h_agent->time_alive = rand() % (*get_MAX_LIFESPAN());
 	for (unsigned int i = 0; i < xmachine_memory_Agent_example_array_LENGTH; i++) {
-		h_agent->example_array[i] = rand() + i;
+		h_agent->example_array[i] = rand() / (double)RAND_MAX;
 	}
+	h_agent->example_vector = {h_agent->id+1,h_agent->id+2,h_agent->id+3,h_agent->id+4};
+	// fprintf(stdout, "Create Agent:\tid %u\ttime_alive %u\tvector {%d, %d, %d, %d}\tarray[0] %f\n", h_agent->id, h_agent->time_alive, h_agent->example_vector.x, h_agent->example_vector.y, h_agent->example_vector.z, h_agent->example_vector.w, h_agent->example_array[0]);
+
 
 	// Copy agent data from the host to the device
 	h_add_agent_Agent_default(h_agent);
@@ -94,16 +108,69 @@ __FLAME_GPU_STEP_FUNC__ void generateAgentStep(){
 		}
 		// Populate data as required
 		for (unsigned int i = 0; i < count; i++) {
+			h_agent_AoS[i]->id = getNextID();
 			h_agent_AoS[i]->time_alive = rand() % (*get_MAX_LIFESPAN());
 			for (unsigned int j = 0; j < xmachine_memory_Agent_example_array_LENGTH; j++) {
-				h_agent_AoS[i]->example_array[j] = rand() + j;
+				h_agent_AoS[i]->example_array[j] = rand() / (double)RAND_MAX;
 			}
+			h_agent_AoS[i]->example_vector = {h_agent_AoS[i]->id+1,h_agent_AoS[i]->id+2,h_agent_AoS[i]->id+3,h_agent_AoS[i]->id+4};
+			// fprintf(stdout, "Create Agent:\tid %u\ttime_alive %u\tvector {%d, %d, %d, %d}\tarray[0] %f\n", h_agent_AoS[i]->id, h_agent_AoS[i]->time_alive, h_agent_AoS[i]->example_vector.x, h_agent_AoS[i]->example_vector.y, h_agent_AoS[i]->example_vector.z, h_agent_AoS[i]->example_vector.w, h_agent_AoS[i]->example_array[0]);
 		}
 		// Copy the data to the device
 		h_add_agents_Agent_default(h_agent_AoS, count);
 	}
 
 	printf("Population after step function %u\n", get_agent_Agent_default_count());
+
+}
+
+
+/*
+ * STEP function to demonstrate access of agent variables on the host.
+ * Memory transfer over the PCI-e (or NVLINK in Power9 systems) is handelled transparently, but this is potentially expensive
+ * Incorrect use could result in a very slow function due to a huge amount of memcpy.
+ */
+__FLAME_GPU_STEP_FUNC__ void customOutputStepFunction(){
+
+	// Get some values and construct an output path.
+	const char * directory = getOutputDir();
+	unsigned int iteration = getIterationNumber();
+
+	std::string outputFilename = std::string( std::string(directory) + "custom-output-" + std::to_string(iteration) +".csv");
+
+	// Get a file handle for output.
+	FILE * fp = fopen(outputFilename.c_str(), "w");
+	// If the file has been opened successfully
+	if(fp != nullptr){
+		fprintf(stdout, "Outputting some Agent data to %s\n", outputFilename.c_str());
+
+		// Output a header row for the CSV
+		fprintf(fp, "ID, time_alive, example_vector.x, example_vector.y, example_array[0], example_array[1]\n");
+
+		// For each agent of a target type in a target state
+		for(int index = 0; index < get_agent_Agent_default_count(); index++){
+			// Append a row to the CSV file.
+			fprintf(
+				fp, 
+				"%u, %u, %d, %d, %f, %f\n",
+				get_Agent_default_variable_id(index),
+				get_Agent_default_variable_time_alive(index),
+				get_Agent_default_variable_example_vector(index).x,
+				get_Agent_default_variable_example_vector(index).y,
+				get_Agent_default_variable_example_array(index, 0),
+				get_Agent_default_variable_example_array(index, 1)
+			);
+		}
+		// Flush the file handle
+		fflush(fp);
+	} else {
+		fprintf(stderr, "Error: file %s could not be created for customOutputStepFunction\n", outputFilename.c_str());
+	}
+	// Close the file handle if necessary.
+	if (fp != nullptr && fp != stdout && fp != stderr){
+		fclose(fp);
+		fp = nullptr;
+	}
 }
 
 /*
@@ -125,15 +192,19 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent)
 {
 	// Increment time alive
 	agent->time_alive++;
-	/*printf(
-		"%u {%u [%f %f %f %f]}\n", 
-		threadIdx.x + blockDim.x * blockIdx.x, 
-		agent->time_alive, 
-		get_Agent_agent_array_value<float>(agent->example_array, 0), 
-		get_Agent_agent_array_value<float>(agent->example_array, 1), 
-		get_Agent_agent_array_value<float>(agent->example_array, 2), 
-		get_Agent_agent_array_value<float>(agent->example_array, 3)
-	);*/
+	/*if(threadIdx.x + blockDim.x * blockIdx.x < 64){
+		printf(
+			"%u: %u {%u {%d %d %d %d} [%f %f %f %f]}\n", 
+			threadIdx.x + blockDim.x * blockIdx.x, 
+			agent->id,
+			agent->time_alive,
+			agent->example_vector.x, agent->example_vector.y, agent->example_vector.z, agent->example_vector.w, 
+			get_Agent_agent_array_value<float>(agent->example_array, 0), 
+			get_Agent_agent_array_value<float>(agent->example_array, 1), 
+			get_Agent_agent_array_value<float>(agent->example_array, 2), 
+			get_Agent_agent_array_value<float>(agent->example_array, 3)
+		);
+	}*/
 	// If agent has been alive long enough, kill them.
 	if (agent->time_alive > MAX_LIFESPAN){
 		return 1;

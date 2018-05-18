@@ -3,6 +3,27 @@
                 xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML"
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
+<xsl:template name="defaultInitialiser">
+    <xsl:param name="type"/>
+    <xsl:choose>
+        <xsl:when test="$type='ivec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='uvec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='fvec2'">{0, 0}</xsl:when>
+        <xsl:when test="$type='dvec2'">{0, 0}</xsl:when>
+        
+        <xsl:when test="$type='ivec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='uvec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='fvec3'">{0, 0, 0}</xsl:when>
+        <xsl:when test="$type='dvec3'">{0, 0, 0}</xsl:when>
+        
+        <xsl:when test="$type='ivec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='uvec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='fvec4'">{0, 0, 0, 0}</xsl:when>
+        <xsl:when test="$type='dvec4'">{0, 0, 0, 0}</xsl:when>
+        
+        <xsl:otherwise>0</xsl:otherwise> <!-- default output format is float -->
+    </xsl:choose>
+</xsl:template> 
 <xsl:template match="/">
   /*
   * FLAME GPU v 1.5.X for CUDA 9
@@ -90,6 +111,8 @@ inline void gpuLaunchAssert(const char *file, int line, bool abort=true)
 int SM_START;
 int PADDING;
 
+unsigned int g_iterationNumber;
+
 /* Agent Memory */
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
 /* <xsl:value-of select="xmml:name"/> Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
@@ -100,11 +123,21 @@ int h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count;   /**&lt; Agent 
 int h_xmachine_memory_<xsl:value-of select="xmml:name"/>_pop_width;   /**&lt; Agent population width */</xsl:if>
 uint * d_xmachine_memory_<xsl:value-of select="xmml:name"/>_keys;	  /**&lt; Agent sort identifiers keys*/
 uint * d_xmachine_memory_<xsl:value-of select="xmml:name"/>_values;  /**&lt; Agent sort identifiers value */
-    <xsl:for-each select="xmml:states/gpu:state">
+<xsl:for-each select="xmml:states/gpu:state">
 /* <xsl:value-of select="../../xmml:name"/> state variables */
 xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* h_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>;      /**&lt; Pointer to agent list (population) on host*/
 xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>;      /**&lt; Pointer to agent list (population) on the device*/
 int h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count;   /**&lt; Agent population size counter */ 
+</xsl:for-each>
+</xsl:for-each>
+
+/* Variables to track the state of host copies of state lists, for the purposes of host agent data access.
+ * @future - if the host data is current it may be possible to avoid duplicating memcpy in xml output.
+ */
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:for-each select="xmml:states/gpu:state"><xsl:variable name="agent_state" select="xmml:name"/>
+<xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type" />unsigned int h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration;
+</xsl:for-each>
 </xsl:for-each>
 </xsl:for-each>
 
@@ -250,11 +283,28 @@ int reorder_messages_sm_size(int blockSize)
 }
 
 
+/** getIterationNumber
+ *  Get the iteration number (host)
+ *  @return a 1 indexed value for the iteration number, which is incremented at the start of each simulation step.
+ *      I.e. it is 0 on up until the first call to singleIteration()
+ */
+extern unsigned int getIterationNumber(){
+    return g_iterationNumber;
+}
+
 void initialise(char * inputfile){
 
 	//set the padding and offset values depending on architecture and OS
 	setPaddingAndOffset();
   
+    // Initialise some global variables
+    g_iterationNumber = 0;
+
+    // Initialise variables for tracking which iterations' data is accessible on the host.
+    <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/><xsl:for-each select="xmml:states/gpu:state"><xsl:variable name="agent_state" select="xmml:name"/><xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type" />h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration = 0;
+    </xsl:for-each></xsl:for-each></xsl:for-each>
+
+
 
 	printf("Allocating Host and Device memory\n");
   
@@ -518,6 +568,9 @@ void singleIteration(){
 	cudaEventRecord(instrument_iteration_start);
 #endif
 
+    // Increment the iteration number.
+    g_iterationNumber++;
+
 	/* set all non partitioned and spatial partitioned message counts to 0*/<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:if test="gpu:partitioningNone or gpu:partitioningSpatial">
 	h_message_<xsl:value-of select="xmml:name"/>_count = 0;
 	//upload to device constant
@@ -632,6 +685,100 @@ int get_<xsl:value-of select="xmml:name"/>_population_width(){
 }
 </xsl:if>
 
+</xsl:for-each>
+
+
+/* Host based access of agent variables*/
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:for-each select="xmml:states/gpu:state"><xsl:variable name="agent_state" select="xmml:name"/>
+<xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type" />
+<xsl:if test="not(xmml:arrayLength)">
+/** <xsl:value-of select="$variable_type"/> get_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(unsigned int index)
+ * Gets the value of the <xsl:value-of select="$variable_name"/> variable of an <xsl:value-of select="$agent_name"/> agent in the <xsl:value-of select="$agent_state"/> state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable <xsl:value-of select="$variable_name"/>
+ */
+__host__ <xsl:value-of select="$variable_type"/> get_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(unsigned int index){
+    unsigned int count = get_agent_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count &gt; 0 &amp;&amp; index &lt; count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration != currentIteration){
+            <!-- fprintf(stdout, "LOG: D2H copy <xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(%u)\n", count); -->
+            gpuErrchk(
+                cudaMemcpy(
+                    h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>-&gt;<xsl:value-of select="$variable_name"/>,
+                    d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>-&gt;<xsl:value-of select="$variable_name"/>,
+                    count * sizeof(<xsl:value-of select="$variable_type"/>),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>-&gt;<xsl:value-of select="$variable_name"/>[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access <xsl:value-of select="$variable_name"/> for the %u th member of <xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template>;
+
+    }
+}
+</xsl:if>
+<xsl:if test="xmml:arrayLength">
+/** <xsl:value-of select="$variable_type"/> get_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(unsigned int index, unsigned int element)
+ * Gets the element-th value of the <xsl:value-of select="$variable_name"/> variable array of an <xsl:value-of select="$agent_name"/> agent in the <xsl:value-of select="$agent_state"/> state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable <xsl:value-of select="$variable_name"/>
+ */
+__host__ <xsl:value-of select="$variable_type"/> get_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(unsigned int index, unsigned int element){
+    unsigned int count = get_agent_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_count();
+    unsigned int numElements = <xsl:value-of select="xmml:arrayLength"/>;
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count &gt; 0 &amp;&amp; index &lt; count &amp;&amp; element &lt; numElements ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration != currentIteration){
+            <!-- fprintf(stdout, "LOG: D2H copy <xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>(%u * %u)\n", count, numElements); -->
+            <!-- @optimisation - If the count is close enough to MAX, it would be better to issue a single large memcpy. -->
+            for(unsigned int e = 0; e &lt; numElements; e++){
+                gpuErrchk(
+                    cudaMemcpy(
+                        h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>-&gt;<xsl:value-of select="$variable_name"/> + (e * xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX),
+                        d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>-&gt;<xsl:value-of select="$variable_name"/> + (e * xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX), 
+                        count * sizeof(<xsl:value-of select="$variable_type"/>), 
+                        cudaMemcpyDeviceToHost
+                    )
+                );
+                // Update some global value indicating what data is currently present in that host array.
+                h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration = currentIteration;
+            }
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>-&gt;<xsl:value-of select="$variable_name"/>[index + (element * xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX)];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access the %u-th element of <xsl:value-of select="$variable_name"/> for the %u th member of <xsl:value-of select="$agent_name"/>_<xsl:value-of select="$agent_state"/>. count is %u at iteration %u\n", element, index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template>;
+
+    }
+}
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
 </xsl:for-each>
 
 
@@ -768,6 +915,10 @@ void h_add_agent_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$st
 	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, &amp;h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, sizeof(int)));
 	cudaDeviceSynchronize();
 
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    <xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type" />h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration = 0;
+    </xsl:for-each>
+
 }
 void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />(xmachine_memory_<xsl:value-of select="$agent_name" />** agents, unsigned int count){
 	if(count &gt; 0){
@@ -795,6 +946,10 @@ void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$s
 		h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count += count;
 		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, &amp;h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, sizeof(int)));
 		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        <xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type" />h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration = 0;
+        </xsl:for-each>
 
 	}
 }
