@@ -93,8 +93,8 @@ NVCC := nvcc
 
 # Get the NVCC verison
 NVCC_MAJOR = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\2/p')
-# NVCC_MINOR = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\3/p')
-# NVCC_PATCH = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\4/p')
+NVCC_MINOR = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\3/p')
+NVCC_PATCH = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\4/p')
 NVCC_GE_9_0 = $(shell [ $(NVCC_MAJOR) -ge 9 ] && echo true)
 NVCC_GE_8_0 = $(shell [ $(NVCC_MAJOR) -ge 8 ] && echo true)
 
@@ -142,6 +142,21 @@ ifeq ($(debug),1)
 	Mode_TYPE := Debug
 else
 	NVCCFLAGS += -lineinfo
+endif
+
+# Enable / Disable profiling
+ifeq ($(profile),1)
+	NVCCFLAGS += -DPROFILE -D_PROFILE
+	ifeq ($(OS),Windows_NT)
+	NVCCFLAGS+=-I"$(NVTOOLSEXT_PATH)include"
+	NVCCLDFLAGS +=-L"$(NVTOOLSEXT_PATH)lib/x64" nvToolsExt64_1.lib
+	else
+		UNAME_S := $(shell uname -s)
+		ifeq ($(UNAME_S),Linux)
+			LDFLAGS +=-lnvToolsExt -L/usr/local/cuda-$(NVCC_MAJOR).$(NVCC_MINOR)/bin/../lib64
+		endif
+	endif
+else
 endif
 
 # Compute the actual build directory, by appending the mode type.
@@ -470,6 +485,10 @@ help:
 	@echo "                   0 : Release (Default)"
 	@echo "                   1 : Debug"
 	@echo "                   I.e. 'make console debug=1'"
+	@echo "   profile=<arg> Includes NVTX ranges for a more detailed timeline"
+	@echo "                   0 : Off (Default)"
+	@echo "                   1 : On"
+	@echo "                   I.e. 'make console profile=1'"
 	@echo "   SMS=<arg>     Builds target for the specified CUDA architectures"
 	@echo "                   I.e. 'make console SMS=\"60 61\"'"
 	@echo "                   Defaults to: '$(SMS)'"
