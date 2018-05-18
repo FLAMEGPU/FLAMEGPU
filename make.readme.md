@@ -7,6 +7,8 @@
 Optionally, if `xmllint` is installed XML Model Files will be validated against the FLAME GPU XML Schemas.
 This can be installed using `sudo apt install libxml2-utils` on Debian based systems.
 
+To build and run visualisation examples, `libglew`, `libglut`, `libglu` and `libgl` must also be installed, in addtion to the relevant `-dev` pacakages. Please use the relevant package manager for your distribution. 
+
 
 ## Building all Examples
 
