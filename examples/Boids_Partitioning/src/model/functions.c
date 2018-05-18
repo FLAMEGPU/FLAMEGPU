@@ -84,14 +84,14 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	glm::vec3 agent_position = glm::vec3(xmemory->x, xmemory->y, xmemory->z);
 	glm::vec3 agent_velocity = glm::vec3(xmemory->fx, xmemory->fy, xmemory->fz);
 
-	//Boids perceived center
-	glm::vec3 global_centre = glm::vec3(0.0f, 0.0f, 0.0f);
-	int global_centre_count = 0;
+	//Boids perceived centre
+	glm::vec3 perceived_centre = glm::vec3(0.0f, 0.0f, 0.0f);
+	int perceived_count = 0;
 
 	//Boids global velocity matching
 	glm::vec3 global_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	//Boids short range avoidance center
+	//Boids short range avoidance centre
 	glm::vec3 collision_centre = glm::vec3(0.0f, 0.0f, 0.0f);
 	int collision_count = 0;
 
@@ -109,15 +109,15 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 			float separation = length(agent_position - message_position);
 			if (separation < (INTERACTION_RADIUS)){
 
-				//Update Percieved global center
-				global_centre += message_position;
-				global_centre_count += 1;
+				//Update perceived centre
+				perceived_centre += message_position;
+				perceived_count += 1;
 
-				//Update global velocity matching
+				//Update perceived velocity matching
 				glm::vec3 message_velocity = glm::vec3(location_message->fx, location_message->fy, location_message->fz);
 				global_velocity += message_velocity;
 
-				//Update collision center
+				//Update collision centre
 				if (separation < (SEPARATION_RADIUS)){ //dependant on model size
 					collision_centre += message_position;
 					collision_count += 1;
@@ -137,27 +137,27 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	glm::vec3 velocity_change = glm::vec3(0.0f, 0.0f, 0.0f);
 
 
-	//Rule 1) Steer towards perceived center of flock
+	//Rule 1) Steer towards perceived centre of flock (Cohesion)
 	glm::vec3 steer_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-	if (global_centre_count >0){
-		global_centre /= global_centre_count;
-		steer_velocity = (global_centre - agent_position)* STEER_SCALE;
+	if (perceived_count >0){
+		perceived_centre /= perceived_count;
+		steer_velocity = (perceived_centre - agent_position) * STEER_SCALE;
 	}
 	velocity_change += steer_velocity; 
 
-	//Rule 2) Match neighbours speeds
+	//Rule 2) Match neighbours speeds (Alignment)
 	glm::vec3 match_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	if (collision_count > 0){
-		global_velocity /= collision_count;
-		match_velocity = match_velocity* MATCH_SCALE;
+		global_velocity /= perceived_count;
+		match_velocity = global_velocity * MATCH_SCALE;
 	}
 	velocity_change += match_velocity; 
 
-	//Rule 3) Avoid close range neighbours
+	//Rule 3) Avoid close range neighbours (Separation)
 	glm::vec3 avoid_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	if (collision_count > 0){
 		collision_centre /= collision_count;
-		avoid_velocity = (agent_position - collision_centre)* COLLISION_SCALE;
+		avoid_velocity = (agent_position - collision_centre) * COLLISION_SCALE;
 	}
 	velocity_change += avoid_velocity; 
 
