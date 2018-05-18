@@ -1,13 +1,15 @@
-# Introduction
+# FLAME GPU Example: MonteCarlo
+
+## Introduction
 
 Monte Carlo simulation is a method of solving deterministic problems by repeated random sampling. The purpose of this example is to show how multi-agent approach can be applied to Monte Carlo crystallization. We present a general method for implementing Monte Carlo simulation in both batch and continuous systems through two case studies (Batch and MSMPR) implemented within the FLAMEGPU simulation framework. The two case studies have been replicated through parallel implementation of GPU. The examples can be found in `examples/MonteCarlo_MSMPR` and `examples/MonteCarlo_BATCH`. We used the base concepts similar to Gooch and Hounslow’s paper [^1].
 
-# How to setup, build, and run MonteCarlo examples on Linux
+## How to setup, build, and run MonteCarlo examples on Linux
 
-1\. Install all the needed build tools and libraries  
+1\. Install all the needed build tools and libraries. Note that the version of GCC must be suitable for the installed version of CUDA.
 
 ```bash
-sudo apt-get install g++ git make libxml2-utils gnuplot
+sudo apt-get install g++ git make libxml2-utils xsltproc gnuplot
 ```
 
 Minimum versions:
@@ -22,7 +24,7 @@ git clone https://github.com/FLAMEGPU/FLAMEGPU.git
 
 Going forward, you will want to pull from the _master_ branch, which will always contain the last known release.
 
-4\. Build the SDK in Release mode (this is the default mode)
+4\. Build the example in Release mode (this is the default mode)
 
 - Batch Simulation
 ```bash
@@ -49,7 +51,7 @@ g++ InputGenerator/inpGen.cpp -o inputGen
 
 ```bash
 cd examples/MonteCarlo_BATCH
-../../bin/linux-x64/Release_Console/MonteCarlo_BATCH iterations/0.xml 1
+../../bin/linux-x64/Release_Console/MonteCarlo_MSMPR iterations/0.xml 1
 ```
 
 
@@ -68,7 +70,61 @@ gnuplot plot_cs2.plt
 
 8\. For the detailed information and the performance results, please view this [document](FLAMEGPU/doc/Notes_on_Monte_Carlo_Simulation.pdf).
 
-# Bug reports
+
+## How to setup, build, and run MonteCarlo examples on Windows
+
+1\. Download and install the windows dependancies for FLAME GPU, and these Montecarlo exmaples
+
+- Microsoft Visual Studio 2015 or later.
+- CUDA 8.0 or Later
+- git
+- gnuplot
+
+3\. Clone the project using Git (it will be stored in the folder "FLAMEGPU"):  
+
+```bash
+git clone https://github.com/FLAMEGPU/FLAMEGPU.git
+```
+
+4\. Open the visual studio solution for the relevant exampl, `MCBatch` or `MC_MSMPR`.
+
+5\. Build both projects within the visual studio solution - both the FLAME GPU model, and `InputGenerator`.
+
+5\. To generate charge using the `InputGenerator`, simply run the script `generate_charge.bat` (or `generate_charge.sh` using bash) in `iterations` folder.
+
+6\. After building the executable and generating charge, run the example. The following command will run a single iteration. 
+
+
+```batch
+cd examples\MonteCarlo_BATCH
+..\..\bin\x64\Release_Console\MonteCarlo_MSMPR iterations\0.xml 1
+```
+
+or
+
+```bash
+cd examples/MonteCarlo_BATCH
+../../bin/x64/Release_Console/MonteCarlo_MSMPR iterations/0.xml 1
+```
+
+
+7\. Plotting the histogram results for the simulation and the input charge.
+
+- Batch Simulation
+```bash
+cd examples/MonteCarlo_BATCH/iterations
+gnuplot plot_cs1.plt
+```
+- MSMPR Steady State Simulation
+```bash
+cd examples/MonteCarlo_MSMPR/iterations
+gnuplot plot_cs2.plt
+```
+
+8\. For the detailed information and the performance results, please view this [document](FLAMEGPU/doc/Notes_on_Monte_Carlo_Simulation.pdf).
+
+
+## Bug reports
 
 To report a bug in this documentation or in the software or propose an improvement, please use the FLAMEGPU github issue tracker.
 [^1]: John R. van Peborgh Gooch and Michael J. Hounslow. Monte carlo simulation of size-enlargement mechanisms in crystallization.
