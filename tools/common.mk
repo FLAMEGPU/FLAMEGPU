@@ -148,12 +148,13 @@ endif
 
 # Enable / Disable profiling
 ifeq ($(profile),1)
+	NVCCFLAGS += -DPROFILE -D_PROFILE
 	ifeq ($(OS),Windows_NT)
-		# @todo - not yet supported
+	NVCCFLAGS+=-I"$(NVTOOLSEXT_PATH)include"
+	NVCCLDFLAGS +=-L"$(NVTOOLSEXT_PATH)lib/x64" nvToolsExt64_1.lib
 	else
 		UNAME_S := $(shell uname -s)
 		ifeq ($(UNAME_S),Linux)
-			NVCCFLAGS += -DPROFILE -D_PROFILE
 			LDFLAGS +=-lnvToolsExt -L/usr/local/cuda-$(NVCC_MAJOR).$(NVCC_MINOR)/bin/../lib64
 		endif
 	endif
