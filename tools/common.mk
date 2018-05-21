@@ -278,6 +278,9 @@ endif
 
 XSLT_FUNCTIONS_C := $(SRC_DYNAMIC)/functions.c.tmp
 
+# Build target for less xmllint validation
+LAST_VALID_AT := $(BUILD_DIR)/.last_valid_at
+
 # Verify that atleast one SM value has been specified.
 ifeq ($(SMS),)
 $(error "Error - no SM architectures have been specified. Aborting.")
@@ -307,11 +310,13 @@ all: validate xslt console
 endif
 
 # Use XMLLint to validate the model (if installed and accessible on the path.)
-validate: $(XML_MODEL_FILE) $(XSD_SCHEMA_DIR)/XMMLGPU.xsd
+validate: $(LAST_VALID_AT)
+
+$(LAST_VALID_AT) : $(XML_MODEL_FILE) $(XSD_SCHEMA_DIR)/XMMLGPU.xsd $(XSD_SCHEMA_DIR)/XMML.xsd
 ifndef XMLLINT
 	$(warning "Warning: xmllint is not available, please install libxml2-utils to enable validation")
 else
-	$(XMLLINT) --noout $(XML_MODEL_FILE) --schema $(XSD_SCHEMA_DIR)/XMMLGPU.xsd
+	$(XMLLINT) --noout $(XML_MODEL_FILE) --schema $(XSD_SCHEMA_DIR)/XMMLGPU.xsd && (touch $(LAST_VALID_AT))
 endif
 
 # Target to use xsltproc to generate all dynamic files.
@@ -439,6 +444,7 @@ $(TARGET_CONSOLE): $(CONSOLE_DEPENDANCIES)
 clean:
 	@find $(EXAMPLE_BUILD_DIR)/ -name '*$(OBJ_EXT)' -delete 2> /dev/null || true
 	@find $(EXAMPLE_BUILD_DIR)/ -name '*.cu$(OBJ_EXT)' -delete 2> /dev/null || true
+	@find $(LAST_VALID_AT) -delete 2> /dev/null || true
 
 # Clobber all temporary files, including dynamic files and the target executable. `|| true` is used to support the case where dirs do not exist.
 clobber: clean
