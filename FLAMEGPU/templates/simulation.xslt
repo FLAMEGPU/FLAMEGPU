@@ -1598,7 +1598,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
       exit(EXIT_FAILURE);
       }
       <xsl:choose>
-        <xsl:when test="xmml:currentState=xmml:nextState and not(xmml:condition) and not(gpu:globalCondition) and gpu:reallocate='false'">
+        <xsl:when test="xmml:currentState=xmml:nextState and not(xmml:condition) and not(gpu:globalCondition) and gpu:reallocate='false' and not(xmml:xagentOutputs/gpu:xagentOutput)">
   //pointer swap the updated data
   <xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>_temp = d_<xsl:value-of select="../../xmml:name"/>s;
   d_<xsl:value-of select="../../xmml:name"/>s = d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>;
