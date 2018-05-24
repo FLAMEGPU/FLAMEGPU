@@ -41,8 +41,6 @@ void updateSimulationConstants();
 //external functions
 extern void stepFLAMESimulation();
 
-extern void setCudaDevice();
-
 //common functions
 void checkGLError();
 

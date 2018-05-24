@@ -338,9 +338,7 @@ void initCUDA(int argc, char** argv){
 		fprintf(stderr, "Error Accessing Cuda Device properties for GPU %d\n", device);
 	}
 
-	<!-- CudaFree here conflicts with cudaGLSetGLDevice(0); in initVisulisation, which cannot be called after a cuda context has been initialised. It would be better to do this elsewhere (if at all) @todo
 	cudaFree(0);
-	-->
 
 }
 
