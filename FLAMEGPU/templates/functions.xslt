@@ -26,6 +26,38 @@
 
 #include &lt;header.h&gt;
 
+<!-- Prototypes for Init functions -->
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:initFunctions/gpu:initFunction">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Init function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_INIT_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+
+}
+</xsl:for-each>
+<!-- Prototypes for Step functions -->
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:stepFunctions/gpu:stepFunction">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Step function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_STEP_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+
+}
+</xsl:for-each>
+<!-- Prototypes for Exit functions -->
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:exitFunctions/gpu:exitFunction">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Exit function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_EXIT_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+
+}
+</xsl:for-each>
+
+<!-- Prototypes for agent functions -->
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function">
 /**
  * <xsl:value-of select="xmml:name"/> FLAMEGPU Agent Function
