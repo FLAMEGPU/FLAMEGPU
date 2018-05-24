@@ -221,9 +221,6 @@ __global__ void output_<xsl:value-of select="xmml:name"/>_agent_to_VBO(xmachine_
 
 void initVisualisation()
 {
-	//set the CUDA GL device: Will cause an error without this since CUDA 3.0
-	cudaGLSetGLDevice(0);
-
 	// Create GL context
 	int   argc   = 1;
         char glutString[] = "GLUT application"; 
