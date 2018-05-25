@@ -66,7 +66,6 @@ extern void initVisualisation()
    char *argv[] = {glutString, NULL};
    //char *argv[] = {"GLUT application", NULL};	
 	
-    setCudaDevice();
     glutInit(&argc, argv);
 
 

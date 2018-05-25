@@ -43,6 +43,7 @@ GLuint sphereNormals;
 
 //Simulation output buffers/textures
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
+cudaGraphicsResource_t <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr;
 GLuint <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo;
 GLuint <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_displacementTex;
 </xsl:for-each>
@@ -85,8 +86,8 @@ int initGL();
 void initShader();
 void createVBO( GLuint* vbo, GLuint size);
 void deleteVBO( GLuint* vbo);
-void createTBO( GLuint* tbo, GLuint* tex, GLuint size);
-void deleteTBO( GLuint* tbo);
+void createTBO( cudaGraphicsResource_t* cudaResource, GLuint* tbo, GLuint* tex, GLuint size);
+void deleteTBO( cudaGraphicsResource_t* cudaResource, GLuint* tbo);
 void setVertexBufferData();
 void reshape(int width, int height);
 void display();
@@ -221,9 +222,6 @@ __global__ void output_<xsl:value-of select="xmml:name"/>_agent_to_VBO(xmachine_
 
 void initVisualisation()
 {
-	//set the CUDA GL device: Will cause an error without this since CUDA 3.0
-	cudaGLSetGLDevice(0);
-
 	// Create GL context
 	int   argc   = 1;
         char glutString[] = "GLUT application"; 
@@ -254,7 +252,7 @@ void initVisualisation()
 	setVertexBufferData();
 
 	// create TBO<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-	createTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_displacementTex, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX * sizeof( glm::vec4));
+	createTBO(&amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_displacementTex, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX * sizeof( glm::vec4));
 	</xsl:for-each>
 
 	//set shader uniforms
@@ -301,7 +299,9 @@ void runCuda()
 	if (get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count() > 0)
 	{
 		// map OpenGL buffer object for writing from CUDA
-		gpuErrchk(cudaGLMapBufferObject( (void**)&amp;dptr, <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo));
+        size_t accessibleBufferSize = 0;
+        gpuErrchk(cudaGraphicsMapResources(1, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&amp;dptr, &amp;accessibleBufferSize, <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr));
 		//cuda block size
 		tile_size = (int) ceil((float)get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()/threads_per_tile);
 		grid = dim3(tile_size, 1, 1);
@@ -322,7 +322,7 @@ void runCuda()
 		output_<xsl:value-of select="../../xmml:name"/>_agent_to_VBO&lt;&lt;&lt; grid, threads&gt;&gt;&gt;(get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), dptr, centralise<xsl:if test="../../gpu:type='discrete'">, population_width</xsl:if>);
 		gpuErrchkLaunch();
 		// unmap buffer object
-		gpuErrchk(cudaGLUnmapBufferObject(<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo));
+        gpuErrchk(cudaGraphicsUnmapResources(1, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr));
 	}
 	</xsl:for-each>
 }
@@ -438,7 +438,7 @@ void deleteVBO( GLuint* vbo)
 ////////////////////////////////////////////////////////////////////////////////
 //! Create TBO
 ////////////////////////////////////////////////////////////////////////////////
-void createTBO(GLuint* tbo, GLuint* tex, GLuint size)
+void createTBO(cudaGraphicsResource_t* cudaResource, GLuint* tbo, GLuint* tex, GLuint size)
 {
 	// create buffer object
 	glGenBuffers( 1, tbo);
@@ -454,7 +454,7 @@ void createTBO(GLuint* tbo, GLuint* tex, GLuint size)
 	glBindBuffer(GL_TEXTURE_BUFFER_EXT, 0);
 
     // register buffer object with CUDA
-    gpuErrchk(cudaGLRegisterBufferObject(*tbo));
+    gpuErrchk(cudaGraphicsGLRegisterBuffer(cudaResource, *tbo, cudaGraphicsMapFlagsWriteDiscard)); 
 
     checkGLError();
 }
@@ -462,12 +462,13 @@ void createTBO(GLuint* tbo, GLuint* tex, GLuint size)
 ////////////////////////////////////////////////////////////////////////////////
 //! Delete TBO
 ////////////////////////////////////////////////////////////////////////////////
-void deleteTBO( GLuint* tbo)
+void deleteTBO(cudaGraphicsResource_t* cudaResource,  GLuint* tbo)
 {
-	glBindBuffer( 1, *tbo);
-	glDeleteBuffers( 1, tbo);
+    gpuErrchk(cudaGraphicsUnregisterResource(*cudaResource));
+    *cudaResource = 0;
 
-	gpuErrchk(cudaGLUnregisterBufferObject(*tbo));
+    glBindBuffer( 1, *tbo);
+    glDeleteBuffers( 1, tbo);
 
 	*tbo = 0;
 }
@@ -652,7 +653,7 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
 		deleteVBO( &amp;sphereVerts);
 		deleteVBO( &amp;sphereNormals);
 		<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-		deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
+		deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
 		</xsl:for-each>
 		cudaEventDestroy(start);
 		cudaEventDestroy(stop);
