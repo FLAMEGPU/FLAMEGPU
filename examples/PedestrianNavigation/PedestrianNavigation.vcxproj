@@ -321,6 +321,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\..\FLAMEGPU\templates\_common_templates.xslt" />
     <Xml Include="..\..\FLAMEGPU\templates\FLAMEGPU_kernals.xslt">
       <SubType>Designer</SubType>
     </Xml>

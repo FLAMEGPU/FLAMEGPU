@@ -28,6 +28,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\..\FLAMEGPU\templates\_common_templates.xslt">
+      <Filter>templates</Filter>
+    </Xml>
     <Xml Include="..\..\FLAMEGPU\templates\FLAMEGPU_kernals.xslt">
       <Filter>templates</Filter>
     </Xml>
