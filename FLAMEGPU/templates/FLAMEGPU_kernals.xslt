@@ -3,84 +3,10 @@
                 xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML"
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
-
-  
-<!--Recursive template for function conditions-->
-<xsl:template match="xmml:condition">(<xsl:choose>
-<xsl:when test="xmml:lhs/xmml:value"><xsl:value-of select="xmml:lhs/xmml:value"/>
-</xsl:when>
-<xsl:when test="xmml:lhs/xmml:agentVariable">currentState-><xsl:value-of select="xmml:lhs/xmml:agentVariable"/>[index]</xsl:when>
-<xsl:otherwise><xsl:apply-templates select="xmml:lhs/xmml:condition"/>
-</xsl:otherwise>
-</xsl:choose>
-<xsl:value-of select="xmml:operator"/>
-<xsl:choose>
-<xsl:when test="xmml:rhs/xmml:value"><xsl:value-of select="xmml:rhs/xmml:value"/>
-</xsl:when>
-<xsl:when test="xmml:rhs/xmml:agentVariable">currentState-><xsl:value-of select="xmml:rhs/xmml:agentVariable"/>[index]</xsl:when>
-<xsl:otherwise><xsl:apply-templates select="xmml:rhs/xmml:condition"/>
-</xsl:otherwise>
-</xsl:choose>)</xsl:template>
-
-<!--Recursive template for function global conditions-->
-<xsl:template match="gpu:globalCondition">(<xsl:choose>
-<xsl:when test="xmml:lhs/xmml:value"><xsl:value-of select="xmml:lhs/xmml:value"/>
-</xsl:when>
-<xsl:when test="xmml:lhs/xmml:agentVariable">currentState-><xsl:value-of select="xmml:lhs/xmml:agentVariable"/>[index]</xsl:when>
-<xsl:otherwise><xsl:apply-templates select="xmml:lhs/xmml:condition"/>
-</xsl:otherwise>
-</xsl:choose>
-<xsl:value-of select="xmml:operator"/>
-<xsl:choose>
-<xsl:when test="xmml:rhs/xmml:value"><xsl:value-of select="xmml:rhs/xmml:value"/>
-</xsl:when>
-<xsl:when test="xmml:rhs/xmml:agentVariable">currentState-><xsl:value-of select="xmml:rhs/xmml:agentVariable"/>[index]</xsl:when>
-<xsl:otherwise><xsl:apply-templates select="xmml:rhs/xmml:condition"/>
-</xsl:otherwise>
-</xsl:choose>)</xsl:template>
-
-<xsl:template name="defaultInitialiser">
-    <xsl:param name="type"/>
-    <xsl:choose>
-        <xsl:when test="$type='ivec2'">{0, 0}</xsl:when>
-        <xsl:when test="$type='uvec2'">{0, 0}</xsl:when>
-        <xsl:when test="$type='fvec2'">{0, 0}</xsl:when>
-        <xsl:when test="$type='dvec2'">{0, 0}</xsl:when>
-        
-        <xsl:when test="$type='ivec3'">{0, 0, 0}</xsl:when>
-        <xsl:when test="$type='uvec3'">{0, 0, 0}</xsl:when>
-        <xsl:when test="$type='fvec3'">{0, 0, 0}</xsl:when>
-        <xsl:when test="$type='dvec3'">{0, 0, 0}</xsl:when>
-        
-        <xsl:when test="$type='ivec4'">{0, 0, 0, 0}</xsl:when>
-        <xsl:when test="$type='uvec4'">{0, 0, 0, 0}</xsl:when>
-        <xsl:when test="$type='fvec4'">{0, 0, 0, 0}</xsl:when>
-        <xsl:when test="$type='dvec4'">{0, 0, 0, 0}</xsl:when>
-        
-        <xsl:otherwise>0</xsl:otherwise> <!-- default output format is float -->
-    </xsl:choose>
-</xsl:template> 
-
-
+<xsl:include href = "./_common_templates.xslt" />
 <!--Main template-->
 <xsl:template match="/">
-
-/*
-* FLAME GPU v 1.5.X for CUDA 9
-* Copyright University of Sheffield.
-* Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
-* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
-*
-* University of Sheffield retain all intellectual property and
-* proprietary rights in and to this software and related documentation.
-* Any use, reproduction, disclosure, or distribution of this software
-* and related documentation without an express license agreement from
-* University of Sheffield is strictly prohibited.
-*
-* For terms of licence agreement please attached licence or view licence
-* on www.flamegpu.com website.
-*
-*/
+<xsl:call-template name="copyrightNotice"></xsl:call-template>
 
 #ifndef _FLAMEGPU_KERNELS_H_
 #define _FLAMEGPU_KERNELS_H_
