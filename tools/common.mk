@@ -277,6 +277,7 @@ VISUALISATION_DEPENDANCIES := $(BUILD_DIR)/io.cu$(OBJ_EXT) $(BUILD_DIR)/simulati
 endif
 
 XSLT_FUNCTIONS_C := $(SRC_DYNAMIC)/functions.c.tmp
+XSLT_COMMON_TEMPLATES := $(TEMPLATES_DIR)/_common_templates.xslt
 
 # Build target for less xmllint validation
 LAST_VALID_AT := $(BUILD_DIR)/.last_valid_at
@@ -334,7 +335,7 @@ visualisation: makedirs validate $(TARGET_VISUALISATION)
 endif
 
 # Rule to create header.h from XSLT. Depends upon both header.xslt and the XML file, so if either is changed a re-build will occur.
-$(SRC_DYNAMIC)/%.h: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE)  $(MAKEFILE_LIST)
+$(SRC_DYNAMIC)/%.h: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(XSLT_COMMON_TEMPLATES) $(MAKEFILE_LIST)
 # Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
@@ -357,7 +358,7 @@ else
 endif
 
 # Rule to create *.cu files in the dynamic folder, as requested by build dependencies.
-$(SRC_DYNAMIC)/%.cu: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(MAKEFILE_LIST)
+$(SRC_DYNAMIC)/%.cu: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(XSLT_COMMON_TEMPLATES) $(MAKEFILE_LIST)
 # Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")
@@ -380,7 +381,7 @@ else
 endif
 
 # Rule to create functsion.c file in the dynamic folder.
-$(SRC_DYNAMIC)/%.c.tmp: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(MAKEFILE_LIST)
+$(SRC_DYNAMIC)/%.c.tmp: $(TEMPLATES_DIR)/%.xslt $(XML_MODEL_FILE) $(XSLT_COMMON_TEMPLATES) $(MAKEFILE_LIST)
 # Error if XSLTPROC is not available
 ifndef XSLTPROC
 	$(error "xsltproc is not available, please install xlstproc")

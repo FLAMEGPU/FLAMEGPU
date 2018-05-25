@@ -3,23 +3,10 @@
                 xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML"
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
+<xsl:include href = "./_common_templates.xslt" />
 <!--Main template-->
 <xsl:template match="/">
-/*
- * Copyright 2011 University of Sheffield.
- * Author: Dr Paul Richmond 
- * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
- *
- * University of Sheffield retain all intellectual property and 
- * proprietary rights in and to this software and related documentation. 
- * Any use, reproduction, disclosure, or distribution of this software 
- * and related documentation without an express license agreement from
- * University of Sheffield is strictly prohibited.
- *
- * For terms of licence agreement please attached licence or view licence 
- * on www.flamegpu.com website.
- * 
- */
+<xsl:call-template name="copyrightNotice"></xsl:call-template>
 
 #ifndef _FLAMEGPU_FUNCTIONS
 #define _FLAMEGPU_FUNCTIONS
