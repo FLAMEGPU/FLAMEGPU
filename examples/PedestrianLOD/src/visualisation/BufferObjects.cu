@@ -34,12 +34,12 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
-extern void registerBO(GLuint* bo)
+extern void registerBO(cudaGraphicsResource_t* cudaResource, GLuint* bo)
 {
-    gpuErrchk(cudaGLRegisterBufferObject(*bo));
+    gpuErrchk(cudaGraphicsGLRegisterBuffer(cudaResource, *bo, cudaGraphicsMapFlagsWriteDiscard)); 
 }
 
-extern void unregisterBO(GLuint* bo)
+extern void unregisterBO(cudaGraphicsResource_t* cudaResource)
 {
-	gpuErrchk(cudaGLUnregisterBufferObject(*bo));
+    gpuErrchk(cudaGraphicsUnregisterResource(*cudaResource));
 }

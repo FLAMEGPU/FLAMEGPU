@@ -106,7 +106,7 @@ __global__ void output_navmaps_to_TBO(xmachine_memory_navmap_list* agents, glm::
 }
 
 //EXTERNAL FUNCTIONS DEFINED IN NavMapPopulation.h
-void generate_instances(GLuint* instances_tbo)
+extern void generate_instances(GLuint* instances_tbo, cudaGraphicsResource_t * instances_cgr)
 {
 	//kernals sizes
 	int threads_per_tile = 128;
@@ -120,7 +120,9 @@ void generate_instances(GLuint* instances_tbo)
 	if (get_agent_navmap_static_count() > 0)
 	{
 		// map OpenGL buffer object for writing from CUDA
-		gpuErrchk(cudaGLMapBufferObject( (void**)&dptr_1, *instances_tbo));
+		gpuErrchk(cudaGraphicsMapResources(1, instances_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr_1, 0, *instances_cgr));
+
 		//cuda block size
 		tile_size = (int) ceil((float)get_agent_navmap_static_count()/threads_per_tile);
 		grid = dim3(tile_size, 1, 1);
@@ -129,7 +131,7 @@ void generate_instances(GLuint* instances_tbo)
 		output_navmaps_to_TBO<<< grid, threads>>>(get_device_navmap_static_agents(), dptr_1);
 		gpuErrchkLaunch();
 		// unmap buffer object
-		gpuErrchk(cudaGLUnmapBufferObject(*instances_tbo));
+		gpuErrchk(cudaGraphicsUnmapResources(1, instances_cgr));
 	}
 }
 

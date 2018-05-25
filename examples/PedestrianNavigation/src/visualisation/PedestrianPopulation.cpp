@@ -31,8 +31,10 @@ float PEDESTRIAN_MODEL_SCALE = 0.0025f;
 //pedestrian instances 
 GLuint p_instances_data1_tbo;
 GLuint p_instances_data1_tex;
+cudaGraphicsResource_t p_instances_data1_cgr;
 GLuint p_instances_data2_tbo;
 GLuint p_instances_data2_tex;
+cudaGraphicsResource_t p_instances_data2_cgr;
 
 GLuint pvs_active_exit;
 
@@ -108,7 +110,7 @@ void renderPedestrianPopulation()
 	int count=0;
 
 	//run CUDA
-	generate_pedestrian_instances(&p_instances_data1_tbo, &p_instances_data2_tbo);
+	generate_pedestrian_instances(&p_instances_data1_tbo, &p_instances_data2_tbo, &p_instances_data1_cgr, &p_instances_data2_cgr);
 
 	glUseProgram(p_shaderProgram);
 
@@ -156,8 +158,8 @@ void createPedestrianBufferObjects()
 	//create TBO
 	createTBO(&p_instances_data1_tbo, &p_instances_data1_tex, get_agent_agent_MAX_count()* sizeof(glm::vec4));
 	createTBO(&p_instances_data2_tbo, &p_instances_data2_tex, get_agent_agent_MAX_count()* sizeof(glm::vec4));
-	registerBO(&p_instances_data1_tbo);
-	registerBO(&p_instances_data2_tbo);
+	registerBO(&p_instances_data1_cgr, &p_instances_data1_tbo);
+	registerBO(&p_instances_data2_cgr, &p_instances_data2_tbo);
 
 	//create VBOs 
 	createVBO(&lod1l_verts_vbo, GL_ARRAY_BUFFER, lod1_v_count*sizeof(glm::vec3));

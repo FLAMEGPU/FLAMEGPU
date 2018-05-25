@@ -38,6 +38,7 @@ int nm_width;
 //navmap instances
 GLuint nm_instances_tbo;
 GLuint nm_instances_tex;
+cudaGraphicsResource_t nm_instances_cgr;
 
 //model primative counts
 int arrow_v_count;
@@ -108,7 +109,8 @@ void renderNavMapPopulation()
 	if (drawArrows)
 	{
 		//generate instance data from FLAME GPU model
-		generate_instances(&nm_instances_tbo);
+		generate_instances(&nm_instances_tbo, &nm_instances_cgr);
+
 		
 		//bind vertex program
 		glUseProgram(nm_shaderProgram);
@@ -196,7 +198,7 @@ void createNavMapBufferObjects()
 {
 	//create TBO
 	createTBO(&nm_instances_tbo, &nm_instances_tex, get_agent_navmap_MAX_count()* sizeof(glm::vec4));
-	registerBO(&nm_instances_tbo);
+	registerBO(&nm_instances_cgr, &nm_instances_tbo);
 
 	if (useLargeVBO)
 	{
@@ -215,11 +217,10 @@ void createNavMapBufferObjects()
 		//bind and map vertex data
 		glBindBuffer(GL_ARRAY_BUFFER, arrow_verts_vbo);
 		verts = (glm::vec3*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-		i,v=0;
 		for (i=0;i<get_agent_navmap_MAX_count();i++){
 			int offset = i*arrow_v_count;
-			int x = floor(i/64.0f);
-			int y = i%64;
+			// int x = floor(i/64.0f);
+			// int y = i%64;
 			for (v=0;v<arrow_v_count;v++){
 				verts[offset+v][0] = arrow_vertices[v][0];
 				verts[offset+v][1] = arrow_vertices[v][1];
@@ -232,7 +233,6 @@ void createNavMapBufferObjects()
 		//bind and map face data
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, arrow_elems_vbo);
 		faces = (glm::ivec3*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-		i,f=0;
 		for (i=0;i<get_agent_navmap_MAX_count();i++){
 			int offset = i*arrow_f_count;
 			int vert_offset = i*arrow_v_count;	//need to offset all face indices by number of verts in each model
@@ -249,7 +249,6 @@ void createNavMapBufferObjects()
 		//bind and map vbo attrbiute data
 		glBindBuffer(GL_ARRAY_BUFFER, arrow_attributes_vbo);
 		atts = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-		i,v=0;
 		for (i=0;i<get_agent_navmap_MAX_count();i++){
 			int offset = i*arrow_v_count;
 			for (v=0;v<arrow_v_count;v++){
