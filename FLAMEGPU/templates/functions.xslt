@@ -88,7 +88,7 @@ __FLAME_GPU_FUNC__ int <xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:v
     float agent_z = 0.0;
     </xsl:if>
     //Template for input message iteration
-    xmachine_message_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>* current_message = get_first_<xsl:value-of select="$messagename"/>_message(<xsl:value-of select="$messagename"/>_messages<xsl:if test="gpu:partitioningSpatial">, partition_matrix, agent_x, agent_y, agent_z</xsl:if><xsl:if test="gpu:partitioningDiscrete">, agent_x, agent_y</xsl:if>);
+    xmachine_message_<xsl:value-of select="$messagename"/>* current_message = get_first_<xsl:value-of select="$messagename"/>_message(<xsl:value-of select="$messagename"/>_messages<xsl:if test="gpu:partitioningSpatial">, partition_matrix, agent_x, agent_y, agent_z</xsl:if><xsl:if test="gpu:partitioningDiscrete">, agent_x, agent_y</xsl:if>);
     while (current_message)
     {
         //INSERT MESSAGE PROCESSING CODE HERE
