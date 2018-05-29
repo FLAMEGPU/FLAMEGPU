@@ -63,6 +63,7 @@
 #include &lt;thrust/device_ptr.h&gt;
 #include &lt;thrust/scan.h&gt;
 #include &lt;thrust/sort.h&gt;
+#include &lt;thrust/extrema.h&gt;
 #include &lt;thrust/system/cuda/execution_policy.h&gt;
 #include &lt;cub/cub.cuh&gt;
 
@@ -1050,15 +1051,30 @@ void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$s
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>),  thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>) + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count);
 }
-</xsl:if>
 
-<xsl:if test="not(xmml:arrayLength)"> <!-- Disable agent array reductions -->
 <xsl:if test="contains(xmml:type, 'int')">
 <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>),  thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>) + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, count_value);
 }
 </xsl:if>
+
+<xsl:if test="not(contains(xmml:type, 'vec'))"> <!-- Any non-vector data type can be min/maxed. -->
+<xsl:value-of select="xmml:type"/> min_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(){
+    //min in default stream
+    thrust::device_ptr&lt;<xsl:value-of select="xmml:type"/>&gt; thrust_ptr = thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-&gt;<xsl:value-of select="xmml:name"/>);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+<xsl:value-of select="xmml:type"/> max_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(){
+    //max in default stream
+    thrust::device_ptr&lt;<xsl:value-of select="xmml:type"/>&gt; thrust_ptr = thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-&gt;<xsl:value-of select="xmml:name"/>);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+</xsl:if>
+
+
 </xsl:if>
 
 </xsl:for-each>
