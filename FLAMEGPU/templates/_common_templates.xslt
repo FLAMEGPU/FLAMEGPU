@@ -52,30 +52,36 @@
         <xsl:otherwise>%f</xsl:otherwise> <!-- default output format is float -->
     </xsl:choose>
 </xsl:template>
-  
 <!-- Default variable initialiser with optional default value argument -->
 <xsl:template name="defaultInitialiser">
     <xsl:param name="type"/>
     <xsl:param name="defaultValue"/>
+    <!-- find how many commas are in the value -->
+    <xsl:variable name="numCommas" select="string-length($defaultValue) - string-length(translate($defaultValue, ',', ''))" />
+    <!-- note that ends with does not exist in xslt 1, so must use multiple string operators... -->
     <xsl:choose>
-        <xsl:when test="$type='ivec2'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='uvec2'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='fvec2'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='dvec2'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        
-        <xsl:when test="$type='ivec3'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='uvec3'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='fvec3'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='dvec3'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        
-        <xsl:when test="$type='ivec4'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0, 0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='uvec4'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0, 0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='fvec4'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0, 0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        <xsl:when test="$type='dvec4'">{<xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0, 0, 0, 0</xsl:otherwise></xsl:choose>}</xsl:when>
-        
-        <!-- default output format is float -->
+        <xsl:when test="substring($type, string-length($type) - string-length('vec2') + 1) = 'vec2'"><xsl:choose>
+            <xsl:when test="$defaultValue and $numCommas=1">{<xsl:value-of select="$defaultValue" />}</xsl:when>
+            <xsl:otherwise>{0,0}</xsl:otherwise>
+        </xsl:choose>
+        </xsl:when>
+        <xsl:when test="substring($type, string-length($type) - string-length('vec3') + 1) = 'vec3'">
+            <xsl:choose>
+                <xsl:when test="$defaultValue and $numCommas=2">{<xsl:value-of select="$defaultValue" />}</xsl:when>
+                <xsl:otherwise>{0,0,0}</xsl:otherwise>
+            </xsl:choose>
+        </xsl:when>
+        <xsl:when test="substring($type, string-length($type) - string-length('vec4') + 1) = 'vec4'">
+            <xsl:choose>
+                <xsl:when test="$defaultValue and $numCommas=3">{<xsl:value-of select="$defaultValue" />}</xsl:when>
+                <xsl:otherwise>{0,0,0,0}</xsl:otherwise>
+            </xsl:choose>
+        </xsl:when>
         <xsl:otherwise>
-            <xsl:choose><xsl:when test="$defaultValue"><xsl:value-of select="$defaultValue"/></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose>
+            <xsl:choose>
+                <xsl:when test="$defaultValue and $numCommas=0"><xsl:value-of select="$defaultValue" /></xsl:when>
+                <xsl:otherwise>0</xsl:otherwise>
+            </xsl:choose>
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>

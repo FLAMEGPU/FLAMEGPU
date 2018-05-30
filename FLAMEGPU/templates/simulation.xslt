@@ -76,10 +76,54 @@
 </xsl:for-each>
 </xsl:for-each>
 
-<!--Compile time error if there are any messages with vector type variables-->
-<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:variable name="message_name" select="xmml:name"/><xsl:for-each select="xmml:variables/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type"/><xsl:if test="contains($variable_type, 'vec')">
+<!--Compile time error if there are any messages with vector type variables or invalid default values-->
+<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message/xmml:variables/gpu:variable">
+<xsl:variable name="message_name" select="../../xmml:name"/>
+<xsl:variable name="variable_name" select="xmml:name"/>
+<xsl:variable name="variable_type" select="xmml:type"/>
+<xsl:variable name="defaultValue" select="xmml:defaultValue" />
+
+<!-- check for invalid defaultValues for scalar message variables -->
+<xsl:if test="$defaultValue and not(contains($variable_type, 'vec'))">
+<xsl:variable name="numValues" select="1" />
+<xsl:variable name="expectedCommas" select="$numValues - 1" />
+<xsl:variable name="numCommas" select="string-length($defaultValue) - string-length(translate($defaultValue, ',', ''))" />
+<xsl:if test="not($numCommas=$expectedCommas)">
+#error "Invalid defaultValue of `<xsl:value-of select="$defaultValue" />` for message `<xsl:value-of select="$message_name" />` variable `<xsl:value-of select="$variable_name" />`. `<xsl:value-of select="$variable_type" />` requires a single value"
+</xsl:if>
+</xsl:if>
+<!-- check for vector type message variables -->
+<xsl:if test="contains($variable_type, 'vec')">
 #error "Message `<xsl:value-of select="$message_name" />` contains vector type message variable `<xsl:value-of select="$variable_name" />` of type `<xsl:value-of select="$variable_type" />`"
-</xsl:if></xsl:for-each></xsl:for-each>
+</xsl:if>
+</xsl:for-each>
+
+<!-- Compile time error for any incorrect default values. -->
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable">
+<xsl:if test="xmml:defaultValue">
+<xsl:variable name="agent_name" select="../../xmml:name"/>
+<xsl:variable name="variable_name" select="xmml:name"/>
+<xsl:variable name="variable_type" select="xmml:type"/>
+<xsl:variable name="defaultValue" select="xmml:defaultValue" />
+<xsl:variable name="numCommas" select="string-length($defaultValue) - string-length(translate($defaultValue, ',', ''))" />
+<!-- Non vectors require no commas -->
+<xsl:if test="not(contains($variable_type, 'vec'))">
+<xsl:variable name="numValues" select="1" />
+<xsl:variable name="expectedCommas" select="$numValues - 1" />
+<xsl:if test="not($numCommas=$expectedCommas)">
+#error "Invalid defaultValue of `<xsl:value-of select="$defaultValue" />` for xagent `<xsl:value-of select="$agent_name" />` variable `<xsl:value-of select="$variable_name" />`. `<xsl:value-of select="$variable_type" />` requires a single value"
+</xsl:if>
+</xsl:if>
+<!-- vector types require an appropriate number of commas -->
+<xsl:if test="contains($variable_type, 'vec')">
+<xsl:variable name="numValues" select="substring($variable_type, string-length($variable_type))" />
+<xsl:variable name="expectedCommas" select="$numValues - 1" />
+<xsl:if test="not($numCommas=$expectedCommas)">
+#error "Invalid defaultValue of `<xsl:value-of select="$defaultValue" />` for xagent `<xsl:value-of select="$agent_name" />` variable `<xsl:value-of select="$variable_name" />`. `<xsl:value-of select="$variable_type" />` requires <xsl:value-of select="$numValues" /> comma separated values"
+</xsl:if>
+</xsl:if>
+</xsl:if>
+</xsl:for-each>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
