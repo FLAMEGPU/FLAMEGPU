@@ -93,6 +93,23 @@
 </xsl:if>
 </xsl:for-each>
 
+<!-- Compile time errors based on message partitioning and agent types-->
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/><xsl:variable name="agent_type" select="gpu:type"/>
+<xsl:for-each select="xmml:functions/gpu:function"><xsl:variable name="function_name" select="xmml:name"/>
+<xsl:for-each select="xmml:outputs/gpu:output"><xsl:variable name="message_name" select="xmml:messageName"/>
+<xsl:for-each select="../../../../../../xmml:messages/gpu:message[xmml:name=$message_name]">
+<!-- Discrete agents can only output discrete messages -->
+<xsl:if test="$agent_type='discrete' and not(gpu:partitioningDiscrete)">
+#error "Discrete agent `<xsl:value-of select="$agent_name"/>` can only output partitioningDiscrete messages. `<xsl:value-of select="$message_name"/>` output by `<xsl:value-of select="$function_name"/>` are not partitioningDiscrete. "
+</xsl:if>
+<!-- Continous agents cannot output discrete messages -->
+<xsl:if test="$agent_type='continuous' and gpu:partitioningDiscrete">
+#error "Continuous agent `<xsl:value-of select="$agent_name"/>` cannot output partitioningDiscrete messages. `<xsl:value-of select="$message_name"/>` output by `<xsl:value-of select="$function_name"/>` are partitioningDiscrete. "
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
+</xsl:for-each>
+</xsl:for-each>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
