@@ -32,12 +32,11 @@
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
-	<xs:simpleType name="type_type">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="int" />
-			<xs:enumeration value="float" />
-			<xs:enumeration value="double" />
-		</xs:restriction>
+	<!-- Regular expression allowing (comma separate lists) of numerical values -->
+	<xs:simpleType name="defaultValue_type">
+	    <xs:restriction base="xs:token">
+	        <xs:pattern value="([\-\+]?[0-9]+(\.[0-9]+f?)?)[ ]*(,[ ]*([\-\+]?[0-9]+(\.[0-9]+f?)?)){0,3}"/>
+	    </xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="variable_type" abstract="true">
 		<xs:sequence>
@@ -45,7 +44,7 @@
 			<xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1" nillable="false" />
 			<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1" />
 			<xs:element name="arrayLength" type="xs:int" minOccurs="0" maxOccurs="1" />
-			<xs:element name="defaultValue" type="xs:double" minOccurs="0" maxOccurs="1" />
+			<xs:element name="defaultValue" type="defaultValue_type" minOccurs="0" maxOccurs="1" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="environment_type" abstract="true">

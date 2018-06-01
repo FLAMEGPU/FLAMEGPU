@@ -3,26 +3,12 @@
                 xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML"
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
+<xsl:include href = "./_common_templates.xslt" />
 <xsl:template match="/">
-  /*
-  * FLAME GPU v 1.5.X for CUDA 9
-  * Copyright University of Sheffield.
-  * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
-  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
-  *
-  * University of Sheffield retain all intellectual property and
-  * proprietary rights in and to this software and related documentation.
-  * Any use, reproduction, disclosure, or distribution of this software
-  * and related documentation without an express license agreement from
-  * University of Sheffield is strictly prohibited.
-  *
-  * For terms of licence agreement please attached licence or view licence
-  * on www.flamegpu.com website.
-  *
-  */
+<xsl:call-template name="copyrightNotice"></xsl:call-template>
 
-  // includes, project
-  #include &lt;cuda_runtime.h&gt;
+// includes, project
+#include &lt;cuda_runtime.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;

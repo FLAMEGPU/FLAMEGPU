@@ -3,44 +3,9 @@
                 xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML"
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
-<xsl:template name="defaultInitialiser">
-    <xsl:param name="type"/>
-    <xsl:choose>
-        <xsl:when test="$type='ivec2'">{0, 0}</xsl:when>
-        <xsl:when test="$type='uvec2'">{0, 0}</xsl:when>
-        <xsl:when test="$type='fvec2'">{0, 0}</xsl:when>
-        <xsl:when test="$type='dvec2'">{0, 0}</xsl:when>
-        
-        <xsl:when test="$type='ivec3'">{0, 0, 0}</xsl:when>
-        <xsl:when test="$type='uvec3'">{0, 0, 0}</xsl:when>
-        <xsl:when test="$type='fvec3'">{0, 0, 0}</xsl:when>
-        <xsl:when test="$type='dvec3'">{0, 0, 0}</xsl:when>
-        
-        <xsl:when test="$type='ivec4'">{0, 0, 0, 0}</xsl:when>
-        <xsl:when test="$type='uvec4'">{0, 0, 0, 0}</xsl:when>
-        <xsl:when test="$type='fvec4'">{0, 0, 0, 0}</xsl:when>
-        <xsl:when test="$type='dvec4'">{0, 0, 0, 0}</xsl:when>
-        
-        <xsl:otherwise>0</xsl:otherwise> <!-- default output format is float -->
-    </xsl:choose>
-</xsl:template> 
+<xsl:include href = "./_common_templates.xslt" />
 <xsl:template match="/">
-  /*
-  * FLAME GPU v 1.5.X for CUDA 9
-  * Copyright University of Sheffield.
-  * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
-  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
-  *
-  * University of Sheffield retain all intellectual property and
-  * proprietary rights in and to this software and related documentation.
-  * Any use, reproduction, disclosure, or distribution of this software
-  * and related documentation without an express license agreement from
-  * University of Sheffield is strictly prohibited.
-  *
-  * For terms of licence agreement please attached licence or view licence
-  * on www.flamegpu.com website.
-  *
-  */
+<xsl:call-template name="copyrightNotice"></xsl:call-template>
 
   //Disable internal thrust warnings about conversions
   #ifdef _MSC_VER
@@ -109,6 +74,55 @@
 </xsl:for-each>
 </xsl:for-each>
 </xsl:for-each>
+</xsl:for-each>
+
+<!--Compile time error if there are any messages with vector type variables or invalid default values-->
+<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message/xmml:variables/gpu:variable">
+<xsl:variable name="message_name" select="../../xmml:name"/>
+<xsl:variable name="variable_name" select="xmml:name"/>
+<xsl:variable name="variable_type" select="xmml:type"/>
+<xsl:variable name="defaultValue" select="xmml:defaultValue" />
+
+<!-- check for invalid defaultValues for scalar message variables -->
+<xsl:if test="$defaultValue and not(contains($variable_type, 'vec'))">
+<xsl:variable name="numValues" select="1" />
+<xsl:variable name="expectedCommas" select="$numValues - 1" />
+<xsl:variable name="numCommas" select="string-length($defaultValue) - string-length(translate($defaultValue, ',', ''))" />
+<xsl:if test="not($numCommas=$expectedCommas)">
+#error "Invalid defaultValue of `<xsl:value-of select="$defaultValue" />` for message `<xsl:value-of select="$message_name" />` variable `<xsl:value-of select="$variable_name" />`. `<xsl:value-of select="$variable_type" />` requires a single value"
+</xsl:if>
+</xsl:if>
+<!-- check for vector type message variables -->
+<xsl:if test="contains($variable_type, 'vec')">
+#error "Message `<xsl:value-of select="$message_name" />` contains vector type message variable `<xsl:value-of select="$variable_name" />` of type `<xsl:value-of select="$variable_type" />`"
+</xsl:if>
+</xsl:for-each>
+
+<!-- Compile time error for any incorrect default values. -->
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable">
+<xsl:if test="xmml:defaultValue">
+<xsl:variable name="agent_name" select="../../xmml:name"/>
+<xsl:variable name="variable_name" select="xmml:name"/>
+<xsl:variable name="variable_type" select="xmml:type"/>
+<xsl:variable name="defaultValue" select="xmml:defaultValue" />
+<xsl:variable name="numCommas" select="string-length($defaultValue) - string-length(translate($defaultValue, ',', ''))" />
+<!-- Non vectors require no commas -->
+<xsl:if test="not(contains($variable_type, 'vec'))">
+<xsl:variable name="numValues" select="1" />
+<xsl:variable name="expectedCommas" select="$numValues - 1" />
+<xsl:if test="not($numCommas=$expectedCommas)">
+#error "Invalid defaultValue of `<xsl:value-of select="$defaultValue" />` for xagent `<xsl:value-of select="$agent_name" />` variable `<xsl:value-of select="$variable_name" />`. `<xsl:value-of select="$variable_type" />` requires a single value"
+</xsl:if>
+</xsl:if>
+<!-- vector types require an appropriate number of commas -->
+<xsl:if test="contains($variable_type, 'vec')">
+<xsl:variable name="numValues" select="substring($variable_type, string-length($variable_type))" />
+<xsl:variable name="expectedCommas" select="$numValues - 1" />
+<xsl:if test="not($numCommas=$expectedCommas)">
+#error "Invalid defaultValue of `<xsl:value-of select="$defaultValue" />` for xagent `<xsl:value-of select="$agent_name" />` variable `<xsl:value-of select="$variable_name" />`. `<xsl:value-of select="$variable_type" />` requires <xsl:value-of select="$numValues" /> comma separated values"
+</xsl:if>
+</xsl:if>
+</xsl:if>
 </xsl:for-each>
 
 #ifdef _MSC_VER
@@ -937,13 +951,13 @@ xmachine_memory_<xsl:value-of select="$agent_name" />* h_allocate_agent_<xsl:val
     memset(agent, 0, sizeof(xmachine_memory_<xsl:value-of select="$agent_name" />));
 <xsl:for-each select="xmml:memory/gpu:variable">
 <xsl:if test="xmml:defaultValue and not(xmml:arrayLength)">
-    agent-&gt;<xsl:value-of select="xmml:name"/> = <xsl:value-of select="xmml:defaultValue"/>;
+    agent-&gt;<xsl:value-of select="xmml:name"/> = <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/><xsl:with-param name="defaultValue" select="xmml:defaultValue" /></xsl:call-template>;
 </xsl:if>
 <xsl:if test="xmml:arrayLength">	// Agent variable arrays must be allocated
     agent-&gt;<xsl:value-of select="xmml:name"/> = (<xsl:value-of select="xmml:type"/>*)malloc(<xsl:value-of select="xmml:arrayLength"/> * sizeof(<xsl:value-of select="xmml:type"/>));
-	<xsl:choose><xsl:when test="xmml:defaultValue">// If we have a defauly value, set each element correctly.
+	<xsl:choose><xsl:when test="xmml:defaultValue">// If we have a default value, set each element correctly.
 	for(unsigned int index = 0; index &lt; <xsl:value-of select="xmml:arrayLength"/>; index++){
-		agent-&gt;<xsl:value-of select="xmml:name"/>[index] = (<xsl:value-of select="xmml:type"/>)<xsl:value-of select="xmml:defaultValue"/>;
+		agent-&gt;<xsl:value-of select="xmml:name"/>[index] = <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/><xsl:with-param name="defaultValue" select="xmml:defaultValue" /></xsl:call-template>;
 	}</xsl:when><xsl:otherwise>
     // If there is no default value, memset to 0.
     memset(agent-&gt;<xsl:value-of select="xmml:name"/>, 0, sizeof(<xsl:value-of select="xmml:type"/>)*<xsl:value-of select="xmml:arrayLength"/>);</xsl:otherwise>
