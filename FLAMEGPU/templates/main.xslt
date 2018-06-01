@@ -113,8 +113,11 @@ int checkUsage(int argc, char** argv) {
 		printf("options arguments:\n");
 		printf("  -h, --help           Output this help message.\n");
 		printf("  cuda_device_id       CUDA device ID to be used. Default is 0.\n");
-		printf("  XML_output_override  Flag indicating if iteration data should be output as XML\n");
-		printf("                       0 = false, 1 = true. Default %d\n", OUTPUT_TO_XML);
+		printf("  XML_output_frequency Frequency of XML output\n");
+		printf("                         0 = No output\n");
+		printf("                         1 = Every 1 iteration\n");
+		printf("                         5 = Every 5 iterations\n");
+		printf("                         Default value: %d\n", OUTPUT_TO_XML);
 		// Set the appropriate return value
 		retval = false;
 	}
@@ -264,22 +267,22 @@ void setFilePaths(char* input){
 }
 
 
-bool getOutputXML(int argc, char**argv){
-	// Initialise to #defined default
-	
+int getOutputXMLFrequency(int argc, char**argv){
 
 #ifdef VISUALISATION
 	// If visualisation mode is set, we do not output.
-	return false;
+	return 0;
 #else
+	// Initialise to #defined default
+	int outputFrequency = OUTPUT_TO_XML;
 	// If console mode is set and we have the right number of arguments, use the relevant index.
 	if (argc &gt;= 5){
-		// Return the value from the argument.
-		return atoi(argv[4]) != 0;
-	} else {
-		// Return the default value.
-		return (bool) OUTPUT_TO_XML;
+		outputFrequency = (int) atoi(argv[4]);
+		if(outputFrequency &lt;= 0){
+			outputFrequency = 0;
+		}
 	}
+	return outputFrequency;
 #endif
 
 }
@@ -353,7 +356,7 @@ void runConsoleWithoutXMLOutput(int iterations){
 	}
 }
 
-void runConsoleWithXMLOutput(int iterations){
+void runConsoleWithXMLOutput(int iterations, int outputFrequency){
 	PROFILE_SCOPED_RANGE("runConsoleWithXMLOutput");
 	// Iteratively tun the correct number of iterations.
 	for (int i=0; i&lt; iterations; i++)
@@ -362,12 +365,18 @@ void runConsoleWithXMLOutput(int iterations){
 		//single simulation iteration
 		singleIteration();
 		// Save the iteration data to disk
-		saveIterationData(outputpath, i+1, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-			<!--<xsl:value-of select="xmml:name"/> state <xsl:value-of select="../../xmml:name"/> agents -->
-			get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose>
-			</xsl:for-each>
+		if((i+1) % outputFrequency == 0){
+			saveIterationData(outputpath, i+1, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose></xsl:for-each>
 			printf("Iteration %i Saved to XML\n", i+1);
+		}
 	}
+
+	// If we did not yet output the final iteration, output the final iteration.
+	if(iterations % outputFrequency != 0){
+		saveIterationData(outputpath, iterations, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose></xsl:for-each>
+		printf("Iteration %i Saved to XML\n", iterations);
+	}
+
 }
 
 /**
@@ -383,8 +392,8 @@ int main( int argc, char** argv)
 	//get the directory paths
 	setFilePaths(argv[1]);
 
-	//determine if we want to output to xml.
-	bool outputXML = getOutputXML(argc, argv);
+	//determine frequency we want to output to xml.
+	int outputXMLFrequency = getOutputXMLFrequency(argc, argv);
 
 	//initialise CUDA
 	initCUDA(argc, argv);
@@ -422,8 +431,8 @@ int main( int argc, char** argv)
 	cudaEventRecord(start);
 
 	// Launch the main loop with / without xml output.
-	if(outputXML){
-		runConsoleWithXMLOutput(iterations);
+	if(outputXMLFrequency &gt; 0){
+		runConsoleWithXMLOutput(iterations, outputXMLFrequency);
 	} else {
 		runConsoleWithoutXMLOutput(iterations);	
 	}
