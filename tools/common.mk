@@ -311,7 +311,7 @@ all: validate xslt console
 endif
 
 # Use XMLLint to validate the model (if installed and accessible on the path.)
-validate: $(LAST_VALID_AT)
+validate: makedirs $(LAST_VALID_AT)
 
 $(LAST_VALID_AT) : $(XML_MODEL_FILE) $(XSD_SCHEMA_DIR)/XMMLGPU.xsd $(XSD_SCHEMA_DIR)/XMML.xsd
 ifndef XMLLINT
@@ -459,6 +459,7 @@ makedirs:
 	@mkdir -p $(BIN_DIR)/$(Mode_TYPE)_Console
 	@mkdir -p $(BIN_DIR)/$(Mode_TYPE)_Visualisation
 	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(SRC_DYNAMIC)
 
 # Help target, printing usage information to stdout
 help:
