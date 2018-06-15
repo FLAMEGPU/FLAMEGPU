@@ -317,3 +317,14 @@ void printMenuItem(menu_item* menu_item)
 
 	printInfoLine(menu_item->text);
 }
+
+
+void updateAllMenuTexts()
+{
+	// Iterate the linked list updating menu item texts, until we get to the start again.
+	menu_item* nextItem = menu;
+	do{
+		nextItem->updateText(nextItem->text);
+		nextItem = nextItem->next;
+	} while(nextItem != menu);
+}

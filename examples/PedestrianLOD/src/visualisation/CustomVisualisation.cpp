@@ -85,9 +85,6 @@ extern void initVisualisation()
 	//initialise input control
 	initInputConroller();
 
-	//init FLAME GPU globals controller
-	initGlobalsController();
-
 	//init menu
 	initMenuItems();
 
@@ -114,6 +111,11 @@ extern void initVisualisation()
 
 extern void runVisualisation()
 {
+    //init FLAME GPU globals controller - after initial states have been loaded
+    initGlobalsController();
+    // Update all menu texts
+    updateAllMenuTexts();
+
     // start rendering mainloop
     glutMainLoop();
 }
