@@ -54,10 +54,10 @@ void printMenuItem(menu_item* menu_item);
 menu_item* menu;
 menu_item *em_rate1, *em_rate2, *em_rate3, *em_rate4, *em_rate5, *em_rate6, *em_rate7;
 menu_item *probability_1, *probability_2, *probability_3, *probability_4, *probability_5, *probability_6, *probability_7;
+menu_item *time, *em_rate, *exit_state_1, *exit_state_2, *exit_state_3, *exit_state_4, *exit_state_5, *exit_state_6, *exit_state_7, *steer, *avoid, *collision, *goal;
 
 void initMenuItems()
 {
-	menu_item *time, *em_rate, *exit_state_1, *exit_state_2, *exit_state_3, *exit_state_4, *exit_state_5, *exit_state_6, *exit_state_7, *steer, *avoid, *collision, *goal;
 
 	time = (menu_item*)malloc(sizeof(menu_item));
 	time->selected = 1;
@@ -100,13 +100,6 @@ void initMenuItems()
 	em_rate->decrease = decreaseGlobalEmmisionRate;
 	em_rate->updateText = updateAllEmmsionRatesTexts;
 	sprintf(em_rate->text, "GLOBAL EMMISION RATE");
-
-	time = (menu_item*)malloc(sizeof(menu_item));
-	time->selected = 1;
-	time->increase = increaseTimeScaler;
-	time->decrease = decreaseTimeScaler;
-	time->updateText = setTimeScalerText;
-	time->updateText(time->text);
 
 	em_rate1 = (menu_item*)malloc(sizeof(menu_item));
 	em_rate1->selected = 0;
@@ -495,6 +488,26 @@ void toggleMenuDisplayOnOff()
 void setMenuDisplayOnOff(int state)
 {
 	drawMenuDisplayState = state;
+}
+
+void updateAllTexts(){
+	time->updateText(time->text);
+	steer->updateText(steer->text);
+	avoid->updateText(avoid->text);
+	collision->updateText(collision->text);
+	goal->updateText(goal->text);
+	time->updateText(time->text);
+	
+	exit_state_1->updateText(exit_state_1->text);
+	exit_state_2->updateText(exit_state_2->text);
+	exit_state_3->updateText(exit_state_3->text);
+	exit_state_4->updateText(exit_state_4->text);
+	exit_state_5->updateText(exit_state_5->text);
+	exit_state_6->updateText(exit_state_6->text);
+	exit_state_7->updateText(exit_state_7->text);
+
+	updateAllEmmsionRatesTexts("");
+	updateAllProbabilityTexts("");
 }
 
 void updateAllEmmsionRatesTexts(char* text)
