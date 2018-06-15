@@ -111,6 +111,14 @@ extern int * get_EXIT5_STATE();
 extern int * get_EXIT6_STATE();
 extern int * get_EXIT7_STATE();
 
+extern int * get_EXIT1_CELL_COUNT();
+extern int * get_EXIT2_CELL_COUNT();
+extern int * get_EXIT3_CELL_COUNT();
+extern int * get_EXIT4_CELL_COUNT();
+extern int * get_EXIT5_CELL_COUNT();
+extern int * get_EXIT6_CELL_COUNT();
+extern int * get_EXIT7_CELL_COUNT();
+
 extern float * get_TIME_SCALER();
 
 extern float * get_STEER_WEIGHT();
@@ -197,7 +205,7 @@ void decreaseEmmisionRateExit1()
 float getEmmisionRateExit1(){	return emmisionRateExit1;}
 void setEmmisionRateExit1Text(char* text)
 {	
-	float rate_pm = emmisionRateExit1*(float)EXIT1_CELL_COUNT*getFPS()*60.0f*timeScaler;
+	float rate_pm = emmisionRateExit1 * (*get_EXIT1_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 1: %f", rate_pm);
 }
 
@@ -215,7 +223,7 @@ void decreaseEmmisionRateExit2()
 float getEmmisionRateExit2(){	return emmisionRateExit2;}
 void setEmmisionRateExit2Text(char* text)
 {	
-	float rate_pm = emmisionRateExit2*EXIT2_CELL_COUNT*getFPS()*60.0f*timeScaler;
+	float rate_pm = emmisionRateExit2 * (*get_EXIT2_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 2: %f", rate_pm);
 }
 
@@ -233,7 +241,7 @@ void decreaseEmmisionRateExit3()
 float getEmmisionRateExit3(){	return emmisionRateExit3;}
 void setEmmisionRateExit3Text(char* text)
 {	
-	float rate_pm = emmisionRateExit3*EXIT3_CELL_COUNT*getFPS()*60.0f*timeScaler;
+	float rate_pm = emmisionRateExit3 * (*get_EXIT3_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 3: %f", rate_pm);
 }
 
@@ -251,7 +259,7 @@ void decreaseEmmisionRateExit4()
 float getEmmisionRateExit4(){	return emmisionRateExit4;}
 void setEmmisionRateExit4Text(char* text)
 {	
-	float rate_pm = emmisionRateExit4*EXIT4_CELL_COUNT*getFPS()*60.0f*timeScaler;
+	float rate_pm = emmisionRateExit4 * (*get_EXIT4_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 4: %f", rate_pm);
 }
 
@@ -269,7 +277,7 @@ void decreaseEmmisionRateExit5()
 float getEmmisionRateExit5(){	return emmisionRateExit5;}
 void setEmmisionRateExit5Text(char* text)
 {	
-	float rate_pm = emmisionRateExit5*EXIT5_CELL_COUNT*getFPS()*60.0f*timeScaler;
+	float rate_pm = emmisionRateExit5 * (*get_EXIT5_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 5: %f", rate_pm);
 }
 
@@ -287,7 +295,7 @@ void decreaseEmmisionRateExit6()
 float getEmmisionRateExit6(){	return emmisionRateExit6;}
 void setEmmisionRateExit6Text(char* text)
 {	
-	float rate_pm = emmisionRateExit6*EXIT6_CELL_COUNT*getFPS()*60.0f*timeScaler;
+	float rate_pm = emmisionRateExit6 * (*get_EXIT6_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 6: %f", rate_pm);
 }
 
@@ -305,7 +313,7 @@ void decreaseEmmisionRateExit7()
 float getEmmisionRateExit7(){	return emmisionRateExit7;}
 void setEmmisionRateExit7Text(char* text)
 {	
-	float rate_pm = emmisionRateExit7*EXIT7_CELL_COUNT*getFPS()*60.0f*timeScaler;
+	float rate_pm = emmisionRateExit7 * (*get_EXIT7_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 7: %f", rate_pm);
 }
 
