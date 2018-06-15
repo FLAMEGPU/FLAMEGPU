@@ -491,23 +491,12 @@ void setMenuDisplayOnOff(int state)
 }
 
 void updateAllTexts(){
-	time->updateText(time->text);
-	steer->updateText(steer->text);
-	avoid->updateText(avoid->text);
-	collision->updateText(collision->text);
-	goal->updateText(goal->text);
-	time->updateText(time->text);
-	
-	exit_state_1->updateText(exit_state_1->text);
-	exit_state_2->updateText(exit_state_2->text);
-	exit_state_3->updateText(exit_state_3->text);
-	exit_state_4->updateText(exit_state_4->text);
-	exit_state_5->updateText(exit_state_5->text);
-	exit_state_6->updateText(exit_state_6->text);
-	exit_state_7->updateText(exit_state_7->text);
-
-	updateAllEmmsionRatesTexts("");
-	updateAllProbabilityTexts("");
+	// Iterate the linked list updating menu item texts, until we get to the start again.
+	menu_item* nextItem = menu;
+	do{
+		nextItem->updateText(nextItem->text);
+		nextItem = nextItem->next;
+	} while(nextItem != menu);
 }
 
 void updateAllEmmsionRatesTexts(char* text)
