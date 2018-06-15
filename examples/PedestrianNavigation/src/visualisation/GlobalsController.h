@@ -23,15 +23,6 @@
 #define COLLISION_WEIGHT_INCREMENT	0.001
 #define GOAL_WEIGHT_INCREMENT		0.001
 
-#define EXIT1_CELL_COUNT 16
-#define EXIT2_CELL_COUNT 26
-#define EXIT3_CELL_COUNT 31
-#define EXIT4_CELL_COUNT 24
-#define EXIT5_CELL_COUNT 20
-#define EXIT6_CELL_COUNT 66
-#define EXIT7_CELL_COUNT 120
-
-
 void initGlobalsController();
 
 void increaseGlobalEmmisionRate();

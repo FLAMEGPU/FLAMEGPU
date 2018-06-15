@@ -88,6 +88,34 @@
         <name>EXIT7_STATE</name>
       </gpu:variable>
       <gpu:variable>
+        <type>int</type>
+        <name>EXIT1_CELL_COUNT</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>EXIT2_CELL_COUNT</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>EXIT3_CELL_COUNT</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>EXIT4_CELL_COUNT</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>EXIT5_CELL_COUNT</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>EXIT6_CELL_COUNT</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>EXIT7_CELL_COUNT</name>
+      </gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>TIME_SCALER</name>
       </gpu:variable>
