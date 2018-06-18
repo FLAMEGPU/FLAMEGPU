@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
-        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>Circles Model</name>
   <gpu:environment>
-    <gpu:functionFiles> 
-      <file>functions.c</file> 
+    <gpu:functionFiles>
+      <file>functions.c</file>
     </gpu:functionFiles>
   </gpu:environment>
   <xagents>
@@ -49,12 +48,14 @@
           </outputs>
           <gpu:reallocate>false</gpu:reallocate>
         </gpu:function>
-        <gpu:function> 
-          <name>inputdata</name> 
+        <gpu:function>
+          <name>inputdata</name>
           <currentState>default</currentState>
-          <nextState>default</nextState> 
+          <nextState>default</nextState>
           <inputs>
-            <gpu:input><messageName>location</messageName></gpu:input>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
           </inputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
@@ -68,7 +69,9 @@
         </gpu:function>
       </functions>
       <states>
-        <gpu:state><name>default</name></gpu:state>
+        <gpu:state>
+          <name>default</name>
+        </gpu:state>
         <initialState>default</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
@@ -96,15 +99,25 @@
           <name>z</name>
         </gpu:variable>
       </variables>
-      <gpu:partitioningNone></gpu:partitioningNone>
+      <gpu:partitioningNone/>
       <gpu:bufferSize>1024</gpu:bufferSize>
     </gpu:message>
   </messages>
   <layers>
-    <layer><gpu:layerFunction><name>outputdata</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>inputdata</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>move</name></gpu:layerFunction></layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>outputdata</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>inputdata</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>move</name>
+      </gpu:layerFunction>
+    </layer>
   </layers>
-
-
 </gpu:xmodel>

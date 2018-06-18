@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
-        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>Circles Model</name>
   <gpu:environment>
-    <gpu:functionFiles> 
+    <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
   </gpu:environment>
   <xagents>
-      
     <gpu:xagent>
       <name>Man</name>
       <memory>
@@ -22,7 +20,8 @@
         </gpu:variable>
         <gpu:variable>
           <type>int</type>
-          <name>engaged_to</name> <!-- -1 if not engaged -->
+          <name>engaged_to</name>
+          <!-- -1 if not engaged -->
         </gpu:variable>
         <gpu:variable>
           <type>int</type>
@@ -30,61 +29,70 @@
           <arrayLength>1024</arrayLength>
         </gpu:variable>
       </memory>
-        
       <functions>
-          
         <gpu:function>
           <name>make_proposals</name>
           <currentState>unengaged</currentState>
           <nextState>unengaged</nextState>
-            <outputs>
-                <gpu:output>
-                    <messageName>proposal</messageName>
-                    <gpu:type>single_message</gpu:type>
-                </gpu:output>
-            </outputs>
-          <condition><lhs><agentVariable>engaged_to</agentVariable></lhs><operator>==</operator><rhs><value>-1</value></rhs></condition> <!-- If not provisionally engaged -->
+          <outputs>
+            <gpu:output>
+              <messageName>proposal</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <condition>
+            <lhs>
+              <agentVariable>engaged_to</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>-1</value>
+            </rhs>
+          </condition>
+          <!-- If not provisionally engaged -->
           <gpu:reallocate>false</gpu:reallocate>
         </gpu:function>
-          
         <gpu:function>
           <name>check_notifications</name>
           <currentState>unengaged</currentState>
           <nextState>unengaged</nextState>
-            <inputs>
-                <gpu:input>
-                    <messageName>notification</messageName>
-                </gpu:input>
-            </inputs>
+          <inputs>
+            <gpu:input>
+              <messageName>notification</messageName>
+            </gpu:input>
+          </inputs>
           <gpu:reallocate>false</gpu:reallocate>
         </gpu:function>
-          
-          <gpu:function>
-              <name>check_resolved</name>
-              <currentState>unengaged</currentState>
-              <nextState>engaged</nextState>
-              <gpu:globalCondition>
-                  <lhs><agentVariable>engaged_to</agentVariable></lhs>
-                  <operator>!=</operator>
-                  <rhs><value>-1</value></rhs>
-                  <gpu:maxItterations>5000</gpu:maxItterations>
-                  <gpu:mustEvaluateTo>true</gpu:mustEvaluateTo>
-              </gpu:globalCondition>
-              <gpu:reallocate>false</gpu:reallocate>
-          </gpu:function>
-          
+        <gpu:function>
+          <name>check_resolved</name>
+          <currentState>unengaged</currentState>
+          <nextState>engaged</nextState>
+          <gpu:globalCondition>
+            <lhs>
+              <agentVariable>engaged_to</agentVariable>
+            </lhs>
+            <operator>!=</operator>
+            <rhs>
+              <value>-1</value>
+            </rhs>
+            <gpu:maxItterations>5000</gpu:maxItterations>
+            <gpu:mustEvaluateTo>true</gpu:mustEvaluateTo>
+          </gpu:globalCondition>
+          <gpu:reallocate>false</gpu:reallocate>
+        </gpu:function>
       </functions>
-        
       <states>
-        <gpu:state><name>unengaged</name></gpu:state>
-        <gpu:state><name>engaged</name></gpu:state>
+        <gpu:state>
+          <name>unengaged</name>
+        </gpu:state>
+        <gpu:state>
+          <name>engaged</name>
+        </gpu:state>
         <initialState>unengaged</initialState>
       </states>
-        
       <gpu:type>continuous</gpu:type>
       <gpu:bufferSize>1024</gpu:bufferSize>
     </gpu:xagent>
-      
     <gpu:xagent>
       <name>Woman</name>
       <memory>
@@ -94,7 +102,8 @@
         </gpu:variable>
         <gpu:variable>
           <type>int</type>
-          <name>current_suitor</name> <!-- -1 if not engaged -->
+          <name>current_suitor</name>
+          <!-- -1 if not engaged -->
         </gpu:variable>
         <gpu:variable>
           <type>int</type>
@@ -107,44 +116,50 @@
         </gpu:variable>
       </memory>
       <functions>
-          
         <gpu:function>
           <name>check_proposals</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
-            <inputs>
-                <gpu:input>
-                    <messageName>proposal</messageName>
-                </gpu:input>
-            </inputs>
+          <inputs>
+            <gpu:input>
+              <messageName>proposal</messageName>
+            </gpu:input>
+          </inputs>
           <gpu:reallocate>false</gpu:reallocate>
         </gpu:function>
-          
         <gpu:function>
           <name>notify_suitors</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
-            <outputs>
-              <gpu:output>
-                  <messageName>notification</messageName>
-                  <gpu:type>single_message</gpu:type>
-              </gpu:output>  
-            </outputs>
-            <condition>
-                <lhs><agentVariable>current_suitor</agentVariable></lhs><operator>!=</operator><rhs><value>-1</value></rhs> <!-- Have a proposal to accept (i.e. provisional engagement)-->
-            </condition>
+          <outputs>
+            <gpu:output>
+              <messageName>notification</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <condition>
+            <lhs>
+              <agentVariable>current_suitor</agentVariable>
+            </lhs>
+            <operator>!=</operator>
+            <rhs>
+              <value>-1</value>
+            </rhs>
+            <!-- Have a proposal to accept (i.e. provisional engagement)-->
+          </condition>
           <gpu:reallocate>false</gpu:reallocate>
         </gpu:function>
       </functions>
       <states>
-        <gpu:state><name>default</name></gpu:state>
+        <gpu:state>
+          <name>default</name>
+        </gpu:state>
         <initialState>default</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
       <gpu:bufferSize>1024</gpu:bufferSize>
     </gpu:xagent>
   </xagents>
-    
   <messages>
     <gpu:message>
       <name>proposal</name>
@@ -158,10 +173,9 @@
           <name>woman</name>
         </gpu:variable>
       </variables>
-      <gpu:partitioningNone></gpu:partitioningNone>
+      <gpu:partitioningNone/>
       <gpu:bufferSize>1024</gpu:bufferSize>
     </gpu:message>
-      
     <gpu:message>
       <name>notification</name>
       <variables>
@@ -174,16 +188,35 @@
           <name>suitor</name>
         </gpu:variable>
       </variables>
-      <gpu:partitioningNone></gpu:partitioningNone>
+      <gpu:partitioningNone/>
       <gpu:bufferSize>1024</gpu:bufferSize>
     </gpu:message>
-      
   </messages>
   <layers>
-    <layer><gpu:layerFunction><name>make_proposals</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>check_proposals</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>notify_suitors</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>check_notifications</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>check_resolved</name></gpu:layerFunction></layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>make_proposals</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>check_proposals</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>notify_suitors</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>check_notifications</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>check_resolved</name>
+      </gpu:layerFunction>
+    </layer>
   </layers>
 </gpu:xmodel>

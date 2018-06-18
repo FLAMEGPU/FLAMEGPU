@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
-        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>HostAgentCreation</name>
   <gpu:environment>
     <gpu:constants>
-       <gpu:variable>
-         <type>unsigned int</type>
-         <name>MAX_LIFESPAN</name>
-       </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>MAX_LIFESPAN</name>
+      </gpu:variable>
     </gpu:constants>
-
     <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
-
     <gpu:initFunctions>
       <gpu:initFunction>
         <gpu:name>initialiseHost</gpu:name>
@@ -22,13 +19,11 @@
         <gpu:name>generateAgentInit</gpu:name>
       </gpu:initFunction>
     </gpu:initFunctions>
-
     <gpu:exitFunctions>
       <gpu:exitFunction>
         <gpu:name>exitFunction</gpu:name>
       </gpu:exitFunction>
     </gpu:exitFunctions>
-
     <gpu:stepFunctions>
       <gpu:stepFunction>
         <gpu:name>generateAgentStep</gpu:name>
@@ -37,7 +32,6 @@
         <gpu:name>customOutputStepFunction</gpu:name>
       </gpu:stepFunction>
     </gpu:stepFunctions>
-
   </gpu:environment>
   <xagents>
     <gpu:xagent>
@@ -74,8 +68,12 @@
         </gpu:function>
       </functions>
       <states>
-        <gpu:state><name>default</name></gpu:state>
-        <gpu:state><name>s2</name></gpu:state>
+        <gpu:state>
+          <name>default</name>
+        </gpu:state>
+        <gpu:state>
+          <name>s2</name>
+        </gpu:state>
         <initialState>default</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
@@ -85,9 +83,10 @@
   <messages>
   </messages>
   <layers>
-    <layer><gpu:layerFunction><name>update</name></gpu:layerFunction></layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>update</name>
+      </gpu:layerFunction>
+    </layer>
   </layers>
-
-
 </gpu:xmodel>
-
