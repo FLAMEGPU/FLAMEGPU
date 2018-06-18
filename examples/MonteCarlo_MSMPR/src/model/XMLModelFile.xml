@@ -1,170 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
-        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>MonteCarlo Model</name>
   <gpu:environment>
     <gpu:constants>
-
-    <gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>DELTA_T</name>
-    </gpu:variable>
-    <gpu:variable>
+      </gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>B0</name>
-    </gpu:variable>
-    <gpu:variable>
+      </gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>G0</name>
-    </gpu:variable>
-    <gpu:variable>
+      </gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>b</name>
-    </gpu:variable>
-    <gpu:variable>
+      </gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>y</name>
-    </gpu:variable>
-    <gpu:variable>
+      </gpu:variable>
+      <gpu:variable>
         <type>int</type>
         <name>t</name>
-    </gpu:variable>
-    <gpu:variable>
-      <type>float</type>
-      <name>m0</name>
-    </gpu:variable>
-    <gpu:variable>
-      <type>float</type>
-      <name>delta_m0</name>
-    </gpu:variable>
-    <gpu:variable>
-      <type>int</type>
-      <name>nuc_no</name>
-    </gpu:variable>
-    <gpu:variable>
-      <type>int</type>
-      <name>exit_no</name>
-    </gpu:variable>
-    <gpu:variable>
-      <type>int</type>
-      <name>agg_no</name>
-    </gpu:variable>
-      
-      
-
-</gpu:constants>
-
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>m0</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>delta_m0</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>nuc_no</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>exit_no</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>int</type>
+        <name>agg_no</name>
+      </gpu:variable>
+    </gpu:constants>
     <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
-
     <gpu:initFunctions>
-    <gpu:initFunction>
-       <gpu:name>initConstants</gpu:name>
-   </gpu:initFunction>
-   </gpu:initFunctions>
-
+      <gpu:initFunction>
+        <gpu:name>initConstants</gpu:name>
+      </gpu:initFunction>
+    </gpu:initFunctions>
     <gpu:exitFunctions>
       <gpu:exitFunction>
         <gpu:name>hist_func</gpu:name>
       </gpu:exitFunction>
     </gpu:exitFunctions>
-
   </gpu:environment>
-
   <xagents>
-
     <gpu:xagent>
       <name>crystal</name>
       <memory>
-          <gpu:variable>
+        <gpu:variable>
           <type>float</type>
           <name>rank</name>
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
-          <name>l</name> <!-- size -->
+          <name>l</name>
+          <!-- size -->
         </gpu:variable>
-          <gpu:variable>
+        <gpu:variable>
           <type>int</type>
-          <name>bin</name> <!-- for histogram -->
+          <name>bin</name>
+          <!-- for histogram -->
         </gpu:variable>
       </memory>
-
       <functions>
         <gpu:function>
           <name>create_ranks</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
-            <outputs>
-                <gpu:output>
-                    <messageName>internal_coord</messageName>
-                    <gpu:type>single_message</gpu:type>
-                </gpu:output>
-            </outputs>
+          <outputs>
+            <gpu:output>
+              <messageName>internal_coord</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>true</gpu:RNG>
         </gpu:function>
-
         <gpu:function>
           <name>nucleate</name>
-            <currentState>default</currentState>
+          <currentState>default</currentState>
           <nextState>default</nextState>
-                   <inputs>
-                        <gpu:input>
-                            <messageName>internal_coord</messageName>
-                        </gpu:input>
-                    </inputs>
-                    <gpu:reallocate>true</gpu:reallocate>
-                    <gpu:RNG>false</gpu:RNG>
+          <inputs>
+            <gpu:input>
+              <messageName>internal_coord</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
         </gpu:function>
-
         <gpu:function>
           <name>growth</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
-      <!--             <inputs>
+          <!--             <inputs>
                         <gpu:input>
                             <messageName>internal_coord</messageName>
                         </gpu:input>
                     </inputs> -->
-                    <gpu:reallocate>true</gpu:reallocate>
-                    <gpu:RNG>false</gpu:RNG>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
         </gpu:function>
-</functions>
-           <states>
-                <gpu:state>
-                    <name>default</name>
-                </gpu:state>
-                <initialState>default</initialState>
-            </states>
-
-            <gpu:type>continuous</gpu:type>
-            <gpu:bufferSize>65536</gpu:bufferSize>
-
+      </functions>
+      <states>
+        <gpu:state>
+          <name>default</name>
+        </gpu:state>
+        <initialState>default</initialState>
+      </states>
+      <gpu:type>continuous</gpu:type>
+      <gpu:bufferSize>65536</gpu:bufferSize>
     </gpu:xagent>
-      </xagents>
+  </xagents>
   <messages>
     <gpu:message>
       <name>internal_coord</name>
       <variables>
-                <gpu:variable>
+        <gpu:variable>
           <type>float</type>
           <name>rank</name>
         </gpu:variable>
-          <gpu:variable>
+        <gpu:variable>
           <type>float</type>
           <name>l</name>
         </gpu:variable>
       </variables>
-      <gpu:partitioningNone></gpu:partitioningNone>
+      <gpu:partitioningNone/>
       <gpu:bufferSize>65536</gpu:bufferSize>
     </gpu:message>
-
   </messages>
   <layers>
-    <layer><gpu:layerFunction><name>create_ranks</name></gpu:layerFunction></layer>
-   <layer><gpu:layerFunction><name>nucleate</name></gpu:layerFunction></layer>
-    <layer><gpu:layerFunction><name>growth</name></gpu:layerFunction></layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>create_ranks</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>nucleate</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>growth</name>
+      </gpu:layerFunction>
+    </layer>
   </layers>
 </gpu:xmodel>

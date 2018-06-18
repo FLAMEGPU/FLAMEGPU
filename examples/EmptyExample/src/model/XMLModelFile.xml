@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
-  
   <name>Example</name>
-
-  <gpu:environment> 
+  <gpu:environment>
     <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
   </gpu:environment>
-
   <xagents>
     <gpu:xagent>
       <name>example_agent</name>
@@ -67,7 +64,6 @@
       <gpu:bufferSize>1024</gpu:bufferSize>
     </gpu:xagent>
   </xagents>
-  
   <messages>
     <gpu:message>
       <name>example_message</name>
@@ -81,18 +77,20 @@
           <name>y</name>
         </gpu:variable>
       </variables>
-      <gpu:partitioningNone></gpu:partitioningNone>
+      <gpu:partitioningNone/>
       <gpu:bufferSize>1024</gpu:bufferSize>
     </gpu:message>
   </messages>
-  
   <layers>
     <layer>
-      <gpu:layerFunction><name>output_example</name></gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>output_example</name>
+      </gpu:layerFunction>
     </layer>
     <layer>
-      <gpu:layerFunction><name>input_example</name></gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>input_example</name>
+      </gpu:layerFunction>
     </layer>
   </layers>
-
 </gpu:xmodel>
