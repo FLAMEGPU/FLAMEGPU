@@ -25,6 +25,11 @@
 #define USE_CUDA_STREAMS
 #define FAST_ATOMIC_SORTING
 
+// FLAME GPU Version Macros.
+#define FLAME_GPU_MAJOR_VERSION 1
+#define FLAME_GPU_MINOR_VERSION 5
+#define FLAME_GPU_PATCH_VERSION 0
+
 typedef unsigned int uint;
 
 //FLAME GPU vector types float, (i)nteger, (u)nsigned integer, (d)ouble
