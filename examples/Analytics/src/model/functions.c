@@ -31,9 +31,9 @@ __FLAME_GPU_INIT_FUNC__ void setInitialConstants(){
 }
 
 __FLAME_GPU_STEP_FUNC__ void stepFunction(){
-	float x = reduce_Circle_default_x_variable();
-	float y = reduce_Circle_default_y_variable();
-	float z = reduce_Circle_default_z_variable();
+	float x = reduce_Circle_default_x_variable() / get_agent_Circle_default_count();
+	float y = reduce_Circle_default_y_variable() / get_agent_Circle_default_count();
+	float z = reduce_Circle_default_z_variable() / get_agent_Circle_default_count();
 	printf("FLAME GPU Step function. Average circle position is (%f, %f, %f)\n", x, y, z);
 
     float min_x = min_Circle_default_x_variable();
@@ -48,9 +48,9 @@ __FLAME_GPU_STEP_FUNC__ void stepFunction(){
 }
 
 __FLAME_GPU_EXIT_FUNC__ void exitFunction(){
-	float x = reduce_Circle_default_x_variable();
-	float y = reduce_Circle_default_y_variable();
-	float z = reduce_Circle_default_z_variable();
+	float x = reduce_Circle_default_x_variable() / get_agent_Circle_default_count();
+	float y = reduce_Circle_default_y_variable() / get_agent_Circle_default_count();
+	float z = reduce_Circle_default_z_variable() / get_agent_Circle_default_count();
 	printf("FLAME GPU Exit function. Average circle position is (%f, %f, %f)\n", x, y, z);
 }
 
