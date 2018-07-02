@@ -16,14 +16,14 @@ The advantages of our contribution are three fold.
 
 ## Documentation
 
-The FLAME GPU documentation and user guide can be found at [http://dpcs.flamegpu.com](http://dpcs.flamegpu.com), with source hosted on github at [FLAMEGPU/docs](https://github.com/FLAMEGPU/docs).
+The FLAME GPU documentation and user guide can be found at [http://dpcs.flamegpu.com](http://dpcs.flamegpu.com), with source hosted on GitHub at [FLAMEGPU/docs](https://github.com/FLAMEGPU/docs).
 
 
 ## Getting FLAME GPU
 
 Pre-compiled Windows binaries are available for the example projects in the [FLAME-GPU-SDK](https://github.com/FLAMEGPU/FLAMEGPU/releases), available as an archive for each release.
 
-Source is available from github, either as a zip download or via `git`:
+Source is available from GitHub, either as a zip download or via `git`:
 
 ```
 git clone https://github.com/FLAMEGPU/FLAMEGPU.git
@@ -169,7 +169,7 @@ The primary author is [Dr Paul Richmond](http://paulrichmond.shef.ac.uk/).
 
 ## Copyright and Software Licence
 
-FLAME GPU is copyright the University of Sheffield 2009 - 2018. Version 1.5.X is released under the MIT open source [licence](LICENSE). Previous versions were rleeased under a University of Sheffield End User licence agreement.
+FLAME GPU is copyright the University of Sheffield 2009 - 2018. Version 1.5.X is released under the MIT open source [licence](LICENSE). Previous versions were released under a University of Sheffield End User licence agreement.
 
 
 ## Release Notes
@@ -224,4 +224,4 @@ FLAME GPU is copyright the University of Sheffield 2009 - 2018. Version 1.5.X is
 
 ##Problem reports
 
-To report a bug in this documentation or in the software or propose an improvement, please use the FLAMEGPU github issue tracker.
+To report a bug in this documentation or in the software or propose an improvement, please use the FLAMEGPU GitHub issue tracker.
