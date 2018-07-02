@@ -200,14 +200,15 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 	FILE *file;
 	/* Char and char buffer for reading file to */
 	char c = ' ';
-	char buffer[10000];
+	const int bufferSize = 10000;
+	char buffer[bufferSize];
 	char agentname[1000];
 
 	/* Pointer to x-memory for initial state data */
 	/*xmachine * current_xmachine;*/
 	/* Variables for checking tags */
 	int reading, i;
-	int in_tag, in_itno, in_xagent, in_name;<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable">
+	int in_tag, in_itno, in_xagent, in_name, in_comment;<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:memory/gpu:variable">
     int in_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>;</xsl:for-each>
     
     /* tags for environment global variables */
@@ -240,6 +241,7 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     agent_minimum.y = 0;
     agent_minimum.z = 0;
 	reading = 1;
+    in_comment = 0;
 	in_tag = 0;
 	in_itno = 0;
     in_env = 0;
@@ -299,6 +301,12 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     i = 0;
 	while(reading==1)
 	{
+        // If I exceeds our buffer size we must abort
+        if(i >= bufferSize){
+            fprintf(stderr, "Error: XML Parsing failed Tag name or content too long (> %d characters)\n", bufferSize);
+            exit(EXIT_FAILURE);
+        }
+
 		/* Get the next char from the file */
 		c = (char)fgetc(file);
 
@@ -310,8 +318,39 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
         // Increment byte counter.
         bytesRead++;
 
+        /*If in a  comment, look for the end of a comment */
+        if(in_comment){
+
+            /* Look for an end tag following two (or more) hyphens.
+               To support very long comments, we use the minimal amount of buffer we can. 
+               If we see a hyphen, store it and increment i (but don't increment i)
+               If we see a &gt; check if we have a correct terminating comment
+               If we see any other characters, reset i.
+            */
+
+            if(c == '-'){
+                buffer[i] = c;
+                i++;
+            } else if(c == '&gt;' &amp;&amp; i >= 2){
+                in_comment = 0;
+                i = 0;
+            } else {
+                i = 0;
+            }
+
+            /*// If we see the end tag, check the preceding two characters for a close comment, if enough characters have been read for -->
+            if(c == '&gt;' &amp;&amp; i >= 2 &amp;&amp; buffer[i-1] == '-' &amp;&amp; buffer[i-2] == '-'){
+                in_comment = 0;
+                buffer[0] = 0;
+                i = 0;
+            } else {
+                // Otherwise just store it in the buffer so we can keep checking for close tags
+                buffer[i] = c;
+                i++;
+            }*/
+        }
 		/* If the end of a tag */
-		if(c == '&gt;')
+		else if(c == '&gt;')
 		{
 			/* Place 0 at end of buffer to make chars a string */
 			buffer[i] = 0;
@@ -477,8 +516,18 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 		/* If in tag put read char into buffer */
 		else if(in_tag)
 		{
-			buffer[i] = c;
-			i++;
+            // Check if we are a comment, when we are in a tag and buffer[0:2] == "!--"
+            if(i == 2 &amp;&amp; c == '-' &amp;&amp; buffer[1] == '-' &amp;&amp; buffer[0] == '!'){
+                in_comment = 1;
+                // Reset the buffer and i.
+                buffer[0] = 0;
+                i = 0;
+            }
+
+            // Store the character and increment the counter
+            buffer[i] = c;
+            i++;
+
 		}
 		/* If in data read char into buffer */
 		else
@@ -492,6 +541,12 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
         fprintf(stdout, "Warning: %s is an empty file\n", inputpath);
         fflush(stdout);
     }
+
+    // If the in_comment flag is still marked, issue a warning.
+    if(in_comment){
+        fprintf(stdout, "Warning: Un-terminated comment in %s\n", inputpath);
+        fflush(stdout);
+    }    
 
 	/* Close the file */
 	fclose(file);
