@@ -37,7 +37,7 @@ git clone git@github.com:FLAMEGPU/FLAMEGPU.git
 
 FLAME GPU can be built for Windows and Linux. MacOS *should* work, but is unsupported.
 
-### Dependancies
+### Dependencies
 + CUDA 8.0 or later
 + Compute Capability 2.0 or greater GPU (CUDA 8)
     + Compute Capability 3.0 or greater GPU (CUDA 9)
@@ -61,13 +61,14 @@ FLAME GPU can be built for Windows and Linux. MacOS *should* work, but is unsupp
 ### Windows using Visual Studio
 
 Visual Studio 2015 solutions are provided for the example FLAME GPU projects.
-*Release* and *Debug* build configurations are provided, for both *console* mode and (optionally) *visualistion* mode.
+*Release* and *Debug* build configurations are provided, for both *console* mode and (optionally) *visualisation* mode.
+Binary files are places in `bin/x64/<OPT>_<MODE>` where `<OPT>` is `Release` or `Debug` and `<MODE>` is `Console` or `Visualisation`.
 
 An additional solution is provided in the `examples` directory, enabling batch building of all examples.
 
 ### `make` for Linux and Windows
 
-`make` can be used to build FLAME GPU under linux and windows (via a windows implementation of `make`).
+`make` can be used to build FLAME GPU simulations under linux and windows (via a windows implementation of `make`).
 
 Makefiles are provided for each example project `examples/project/Makefile`), and for batch building all examples (`examples/Makefile`).
 
@@ -80,10 +81,13 @@ make console
 Or for a visualisation example in release mode:
 ```
 cd examples/EmptyExample/
-make Visualisation
+make visualisation
 ```
 
-*Debug* mode executables can be built by specifying *debug=1* to make, `make all debug=1`.
+*Debug* mode executables can be built by specifying *debug=1* to make, i.e `make console debug=1`.
+
+
+Binary files are places in `bin/linux-x64/<OPT>_<MODE>` where `<OPT>` is `Release` or `Debug` and `<MODE>` is `Console` or `Visualisation`.
 
 For more information on building FLAME GPU via make, run `make help` in an example directory.
 
