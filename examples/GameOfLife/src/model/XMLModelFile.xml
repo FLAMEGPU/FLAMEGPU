@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
-        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>Optional </name>
-  <gpu:environment> 
+  <gpu:environment>
     <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
@@ -61,7 +60,6 @@
       <gpu:bufferSize>65536</gpu:bufferSize>
     </gpu:xagent>
   </xagents>
-  
   <messages>
     <gpu:message>
       <name>state</name>
@@ -85,15 +83,16 @@
       <gpu:bufferSize>65536</gpu:bufferSize>
     </gpu:message>
   </messages>
-  
   <layers>
     <layer>
-      <gpu:layerFunction><name>output_state</name></gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>output_state</name>
+      </gpu:layerFunction>
     </layer>
     <layer>
-      <gpu:layerFunction><name>update_state</name></gpu:layerFunction>
+      <gpu:layerFunction>
+        <name>update_state</name>
+      </gpu:layerFunction>
     </layer>
   </layers>
-
-
 </gpu:xmodel>
