@@ -169,8 +169,7 @@ The primary author is [Dr Paul Richmond](http://paulrichmond.shef.ac.uk/).
 
 ## Copyright and Software Licence
 
-FLAME GPU is copyright the University of Sheffield 2009 - 2017.
-The Library, examples and all source code are covered by the [LICENSE](LICENSE).
+FLAME GPU is copyright the University of Sheffield 2009 - 2018. Version 1.5.X is released under the MIT open source [licence](LICENSE). Previous versions were rleeased under a University of Sheffield End User licence agreement.
 
 
 ## Release Notes
@@ -180,6 +179,7 @@ The Library, examples and all source code are covered by the [LICENSE](LICENSE).
 + Documentation now hosted on readthedocs, http://docs.flamegpu.com and https://github.com/flamegpu/docs
 + Supports CUDA 8 and CUDA 9
     + Removed SM20 and SM21 support from the default build settings (Deprecated / Removed by CUDA 8.0 / 9.0)
++ Graph communication for agents with new example
 + Updated Visual Studio version to 2015
 + Improved linux support by upgraded Makefiles
 + Additional example projects
@@ -196,7 +196,7 @@ The Library, examples and all source code are covered by the [LICENSE](LICENSE).
 + Macro definitions for default visualisation colours
 + Macro definitions for message partitioning strategy
 + Adds instrumentation for simple performance measurement via preprocessor macros
-+ Improved `functions.xslt` output
++ Improved `functions.xslt` output for generating template functions files.
 + Improved state model diagram generator
 
 
