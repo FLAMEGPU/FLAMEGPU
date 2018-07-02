@@ -117,6 +117,24 @@ usage: executable [-h] [--help] input_path [cuda_device_id]
 For further details, see the [documentation](http://docs.flamegpu.com) or see `executable --help`.
 
 
+### Running a Simulation on Windows
+
+Assuming the `GameOfLife` example has been compiled for visualisation, there are several options for running the example.
+
+1. Run the included batch script in `bin/x64/`: `GameOfLife_visualisation.bat`
+2. Run the executable directly with an initial states file
+    1. Navigate to the `examples/GameOfLife/` directory in a command prompt
+    2. Run `..\..\bin\x64\Release_Visualisation\GameOfLife.exe iterations\0.xml`
+
+### Running a Simulation on Linux
+
+Assuming the `GameOfLife` example has been compiled for visualisation, there are several options for running the example.
+
+1. Run the included bash script in `bin/linux-x64/`: `GameOfLife_visualisation.sh `
+2. Run the executable directly with an initial states file
+    1. Navigate to the `examples/GameOfLife/` directory
+    2. Run `../../bin/linux-x64/Release_Visualisation/GameOfLife iterations/0.xml`
+
 ## How to Contribute
 
 To report FLAME GPU bugs or request features, please [file an issue directly using Github](http://github.com/FLAMEGPU/FLAMEGPU/issues).
