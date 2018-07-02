@@ -44,5 +44,7 @@ void drawMenuDisplay(int window_width, int window_height);
 void toggleMenuDisplayOnOff();
 void setMenuDisplayOnOff(int state);
 
+void updateAllMenuTexts();
+
 
 #endif //__MENU_DISPLAY
