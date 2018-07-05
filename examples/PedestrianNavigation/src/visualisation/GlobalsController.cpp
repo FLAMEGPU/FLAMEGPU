@@ -23,6 +23,9 @@
 #include "GlobalsController.h"
 #include "CustomVisualisation.h"
 
+// Disable _CRT_SECURE_NO_WARNINGS warnings
+#pragma warning(disable:4996)
+
 //globals, initialised to 0 then loaded from the relevant variable as specified in the model or initial states file (or init function)
 float emmisionRateExit1 = 0;
 float emmisionRateExit2 = 0;
@@ -87,44 +90,44 @@ extern void set_AVOID_WEIGHT(float* h_weight);
 extern void set_COLLISION_WEIGHT(float* h_weight);
 extern void set_GOAL_WEIGHT(float* h_weight);
 
-extern float * get_EMMISION_RATE_EXIT1();
-extern float * get_EMMISION_RATE_EXIT2();
-extern float * get_EMMISION_RATE_EXIT3();
-extern float * get_EMMISION_RATE_EXIT4();
-extern float * get_EMMISION_RATE_EXIT5();
-extern float * get_EMMISION_RATE_EXIT6();
-extern float * get_EMMISION_RATE_EXIT7();
+extern const float * get_EMMISION_RATE_EXIT1();
+extern const float * get_EMMISION_RATE_EXIT2();
+extern const float * get_EMMISION_RATE_EXIT3();
+extern const float * get_EMMISION_RATE_EXIT4();
+extern const float * get_EMMISION_RATE_EXIT5();
+extern const float * get_EMMISION_RATE_EXIT6();
+extern const float * get_EMMISION_RATE_EXIT7();
 
-extern int * get_EXIT1_PROBABILITY();
-extern int * get_EXIT2_PROBABILITY();
-extern int * get_EXIT3_PROBABILITY();
-extern int * get_EXIT4_PROBABILITY();
-extern int * get_EXIT5_PROBABILITY();
-extern int * get_EXIT6_PROBABILITY();
-extern int * get_EXIT7_PROBABILITY();
+extern const int * get_EXIT1_PROBABILITY();
+extern const int * get_EXIT2_PROBABILITY();
+extern const int * get_EXIT3_PROBABILITY();
+extern const int * get_EXIT4_PROBABILITY();
+extern const int * get_EXIT5_PROBABILITY();
+extern const int * get_EXIT6_PROBABILITY();
+extern const int * get_EXIT7_PROBABILITY();
 
-extern int * get_EXIT1_STATE();
-extern int * get_EXIT2_STATE();
-extern int * get_EXIT3_STATE();
-extern int * get_EXIT4_STATE();
-extern int * get_EXIT5_STATE();
-extern int * get_EXIT6_STATE();
-extern int * get_EXIT7_STATE();
+extern const int * get_EXIT1_STATE();
+extern const int * get_EXIT2_STATE();
+extern const int * get_EXIT3_STATE();
+extern const int * get_EXIT4_STATE();
+extern const int * get_EXIT5_STATE();
+extern const int * get_EXIT6_STATE();
+extern const int * get_EXIT7_STATE();
 
-extern int * get_EXIT1_CELL_COUNT();
-extern int * get_EXIT2_CELL_COUNT();
-extern int * get_EXIT3_CELL_COUNT();
-extern int * get_EXIT4_CELL_COUNT();
-extern int * get_EXIT5_CELL_COUNT();
-extern int * get_EXIT6_CELL_COUNT();
-extern int * get_EXIT7_CELL_COUNT();
+extern const int * get_EXIT1_CELL_COUNT();
+extern const int * get_EXIT2_CELL_COUNT();
+extern const int * get_EXIT3_CELL_COUNT();
+extern const int * get_EXIT4_CELL_COUNT();
+extern const int * get_EXIT5_CELL_COUNT();
+extern const int * get_EXIT6_CELL_COUNT();
+extern const int * get_EXIT7_CELL_COUNT();
 
-extern float * get_TIME_SCALER();
+extern const float * get_TIME_SCALER();
 
-extern float * get_STEER_WEIGHT();
-extern float * get_AVOID_WEIGHT();
-extern float * get_COLLISION_WEIGHT();
-extern float * get_GOAL_WEIGHT();
+extern const float * get_STEER_WEIGHT();
+extern const float * get_AVOID_WEIGHT();
+extern const float * get_COLLISION_WEIGHT();
+extern const float * get_GOAL_WEIGHT();
 
 //private prototypes
 float getExitProbabilityCounts();

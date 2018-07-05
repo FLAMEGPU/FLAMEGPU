@@ -24,6 +24,9 @@
 #include "CustomVisualisation.h"
 
 
+// Disable _CRT_SECURE_NO_WARNINGS warnings
+#pragma warning(disable:4996)
+
 float timeScaler = 0;
 float steerWeight = 0;
 float avoidWeight = 0;
@@ -37,11 +40,11 @@ extern void set_COLLISION_WEIGHT(float* h_weight);
 extern void set_GOAL_WEIGHT(float* h_weight);
 
 
-extern float * get_TIME_SCALER();
-extern float * get_STEER_WEIGHT();
-extern float * get_AVOID_WEIGHT();
-extern float * get_COLLISION_WEIGHT();
-extern float * get_GOAL_WEIGHT();
+extern const float * get_TIME_SCALER();
+extern const float * get_STEER_WEIGHT();
+extern const float * get_AVOID_WEIGHT();
+extern const float * get_COLLISION_WEIGHT();
+extern const float * get_GOAL_WEIGHT();
 
 //private prototypes
 float getExitProbabilityCounts();
