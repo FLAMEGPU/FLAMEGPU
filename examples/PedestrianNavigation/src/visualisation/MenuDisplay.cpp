@@ -25,6 +25,11 @@
 #include "GlobalsController.h"
 #include "CustomVisualisation.h"
 
+#ifdef _MSC_VER
+// Disable _CRT_SECURE_NO_WARNINGS warnings
+#pragma warning(disable:4996)
+#endif 
+
 //holder for window width and height
 int menu_width;
 int menu_height;
@@ -54,10 +59,10 @@ void printMenuItem(menu_item* menu_item);
 menu_item* menu;
 menu_item *em_rate1, *em_rate2, *em_rate3, *em_rate4, *em_rate5, *em_rate6, *em_rate7;
 menu_item *probability_1, *probability_2, *probability_3, *probability_4, *probability_5, *probability_6, *probability_7;
+menu_item *time, *em_rate, *exit_state_1, *exit_state_2, *exit_state_3, *exit_state_4, *exit_state_5, *exit_state_6, *exit_state_7, *steer, *avoid, *collision, *goal;
 
 void initMenuItems()
 {
-	menu_item *time, *em_rate, *exit_state_1, *exit_state_2, *exit_state_3, *exit_state_4, *exit_state_5, *exit_state_6, *exit_state_7, *steer, *avoid, *collision, *goal;
 
 	time = (menu_item*)malloc(sizeof(menu_item));
 	time->selected = 1;
@@ -100,13 +105,6 @@ void initMenuItems()
 	em_rate->decrease = decreaseGlobalEmmisionRate;
 	em_rate->updateText = updateAllEmmsionRatesTexts;
 	sprintf(em_rate->text, "GLOBAL EMMISION RATE");
-
-	time = (menu_item*)malloc(sizeof(menu_item));
-	time->selected = 1;
-	time->increase = increaseTimeScaler;
-	time->decrease = decreaseTimeScaler;
-	time->updateText = setTimeScalerText;
-	time->updateText(time->text);
 
 	em_rate1 = (menu_item*)malloc(sizeof(menu_item));
 	em_rate1->selected = 0;
@@ -414,8 +412,11 @@ void drawInfoDisplay(int width, int height)
 		
 		text_position = 0;
 
+                char simInfoString[] = "********** Simulation Information **********"; 
+                char simEndInfoString[] = "******** End Simulation Information ********"; 
+                
 		glColor3f(0.0, 0.0, 0.0);
-		printInfoLine("********** Simulation Information **********");
+		printInfoLine(simInfoString);
 
 		sprintf(output_buffer,"Current Frames Per Second: %f", getFPS());
 		printInfoLine(output_buffer);
@@ -432,7 +433,7 @@ void drawInfoDisplay(int width, int height)
 		sprintf(output_buffer,"Emmission Rate: %f", getEmmisionRateExit1());
 		printInfoLine(output_buffer);
 
-		printInfoLine("******** End Simulation Information ********");
+		printInfoLine(simEndInfoString);
 	}
 }
 
@@ -459,8 +460,11 @@ void drawMenuDisplay(int width, int height)
 
 		text_position = 0;
 
+                char simMenueString[] = "********** Simulation Menu **********"; 
+                char simEndMenueString[] = "******** End Simulation Menu ********"; 
+                
 		glColor3f(0.0f,0.0f,0.0f);
-		printInfoLine("********** Simulation Menu **********");
+		printInfoLine(simMenueString);
 
 		//print menu
 		if (menu)
@@ -477,7 +481,7 @@ void drawMenuDisplay(int width, int height)
 		}
 
 		glColor3f(0.0f,0.0f,0.0f);
-		printInfoLine("******** End Simulation Menu ********");
+		printInfoLine(simEndMenueString);
 	}
 }
 
@@ -489,6 +493,15 @@ void toggleMenuDisplayOnOff()
 void setMenuDisplayOnOff(int state)
 {
 	drawMenuDisplayState = state;
+}
+
+void updateAllTexts(){
+	// Iterate the linked list updating menu item texts, until we get to the start again.
+	menu_item* nextItem = menu;
+	do{
+		nextItem->updateText(nextItem->text);
+		nextItem = nextItem->next;
+	} while(nextItem != menu);
 }
 
 void updateAllEmmsionRatesTexts(char* text)

@@ -30,8 +30,10 @@ float PEDESTRIAN_MODEL_SCALE = 0.0025f;
 //pedestrian instances 
 GLuint p_instances_data1_tbo;
 GLuint p_instances_data1_tex;
+cudaGraphicsResource_t p_instances_data1_cgr;
 GLuint p_instances_data2_tbo;
 GLuint p_instances_data2_tex;
+cudaGraphicsResource_t p_instances_data2_cgr;
 
 //MODEL DATA FOR LOD 1
 //primative count
@@ -122,36 +124,42 @@ void initPedestrianPopulation()
 	lod1_v_count = 354;
 	lod1_f_count = 704;
 	//Left
+	char lod1LeftString[] = "../../media/person-lod1-left.obj"; 
 	allocateObjModel(lod1_v_count, lod1_f_count, &lod1l_vertices, &lod1l_normals, &lod1l_faces);
-	loadObjFromFile("../../media/person-lod1-left.obj",	lod1_v_count, lod1_f_count, lod1l_vertices, lod1l_normals, lod1l_faces);
+	loadObjFromFile(lod1LeftString,	lod1_v_count, lod1_f_count, lod1l_vertices, lod1l_normals, lod1l_faces);
 	scaleObj(PEDESTRIAN_MODEL_SCALE, lod1_v_count, lod1l_vertices);		 
 	//Right
+	char lod1RightString[] = "../../media/person-lod1-right.obj"; 
 	allocateObjModel(lod1_v_count, lod1_f_count, &lod1r_vertices, &lod1r_normals, &lod1r_faces);
-	loadObjFromFile("../../media/person-lod1-right.obj", lod1_v_count, lod1_f_count, lod1r_vertices, lod1r_normals, lod1r_faces);
+	loadObjFromFile(lod1RightString, lod1_v_count, lod1_f_count, lod1r_vertices, lod1r_normals, lod1r_faces);
 	scaleObj(PEDESTRIAN_MODEL_SCALE, lod1_v_count, lod1r_vertices);
 
 	//LOD 2
 	lod2_v_count = 135;
 	lod2_f_count = 266;
 	//Left
+	char lod2LeftString[] = "../../media/person-lod2-left.obj"; 
 	allocateObjModel(lod2_v_count, lod2_f_count, &lod2l_vertices, &lod2l_normals, &lod2l_faces);
-	loadObjFromFile("../../media/person-lod2-left.obj",	lod2_v_count, lod2_f_count, lod2l_vertices, lod2l_normals, lod2l_faces);
+	loadObjFromFile(lod2LeftString,	lod2_v_count, lod2_f_count, lod2l_vertices, lod2l_normals, lod2l_faces);
 	scaleObj(PEDESTRIAN_MODEL_SCALE, lod2_v_count, lod2l_vertices);		 
 	//Right
+	char lod2RightString[] = "../../media/person-lod2-right.obj"; 
 	allocateObjModel(lod2_v_count, lod2_f_count, &lod2r_vertices, &lod2r_normals, &lod2r_faces);
-	loadObjFromFile("../../media/person-lod2-right.obj", lod2_v_count, lod2_f_count, lod2r_vertices, lod2r_normals, lod2r_faces);
+	loadObjFromFile(lod2RightString, lod2_v_count, lod2_f_count, lod2r_vertices, lod2r_normals, lod2r_faces);
 	scaleObj(PEDESTRIAN_MODEL_SCALE, lod2_v_count, lod2r_vertices);
 
 	//LOD 3
 	lod3_v_count = 56;//135;
 	lod3_f_count = 58;//266;
 	//Left
+	char lod3LeftString[] = "../../media/person-lod3-left.obj"; 
 	allocateObjModel(lod3_v_count, lod3_f_count, &lod3l_vertices, &lod3l_normals, &lod3l_faces);
-	loadObjFromFile("../../media/person-lod3-left.obj",	lod3_v_count, lod3_f_count, lod3l_vertices, lod3l_normals, lod3l_faces);
+	loadObjFromFile(lod3LeftString,	lod3_v_count, lod3_f_count, lod3l_vertices, lod3l_normals, lod3l_faces);
 	scaleObj(PEDESTRIAN_MODEL_SCALE, lod3_v_count, lod3l_vertices);		 
 	//Right
+	char lod3RightString[] = "../../media/person-lod3-right.obj"; 
 	allocateObjModel(lod3_v_count, lod3_f_count, &lod3r_vertices, &lod3r_normals, &lod3r_faces);
-	loadObjFromFile("../../media/person-lod3-right.obj", lod3_v_count, lod3_f_count, lod3r_vertices, lod3r_normals, lod3r_faces);
+	loadObjFromFile(lod3RightString, lod3_v_count, lod3_f_count, lod3r_vertices, lod3r_normals, lod3r_faces);
 	scaleObj(PEDESTRIAN_MODEL_SCALE, lod3_v_count, lod3r_vertices);
 
 	createPedestrianBufferObjects();
@@ -168,7 +176,7 @@ void renderPedestrianPopulation()
 	int count=0;
 
 	//run CUDA
-	generate_instances_and_LOD(&p_instances_data1_tbo, &p_instances_data2_tbo);
+	generate_instances_and_LOD(&p_instances_data1_tbo, &p_instances_data2_tbo, &p_instances_data1_cgr, &p_instances_data2_cgr);
 
 	glUseProgram(p_shaderProgram);
 
@@ -264,8 +272,8 @@ void createPedestrianBufferObjects()
 	//create TBO
 	createTBO(&p_instances_data1_tbo, &p_instances_data1_tex, get_agent_agent_MAX_count()* sizeof(glm::vec4));
 	createTBO(&p_instances_data2_tbo, &p_instances_data2_tex, get_agent_agent_MAX_count()* sizeof(glm::vec4));
-	registerBO(&p_instances_data1_tbo);
-	registerBO(&p_instances_data2_tbo);
+	registerBO(&p_instances_data1_cgr, &p_instances_data1_tbo);
+	registerBO(&p_instances_data2_cgr, &p_instances_data2_tbo);
 
 	//create VBOs (LOD1, LOD2, LOD3)
 	createVBO(&lod1l_verts_vbo, GL_ARRAY_BUFFER, lod1_v_count*sizeof(glm::vec3));

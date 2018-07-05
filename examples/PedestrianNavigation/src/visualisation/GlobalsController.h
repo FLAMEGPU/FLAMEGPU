@@ -16,52 +16,12 @@
 #ifndef __GLOBALS_CONTROLLER
 #define __GLOBALS_CONTROLLER
 
-#define INITIAL_EMISSION_RATE_EXIT1	0.01f
-#define INITIAL_EMISSION_RATE_EXIT2	0.01f
-#define INITIAL_EMISSION_RATE_EXIT3	0.01f
-#define INITIAL_EMISSION_RATE_EXIT4	0.01f
-#define INITIAL_EMISSION_RATE_EXIT5	0.01f
-#define INITIAL_EMISSION_RATE_EXIT6	0.01f
-#define INITIAL_EMISSION_RATE_EXIT7	0.01f
-#define EMISSION_RATE_INCREMENT 0.0001f
-
-#define INITIAL_EXIT1_PROBABILITY 1
-#define INITIAL_EXIT2_PROBABILITY 1
-#define INITIAL_EXIT3_PROBABILITY 1
-#define INITIAL_EXIT4_PROBABILITY 1
-#define INITIAL_EXIT5_PROBABILITY 3
-#define INITIAL_EXIT6_PROBABILITY 2
-#define INITIAL_EXIT7_PROBABILITY 1
-
-#define INITIAL_EXIT1_STATE 1
-#define INITIAL_EXIT2_STATE 1
-#define INITIAL_EXIT3_STATE 1
-#define INITIAL_EXIT4_STATE 1
-#define INITIAL_EXIT5_STATE 1
-#define INITIAL_EXIT6_STATE 1
-#define INITIAL_EXIT7_STATE 1
-
-#define INITIAL_TIME_SCALER		0.0003
+#define EMISSION_RATE_INCREMENT 0.01f
 #define TIME_SCALER_INCREMENT	0.00001
-
-#define INITIAL_STEER_WEIGHT		0.10
-#define INITIAL_AVOID_WEIGHT		0.02
-#define INITIAL_COLLISION_WEIGHT	0.50
-#define INITIAL_GOAL_WEIGHT			0.20
-
 #define STEER_WEIGHT_INCREMENT		0.001
 #define AVOID_WEIGHT_INCREMENT		0.001
 #define COLLISION_WEIGHT_INCREMENT	0.001
 #define GOAL_WEIGHT_INCREMENT		0.001
-
-#define EXIT1_CELL_COUNT 16
-#define EXIT2_CELL_COUNT 26
-#define EXIT3_CELL_COUNT 31
-#define EXIT4_CELL_COUNT 24
-#define EXIT5_CELL_COUNT 20
-#define EXIT6_CELL_COUNT 66
-#define EXIT7_CELL_COUNT 120
-
 
 void initGlobalsController();
 
@@ -130,25 +90,25 @@ void setProbabilityExit7Text(char* text);
 
 //exit states
 void toggleStateExit1();
-float getStateExit1();
+int getStateExit1();
 void setStateExit1Text(char* text);
 void toggleStateExit2();
-float getStateExit2();
+int getStateExit2();
 void setStateExit2Text(char* text);
 void toggleStateExit3();
-float getStateExit3();
+int getStateExit3();
 void setStateExit3Text(char* text);
 void toggleStateExit4();
-float getStateExit4();
+int getStateExit4();
 void setStateExit4Text(char* text);
 void toggleStateExit5();
-float getStateExit5();
+int getStateExit5();
 void setStateExit5Text(char* text);
 void toggleStateExit6();
-float getStateExit6();
+int getStateExit6();
 void setStateExit6Text(char* text);
 void toggleStateExit7();
-float getStateExit7();
+int getStateExit7();
 void setStateExit7Text(char* text);
 
 //time
@@ -175,4 +135,4 @@ void decreaseGoalWeight();
 float getGoalWeight();
 void setGoalWeightText(char* text);
 
-#endif __GLOBALS_CONTROLLER
+#endif //__GLOBALS_CONTROLLER

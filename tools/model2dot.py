@@ -6,18 +6,19 @@
 # This program is an extended/modified version written previously by Alcione de Paiva Oliveira.
 # Any questions, please contact m.kabiri-chimeh@sheffiled.ac.uk or p.richmond@sheffield.ac.uk
 #
-# Date : November 2016
+# Date : July 2017
 #
 # Description:
 # Create a dot direct graph from the Flame GPU model file.
 # By default the nodes are renamed to avoid direct cycles, so improving readability.
 #
-# WARNING : Current version of the diagram-gen does not generate the correct diagram for models where there are multiple functions from the same agent in the same simulation # layer. For those specific models, where each function is applied on certain agents, the diagram-gen cannot distinguish the correct state for each of these functions.
-
+# Note: Feel free to remove "splines=ortho;", then you will have curved lines
 #---------------------------------------------------------------------
 #
 # input arguments
 # Example python3 model2dot.py -i XMLModelFile.xml -o out.gdot
+
+# To convert the dot graph to png: dot -Tpng out.gdot -o out.png
 
 
 import getopt, sys
@@ -102,6 +103,8 @@ def renameStates(agent):
                 previousState[j] = previousState[j]+"\'"
              if (previousState[i] == afterState[j]):
                 afterState[j] = afterState[j]+"\'"
+             if (afterState[i] == afterState[j]):
+                afterState[j] = afterState[j]+"\'"
              j = j+ 1
 
 
@@ -146,7 +149,7 @@ init_flag = False
 step_flag = False
 exit_flag = False
 
-file.write("  newrank=true;\ncompound=true; \n ")
+file.write("  newrank=true;\ncompound=true; \n splines=ortho;\n")
 
 file.write("  START [style=invisible];\n");
 file.write("  MID [style=invisible];\n");
@@ -332,13 +335,15 @@ for agent in agents:
     #----------------------------------------------------------------------------------
    if (not cycle):
       renameStates(nome)
+      last_state=0
       for k in range(len(funcOrder)):
           if(previousState[k].find(nome+":")==0 ):
              file.write("   \"%s\" -> %s %s;\n" % (previousState[k][previousState[k].find(":")+1:], funcOrder[k], conditions[k] ))
              print("   \"%s\" -> %s %s;\n" % (previousState[k][previousState[k].find(":")+1:], funcOrder[k], conditions[k] ))
              file.write("   %s -> \"%s\";\n" %  (funcOrder[k],  afterState[k][afterState[k].find(":")+1:]))
              print ("   %s -> \"%s\";\n" %  (funcOrder[k],  afterState[k][afterState[k].find(":")+1:]))
-      file.write("  \"%s\"-> MID [style=invis];\n" %  (afterState[k][afterState[k].find(":")+1:]))
+             last_state=k
+      file.write("  \"%s\"-> MID [style=invis];\n" %  (afterState[last_state][afterState[last_state].find(":")+1:]))
 
     #  file.write(" START-> \"%s\"[style=invis] ;\n"% previousState[0][previousState[0].find(":")+1:])
 

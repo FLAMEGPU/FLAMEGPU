@@ -332,19 +332,19 @@ __FLAME_GPU_FUNC__ int generate_pedestrians(xmachine_memory_navmap* agent, xmach
 		float random = rnd<DISCRETE_2D>(rand48);
 		bool emit_agent = false;
 
-		if ((agent->exit_no == 1)&&((random <EMMISION_RATE_EXIT1)))
+		if ((agent->exit_no == 1)&&((random < EMMISION_RATE_EXIT1*TIME_SCALER)))
 			emit_agent = true;
-		if ((agent->exit_no == 2)&&((random <EMMISION_RATE_EXIT2)))
+		if ((agent->exit_no == 2)&&((random <EMMISION_RATE_EXIT2*TIME_SCALER)))
 			emit_agent = true;
-		if ((agent->exit_no == 3)&&((random <EMMISION_RATE_EXIT3)))
+		if ((agent->exit_no == 3)&&((random <EMMISION_RATE_EXIT3*TIME_SCALER)))
 			emit_agent = true;
-		if ((agent->exit_no == 4)&&((random <EMMISION_RATE_EXIT4)))
+		if ((agent->exit_no == 4)&&((random <EMMISION_RATE_EXIT4*TIME_SCALER)))
 			emit_agent = true;
-		if ((agent->exit_no == 5)&&((random <EMMISION_RATE_EXIT5)))
+		if ((agent->exit_no == 5)&&((random <EMMISION_RATE_EXIT5*TIME_SCALER)))
 			emit_agent = true;
-		if ((agent->exit_no == 6)&&((random <EMMISION_RATE_EXIT6)))
+		if ((agent->exit_no == 6)&&((random <EMMISION_RATE_EXIT6*TIME_SCALER)))
 			emit_agent = true;
-		if ((agent->exit_no == 7)&&((random <EMMISION_RATE_EXIT7)))
+		if ((agent->exit_no == 7)&&((random <EMMISION_RATE_EXIT7*TIME_SCALER)))
 			emit_agent = true;
 
 		if (emit_agent){

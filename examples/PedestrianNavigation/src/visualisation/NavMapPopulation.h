@@ -16,6 +16,7 @@
 #ifndef _NAVMAP_POPULATION
 #define _NAVMAP_POPULATION
 
+#include <cuda_gl_interop.h>
 #include "CustomVisualisation.h"
 
 /** initNavMapPopulation
@@ -55,7 +56,7 @@ int getActiveExit();
  *  Generates instances by calling a CUDA Kernel which outputs agent data to a texture buffer object
  * @param instances_tbo Texture Buffer Object used for storing instances data
  */
-extern void generate_instances(GLuint* instances_tbo);
+extern void generate_instances(GLuint* instances_tbo, cudaGraphicsResource_t * instances_cgr);
 
 /** displayMapNumber
  *  Sets which map number should be displayed (0 = collision map, 1 = exit 1 map, etc).
@@ -127,4 +128,4 @@ static const char navmap_vshader_source[] =
     "}																				\n"
 };
 
-#endif _NAVMAP_POPULATION
+#endif //_NAVMAP_POPULATION

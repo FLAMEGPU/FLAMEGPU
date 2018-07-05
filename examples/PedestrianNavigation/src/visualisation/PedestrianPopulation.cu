@@ -13,6 +13,10 @@
  * on www.flamegpu.com website.
  * 
  */
+#if defined __NVCC__
+   // Disable annotation on defaulted function warnings (glm 0.9.9 and CUDA 9.0 introduced this warning)
+   #pragma diag_suppress esa_on_defaulted_function_ignored 
+#endif 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -67,7 +71,7 @@ __global__ void output_pedestrians_to_TBO(xmachine_memory_agent_list* agents, gl
 }
 
 
-void generate_pedestrian_instances(GLuint* instances_data1_tbo, GLuint* instances_data2_tbo)
+extern void generate_pedestrian_instances(GLuint* instances_data1_tbo, GLuint* instances_data2_tbo, cudaGraphicsResource_t * instances_data1_cgr, cudaGraphicsResource_t * instances_data2_cgr)
 {
 	//kernals sizes
 	int threads_per_tile = 128;
@@ -82,8 +86,12 @@ void generate_pedestrian_instances(GLuint* instances_data1_tbo, GLuint* instance
 	if (get_agent_agent_default_count() > 0)
 	{
 		// map OpenGL buffer object for writing from CUDA
-		gpuErrchk(cudaGLMapBufferObject( (void**)&dptr_1, *instances_data1_tbo));
-		gpuErrchk(cudaGLMapBufferObject( (void**)&dptr_2, *instances_data2_tbo));
+		gpuErrchk(cudaGraphicsMapResources(1, instances_data1_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr_1, 0, *instances_data1_cgr));
+
+		gpuErrchk(cudaGraphicsMapResources(1, instances_data2_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr_2, 0, *instances_data2_cgr));
+
 		//cuda block size
 		tile_size = (int) ceil((float)get_agent_agent_default_count()/threads_per_tile);
 		grid = dim3(tile_size, 1, 1);
@@ -92,8 +100,8 @@ void generate_pedestrian_instances(GLuint* instances_data1_tbo, GLuint* instance
 		output_pedestrians_to_TBO<<< grid, threads>>>(get_device_agent_default_agents(), dptr_1, dptr_2);
 		gpuErrchkLaunch();
 		// unmap buffer object
-		gpuErrchk(cudaGLUnmapBufferObject(*instances_data1_tbo));
-		gpuErrchk(cudaGLUnmapBufferObject(*instances_data2_tbo));
+		gpuErrchk(cudaGraphicsUnmapResources(1, instances_data1_cgr));
+        gpuErrchk(cudaGraphicsUnmapResources(1, instances_data2_cgr));
 	}
 }
 

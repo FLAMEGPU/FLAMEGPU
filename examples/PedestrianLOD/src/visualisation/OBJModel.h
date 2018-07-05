@@ -39,4 +39,4 @@ void xScaleObj(float scale_factor, int vertex_count, glm::vec3* vertices);
 void xDrawObj(int vertex_count, int normal_count, int face_count, glm::vec3* vertices, glm::vec3* normals, glm::ivec4* faces);
 
 
-#endif __OBJMODEL
+#endif //__OBJMODEL

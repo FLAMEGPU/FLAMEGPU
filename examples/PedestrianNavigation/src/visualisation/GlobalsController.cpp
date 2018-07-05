@@ -23,37 +23,42 @@
 #include "GlobalsController.h"
 #include "CustomVisualisation.h"
 
-//globals
-float emmisionRateExit1 = INITIAL_EMISSION_RATE_EXIT1;
-float emmisionRateExit2 = INITIAL_EMISSION_RATE_EXIT2;
-float emmisionRateExit3 = INITIAL_EMISSION_RATE_EXIT3;
-float emmisionRateExit4 = INITIAL_EMISSION_RATE_EXIT4;
-float emmisionRateExit5 = INITIAL_EMISSION_RATE_EXIT5;
-float emmisionRateExit6 = INITIAL_EMISSION_RATE_EXIT6;
-float emmisionRateExit7 = INITIAL_EMISSION_RATE_EXIT7;
+#ifdef _MSC_VER
+// Disable _CRT_SECURE_NO_WARNINGS warnings
+#pragma warning(disable:4996)
+#endif
 
-int exitProbability1 = INITIAL_EXIT1_PROBABILITY;
-int exitProbability2 = INITIAL_EXIT2_PROBABILITY;
-int exitProbability3 = INITIAL_EXIT3_PROBABILITY;
-int exitProbability4 = INITIAL_EXIT4_PROBABILITY;
-int exitProbability5 = INITIAL_EXIT5_PROBABILITY;
-int exitProbability6 = INITIAL_EXIT6_PROBABILITY;
-int exitProbability7 = INITIAL_EXIT7_PROBABILITY;
+//globals, initialised to 0 then loaded from the relevant variable as specified in the model or initial states file (or init function)
+float emmisionRateExit1 = 0;
+float emmisionRateExit2 = 0;
+float emmisionRateExit3 = 0;
+float emmisionRateExit4 = 0;
+float emmisionRateExit5 = 0;
+float emmisionRateExit6 = 0;
+float emmisionRateExit7 = 0;
 
-int exitState1 = INITIAL_EXIT1_STATE;
-int exitState2 = INITIAL_EXIT2_STATE;
-int exitState3 = INITIAL_EXIT3_STATE;
-int exitState4 = INITIAL_EXIT4_STATE;
-int exitState5 = INITIAL_EXIT5_STATE;
-int exitState6 = INITIAL_EXIT6_STATE;
-int exitState7 = INITIAL_EXIT7_STATE;
+int exitProbability1 = 0;
+int exitProbability2 = 0;
+int exitProbability3 = 0;
+int exitProbability4 = 0;
+int exitProbability5 = 0;
+int exitProbability6 = 0;
+int exitProbability7 = 0;
 
-float timeScaler = INITIAL_TIME_SCALER;
+int exitState1 = 0;
+int exitState2 = 0;
+int exitState3 = 0;
+int exitState4 = 0;
+int exitState5 = 0;
+int exitState6 = 0;
+int exitState7 = 0;
 
-float steerWeight = INITIAL_STEER_WEIGHT;
-float avoidWeight = INITIAL_AVOID_WEIGHT;
-float collisionWeight = INITIAL_COLLISION_WEIGHT;
-float goalWeight = INITIAL_GOAL_WEIGHT;
+float timeScaler = 0;
+
+float steerWeight = 0;
+float avoidWeight = 0;
+float collisionWeight = 0;
+float goalWeight = 0;
 
 //imported functions from FLAME GPU
 extern void set_EMMISION_RATE_EXIT1(float* h_EMMISION_RATE);
@@ -87,42 +92,81 @@ extern void set_AVOID_WEIGHT(float* h_weight);
 extern void set_COLLISION_WEIGHT(float* h_weight);
 extern void set_GOAL_WEIGHT(float* h_weight);
 
+extern const float * get_EMMISION_RATE_EXIT1();
+extern const float * get_EMMISION_RATE_EXIT2();
+extern const float * get_EMMISION_RATE_EXIT3();
+extern const float * get_EMMISION_RATE_EXIT4();
+extern const float * get_EMMISION_RATE_EXIT5();
+extern const float * get_EMMISION_RATE_EXIT6();
+extern const float * get_EMMISION_RATE_EXIT7();
+
+extern const int * get_EXIT1_PROBABILITY();
+extern const int * get_EXIT2_PROBABILITY();
+extern const int * get_EXIT3_PROBABILITY();
+extern const int * get_EXIT4_PROBABILITY();
+extern const int * get_EXIT5_PROBABILITY();
+extern const int * get_EXIT6_PROBABILITY();
+extern const int * get_EXIT7_PROBABILITY();
+
+extern const int * get_EXIT1_STATE();
+extern const int * get_EXIT2_STATE();
+extern const int * get_EXIT3_STATE();
+extern const int * get_EXIT4_STATE();
+extern const int * get_EXIT5_STATE();
+extern const int * get_EXIT6_STATE();
+extern const int * get_EXIT7_STATE();
+
+extern const int * get_EXIT1_CELL_COUNT();
+extern const int * get_EXIT2_CELL_COUNT();
+extern const int * get_EXIT3_CELL_COUNT();
+extern const int * get_EXIT4_CELL_COUNT();
+extern const int * get_EXIT5_CELL_COUNT();
+extern const int * get_EXIT6_CELL_COUNT();
+extern const int * get_EXIT7_CELL_COUNT();
+
+extern const float * get_TIME_SCALER();
+
+extern const float * get_STEER_WEIGHT();
+extern const float * get_AVOID_WEIGHT();
+extern const float * get_COLLISION_WEIGHT();
+extern const float * get_GOAL_WEIGHT();
+
 //private prototypes
 float getExitProbabilityCounts();
 
 
 void initGlobalsController()
 {
-	set_TIME_SCALER(&timeScaler);
-	set_STEER_WEIGHT(&steerWeight);
-	set_AVOID_WEIGHT(&avoidWeight);
-	set_COLLISION_WEIGHT(&collisionWeight);
-	set_GOAL_WEIGHT(&goalWeight);
+	// Fetch each value 
+	timeScaler = *get_TIME_SCALER();
+	steerWeight = *get_STEER_WEIGHT();
+	avoidWeight = *get_AVOID_WEIGHT();
+	collisionWeight = *get_COLLISION_WEIGHT();
+	goalWeight = *get_GOAL_WEIGHT();
 
+	emmisionRateExit1 = *get_EMMISION_RATE_EXIT1();
+	emmisionRateExit2 = *get_EMMISION_RATE_EXIT2();
+	emmisionRateExit3 = *get_EMMISION_RATE_EXIT3();
+	emmisionRateExit4 = *get_EMMISION_RATE_EXIT4();
+	emmisionRateExit5 = *get_EMMISION_RATE_EXIT5();
+	emmisionRateExit6 = *get_EMMISION_RATE_EXIT6();
+	emmisionRateExit7 = *get_EMMISION_RATE_EXIT7();
 
-	set_EMMISION_RATE_EXIT1(&emmisionRateExit1);
-	set_EMMISION_RATE_EXIT2(&emmisionRateExit2);
-	set_EMMISION_RATE_EXIT3(&emmisionRateExit3);
-	set_EMMISION_RATE_EXIT4(&emmisionRateExit4);
-	set_EMMISION_RATE_EXIT5(&emmisionRateExit5);
-	set_EMMISION_RATE_EXIT6(&emmisionRateExit6);
-	set_EMMISION_RATE_EXIT7(&emmisionRateExit7);
+	exitProbability1 = *get_EXIT1_PROBABILITY();
+	exitProbability2 = *get_EXIT2_PROBABILITY();
+	exitProbability3 = *get_EXIT3_PROBABILITY();
+	exitProbability4 = *get_EXIT4_PROBABILITY();
+	exitProbability5 = *get_EXIT5_PROBABILITY();
+	exitProbability6 = *get_EXIT6_PROBABILITY();
+	exitProbability7 = *get_EXIT7_PROBABILITY();
 
-	set_EXIT1_PROBABILITY(&exitProbability1);
-	set_EXIT2_PROBABILITY(&exitProbability2);
-	set_EXIT3_PROBABILITY(&exitProbability3);
-	set_EXIT4_PROBABILITY(&exitProbability4);
-	set_EXIT5_PROBABILITY(&exitProbability5);
-	set_EXIT6_PROBABILITY(&exitProbability6);
-	set_EXIT7_PROBABILITY(&exitProbability7);
-
-	set_EXIT1_STATE(&exitState1);
-	set_EXIT2_STATE(&exitState2);
-	set_EXIT3_STATE(&exitState3);
-	set_EXIT4_STATE(&exitState4);
-	set_EXIT5_STATE(&exitState5);
-	set_EXIT6_STATE(&exitState6);
-	set_EXIT7_STATE(&exitState7);
+	exitState1 = *get_EXIT1_STATE();
+	exitState2 = *get_EXIT2_STATE();
+	exitState3 = *get_EXIT3_STATE();
+	exitState4 = *get_EXIT4_STATE();
+	exitState5 = *get_EXIT5_STATE();
+	exitState6 = *get_EXIT6_STATE();
+	exitState7 = *get_EXIT7_STATE();
 }
 
 //global emmision rate
@@ -166,7 +210,7 @@ void decreaseEmmisionRateExit1()
 float getEmmisionRateExit1(){	return emmisionRateExit1;}
 void setEmmisionRateExit1Text(char* text)
 {	
-	float rate_pm = emmisionRateExit1*(float)EXIT1_CELL_COUNT*getFPS()*60.0f;
+	float rate_pm = emmisionRateExit1 * (*get_EXIT1_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 1: %f", rate_pm);
 }
 
@@ -184,7 +228,7 @@ void decreaseEmmisionRateExit2()
 float getEmmisionRateExit2(){	return emmisionRateExit2;}
 void setEmmisionRateExit2Text(char* text)
 {	
-	float rate_pm = emmisionRateExit2*EXIT2_CELL_COUNT*getFPS()*60.0f;
+	float rate_pm = emmisionRateExit2 * (*get_EXIT2_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 2: %f", rate_pm);
 }
 
@@ -202,7 +246,7 @@ void decreaseEmmisionRateExit3()
 float getEmmisionRateExit3(){	return emmisionRateExit3;}
 void setEmmisionRateExit3Text(char* text)
 {	
-	float rate_pm = emmisionRateExit3*EXIT3_CELL_COUNT*getFPS()*60.0f;
+	float rate_pm = emmisionRateExit3 * (*get_EXIT3_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 3: %f", rate_pm);
 }
 
@@ -220,7 +264,7 @@ void decreaseEmmisionRateExit4()
 float getEmmisionRateExit4(){	return emmisionRateExit4;}
 void setEmmisionRateExit4Text(char* text)
 {	
-	float rate_pm = emmisionRateExit4*EXIT4_CELL_COUNT*getFPS()*60.0f;
+	float rate_pm = emmisionRateExit4 * (*get_EXIT4_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 4: %f", rate_pm);
 }
 
@@ -238,7 +282,7 @@ void decreaseEmmisionRateExit5()
 float getEmmisionRateExit5(){	return emmisionRateExit5;}
 void setEmmisionRateExit5Text(char* text)
 {	
-	float rate_pm = emmisionRateExit5*EXIT5_CELL_COUNT*getFPS()*60.0f;
+	float rate_pm = emmisionRateExit5 * (*get_EXIT5_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 5: %f", rate_pm);
 }
 
@@ -256,7 +300,7 @@ void decreaseEmmisionRateExit6()
 float getEmmisionRateExit6(){	return emmisionRateExit6;}
 void setEmmisionRateExit6Text(char* text)
 {	
-	float rate_pm = emmisionRateExit6*EXIT6_CELL_COUNT*getFPS()*60.0f;
+	float rate_pm = emmisionRateExit6 * (*get_EXIT6_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 6: %f", rate_pm);
 }
 
@@ -274,7 +318,7 @@ void decreaseEmmisionRateExit7()
 float getEmmisionRateExit7(){	return emmisionRateExit7;}
 void setEmmisionRateExit7Text(char* text)
 {	
-	float rate_pm = emmisionRateExit7*EXIT7_CELL_COUNT*getFPS()*60.0f;
+	float rate_pm = emmisionRateExit7 * (*get_EXIT7_CELL_COUNT()) * getFPS() * 60.0f * timeScaler;
 	sprintf(text, "Emmision Rate Exit 7: %f", rate_pm);
 }
 
@@ -416,7 +460,7 @@ void toggleStateExit1()
 	exitState1 = !exitState1;
 	set_EXIT1_STATE(&exitState1);
 }
-float getStateExit1()
+int getStateExit1()
 {
 	return exitState1;
 }
@@ -434,7 +478,7 @@ void toggleStateExit2()
 	exitState2 = !exitState2;
 	set_EXIT2_STATE(&exitState2);
 }
-float getStateExit2()
+int getStateExit2()
 {
 	return exitState2;
 }
@@ -452,7 +496,7 @@ void toggleStateExit3()
 	exitState3 = !exitState3;
 	set_EXIT3_STATE(&exitState3);
 }
-float getStateExit3()
+int getStateExit3()
 {
 	return exitState3;
 }
@@ -470,7 +514,7 @@ void toggleStateExit4()
 	exitState4 = !exitState4;
 	set_EXIT4_STATE(&exitState4);
 }
-float getStateExit4()
+int getStateExit4()
 {
 	return exitState4;
 }
@@ -488,7 +532,7 @@ void toggleStateExit5()
 	exitState5 = !exitState5;
 	set_EXIT5_STATE(&exitState5);
 }
-float getStateExit5()
+int getStateExit5()
 {
 	return exitState5;
 }
@@ -506,7 +550,7 @@ void toggleStateExit6()
 	exitState6 = !exitState6;
 	set_EXIT6_STATE(&exitState6);
 }
-float getStateExit6()
+int getStateExit6()
 {
 	return exitState6;
 }
@@ -524,7 +568,7 @@ void toggleStateExit7()
 	exitState7 = !exitState7;
 	set_EXIT7_STATE(&exitState7);
 }
-float getStateExit7()
+int getStateExit7()
 {
 	return exitState7;
 }
@@ -546,6 +590,9 @@ void increaseTimeScaler()
 void decreaseTimeScaler()
 {
 	timeScaler -= TIME_SCALER_INCREMENT;
+	//prevent negative time scaler
+	if (timeScaler < 0)
+		timeScaler += TIME_SCALER_INCREMENT;
 	set_TIME_SCALER(&timeScaler);
 }
 

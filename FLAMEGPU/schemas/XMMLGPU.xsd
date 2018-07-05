@@ -42,8 +42,9 @@
 			<xs:extension base="xmml:environment_type">
 				<xs:sequence>
 					<xs:element ref="initFunctions" maxOccurs="1" minOccurs="0" />
-          <xs:element ref="exitFunctions" maxOccurs="1" minOccurs="0" />
-          <xs:element ref="stepFunctions" maxOccurs="1" minOccurs="0" />
+					<xs:element ref="exitFunctions" maxOccurs="1" minOccurs="0" />
+					<xs:element ref="stepFunctions" maxOccurs="1" minOccurs="0" />
+					<xs:element name="graphs" type="graphs_type" maxOccurs="1" minOccurs="0" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -190,6 +191,14 @@
 			<xs:selector xpath=".//xmml:xagents/mstns:xagent/xmml:functions/mstns:function/xmml:outputs/mstns:output" />
 			<xs:field xpath="xmml:messageName" />
 		</xs:keyref>
+		<xs:key name="graph_name_key">
+			<xs:selector xpath=".//mstns:environment/mstns:graphs/mstns:staticGraph" />
+			<xs:field xpath="mstns:name" />
+		</xs:key>
+		<xs:keyref name="graphPartitioing" refer="graph_name_key">
+			<xs:selector xpath=".//xmml:messages/mstns:message/mstns:partitioningGraphEdge" />
+			<xs:field xpath="mstns:environmentGraph" />
+		</xs:keyref>
 	</xs:element>
 	<xs:simpleType name="output_type_option">
 		<xs:restriction base="xs:string">
@@ -235,6 +244,17 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:element substitutionGroup="partitioningNone" name="partitioningSpatial" type="partitioning_spatial_type" />
+	<xs:complexType name="partitioningGraphEdge_type">
+		<xs:complexContent>
+			<xs:extension base="partitioning_type">
+				<xs:sequence>
+					<xs:element name="environmentGraph" type="xs:string" />
+					<xs:element name="messageEdgeID" type="xs:string" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element substitutionGroup="partitioningNone" name="partitioningGraphEdge" type="partitioningGraphEdge_type" />
 	<xs:element name="initFunction">
 		<xs:complexType>
 			<xs:sequence>
@@ -297,4 +317,40 @@
 	</xs:complexType>
 	<xs:element substitutionGroup="xmml:condition" name="globalCondition" type="globalCondition_type">
 	</xs:element>
+
+	<xs:complexType name="graphs_type">
+		<xs:sequence>
+			<xs:element name="staticGraph" type="staticGraph_type" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="staticGraph_type">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1"/>
+			<xs:element name="description" type="xs:string" maxOccurs="1" minOccurs="0" />
+			<xs:element name="loadFromFile" type="loadFromFile_type" maxOccurs="1" minOccurs="0" />
+			<xs:element name="vertex" type="vertex_type" maxOccurs="1" minOccurs="1"/>
+			<xs:element name="edge" type="edge_type" maxOccurs="1" minOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="loadFromFile_type">
+		<xs:choice maxOccurs="1" minOccurs="1">
+			<xs:element name="json" type="xs:string" />
+			<xs:element name="xml" type="xs:string" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="vertex_type">
+		<xs:sequence>
+			<xs:element minOccurs="1" maxOccurs="1" ref="xmml:variables" />
+			<xs:element name="bufferSize" type="xs:int" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="edge_type">
+		<xs:sequence>
+			<xs:element minOccurs="1" maxOccurs="1" ref="xmml:variables" />
+			<xs:element name="bufferSize" type="xs:int" />
+		</xs:sequence>
+	</xs:complexType>
+
+
 </xs:schema>

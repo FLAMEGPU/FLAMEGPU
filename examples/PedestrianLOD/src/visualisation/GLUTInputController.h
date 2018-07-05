@@ -52,4 +52,4 @@ extern float up[3];
 extern float look[3];
 extern float eye_distance;
 
-#endif __GLUT_INPUT_CONTROLLER
+#endif //__GLUT_INPUT_CONTROLLER

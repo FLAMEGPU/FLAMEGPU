@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="FLAMEGPU_vcproj.xslt"?>
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+  <name>RestrictedFlowGraph</name>
+  <gpu:environment>
+    <gpu:constants>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>SEED</name>
+        <description>Seed used for RNG on the host, to create the initial population</description>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>INIT_POPULATION</name>
+        <description>The initial population of agents to /distribute on the network</description>
+        <defaultValue>1</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>PARAM_MIN_SPEED</name>
+        <description>The minimum value of speed for agents</description>
+        <defaultValue>1</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>PARAM_MAX_SPEED</name>
+        <description>The maximum value of speed for agents</description>
+        <defaultValue>1</defaultValue>
+      </gpu:variable>
+    </gpu:constants>
+    <gpu:functionFiles>
+      <file>functions.c</file>
+    </gpu:functionFiles>
+    <gpu:initFunctions>
+      <gpu:initFunction>
+        <gpu:name>initialiseHost</gpu:name>
+      </gpu:initFunction>
+      <gpu:initFunction>
+        <gpu:name>generateAgents</gpu:name>
+      </gpu:initFunction>
+    </gpu:initFunctions>
+    <gpu:exitFunctions>
+      <gpu:exitFunction>
+        <gpu:name>exitFunc</gpu:name>
+      </gpu:exitFunction>
+    </gpu:exitFunctions>
+    <gpu:graphs>
+      <gpu:staticGraph>
+        <gpu:name>network</gpu:name>
+        <gpu:description>A graph representing the network which agents exist on</gpu:description>
+        <gpu:loadFromFile>
+            <gpu:json>network.json</gpu:json>
+        </gpu:loadFromFile>
+        <gpu:vertex>
+          <variables>
+            <gpu:variable>
+              <type>unsigned int</type>
+              <name>id</name>
+              <defaultValue>0</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+              <type>float</type>
+              <name>x</name>
+              <defaultValue>1.0f</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+              <type>float</type>
+              <name>y</name>
+              <defaultValue>1.0f</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+              <type>float</type>
+              <name>z</name>
+              <defaultValue>1.0f</defaultValue>
+            </gpu:variable>
+          </variables>
+          <gpu:bufferSize>1024256</gpu:bufferSize>
+        </gpu:vertex>
+        <gpu:edge>
+          <variables>
+            <gpu:variable>
+              <type>unsigned int</type>
+              <name>id</name>
+              <defaultValue>0</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+              <type>unsigned int</type>
+              <name>source</name>
+              <defaultValue>0</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+              <type>unsigned int</type>
+              <name>destination</name>
+              <defaultValue>0</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+              <type>float</type>
+              <name>length</name>
+              <defaultValue>1</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+              <type>unsigned int</type>
+              <name>capacity</name>
+              <defaultValue>1</defaultValue>
+            </gpu:variable>
+          </variables>
+          <gpu:bufferSize>256</gpu:bufferSize>
+        </gpu:edge>
+      </gpu:staticGraph>
+    </gpu:graphs>
+  </gpu:environment>
+  <xagents>
+    <gpu:xagent>
+      <name>Agent</name>
+      <description>A simple agent moving around a graph</description>
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+          <description>Unique identifier for the individual</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>currentEdge</name>
+          <description>ID of the edge the agent currently exists upon</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>nextEdge</name>
+          <description>The ID of the next edge the agent will traverse</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>nextEdgeRemainingCapacity</name>
+          <description>The remaining capacity of the next edge, calculated when edge messages are parsed</description>
+          <defaultValue>0</defaultValue>
+        </gpu:variable>
+        <gpu:variable>
+          <type>bool</type>
+          <name>hasIntent</name>
+          <description>Flag indicating if the agent intends to switch edge this iteration</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>position</name>
+          <description>Distance along the current edge</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>distanceTravelled</name>
+          <description>Distance travelled by the individual</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>blockedIterationCount</name>
+          <description>The number of iterations for which the agent was blocked from moving</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>speed</name>
+          <description>The agents speed of travel</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>x</name>
+          <description>World position X coordinate for visualisation</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>y</name>
+          <description>World position Y coordinate for visualisation</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>z</name>
+          <description>World position Z coordinate for visualisation</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>colour</name>
+          <description>Colour of the agent used in visualisation</description>
+          <defaultValue>0.0</defaultValue>
+        </gpu:variable>
+      </memory>
+      <functions>
+        <gpu:function>
+          <name>output_location</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>location</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>read_locations</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
+          </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>intent</messageName>
+              <gpu:type>optional_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>resolve_intent</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>intent</messageName>
+            </gpu:input>
+          </inputs>
+          <!--Only agents which have determined there is capacity to move, can do so.-->
+          <condition>
+            <lhs>
+              <agentVariable>hasIntent</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>true</value>
+            </rhs>
+          </condition>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>true</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>move</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+      </gpu:function>
+      </functions>
+      <states>
+        <gpu:state>
+          <name>default</name>
+        </gpu:state>
+        <initialState>default</initialState>
+      </states>
+      <gpu:type>continuous</gpu:type>
+      <gpu:bufferSize>2048</gpu:bufferSize>
+    </gpu:xagent>
+  </xagents>
+  <messages>
+    <gpu:message>
+      <name>location</name>
+      <description>a message holding the location of an agent within the graph structure</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+          <description>The unique identifier of the agent which output the message</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>edge_id</name>
+          <description>The unique ID of the edge within the network graph</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>position</name>
+          <description>The position of the agent along the current edge</description>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningGraphEdge>
+        <gpu:environmentGraph>network</gpu:environmentGraph>
+        <gpu:messageEdgeID>edge_id</gpu:messageEdgeID>
+      </gpu:partitioningGraphEdge>
+      <gpu:bufferSize>2048</gpu:bufferSize>
+    </gpu:message>
+    <gpu:message>
+      <name>intent</name>
+      <description>Message declaring the intent of an agent to move to a new edge</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+          <description>The unique identifier of the agent which output the message</description>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>edge_id</name>
+          <description>The unique ID of the edge within the network graph data structure</description>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningGraphEdge>
+        <gpu:environmentGraph>network</gpu:environmentGraph>
+        <gpu:messageEdgeID>edge_id</gpu:messageEdgeID>
+      </gpu:partitioningGraphEdge>
+      <gpu:bufferSize>2048</gpu:bufferSize>
+    </gpu:message>
+  </messages>
+  <layers>
+    <layer>
+      <gpu:layerFunction>
+        <name>output_location</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>read_locations</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>resolve_intent</name>
+      </gpu:layerFunction>
+    </layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>move</name>
+      </gpu:layerFunction>
+    </layer>
+  </layers>
+</gpu:xmodel>

@@ -18,6 +18,7 @@
 
 #include <GL/glew.h>
 #include <GL/glut.h>
+#include <cuda_gl_interop.h>
 
 /** createVBO
  * Creates a Vertex Buffer Object (VBO)
@@ -48,15 +49,16 @@ void deleteTBO( GLuint* tbo);
 //EXTERNAL FUNCTIONS INPLEMENTED IN BufferObjects.cu
 /** registerBO
  * Registers a Buffer Object (BO) for use with CUDA
- * @bo	bo	pointer to BO
+ * @param   cudaResource pointer to a cuda Graphics Resource
+ * @param	bo	pointer to BO
  */
-extern void registerBO(GLuint* bo);
+extern void registerBO(cudaGraphicsResource_t* cudaResource, GLuint* bo);
 /** unregisterBO
  * Unregisters a Buffer Object (BO) from use with CUDA
- * @bo	bo	pointer to BO
+ * @param	cudaResource pointer to a cuda Graphics Resource
  */
-extern void unregisterBO(GLuint* bo);
+extern void unregisterBO(cudaGraphicsResource_t* cudaResource);
 
 
 
-#endif __BUFFER_OBJECTS
+#endif //__BUFFER_OBJECTS

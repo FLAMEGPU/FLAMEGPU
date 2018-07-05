@@ -16,6 +16,9 @@
 #ifndef __PEDESTRIAN_POPULATION
 #define __PEDESTRIAN_POPULATION
 
+#include <cuda_gl_interop.h>
+
+
 /** initPedestrianPopulation
  * Initialises the pedestrian population by loading model data and creating appropriate buffer objects and shaders
  */
@@ -37,7 +40,7 @@ extern void initGPULODFeedback();
  * @param instances_data1_tbo Texture Buffer Object used for storing instances data
  * @param instances_data2_tbo Texture Buffer Object used for storing instances data
  */
-extern void generate_instances_and_LOD(GLuint* instances_data1_tbo, GLuint* instances_data2_tbo);
+extern void generate_instances_and_LOD(GLuint* instances_data1_tbo, GLuint* instances_data2_tbo, cudaGraphicsResource_t * p_instances_data1_cgr, cudaGraphicsResource_t * p_instances_data2_cgr);
 /** getPedestrianLOD1Count
  * Returns the Level of Detail (LOD) count for detail level 1
  * @return the number of agents at detail level 1
@@ -109,4 +112,4 @@ static const char pedestrian_vshader_source[] =
 };
 
 
-#endif __PEDESTRIAN_POPULATION
+#endif //__PEDESTRIAN_POPULATION

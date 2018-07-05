@@ -3,23 +3,9 @@
                 xmlns:xmml="http://www.dcs.shef.ac.uk/~paul/XMML"
                 xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU">
 <xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" />
+<xsl:include href = "./_common_templates.xslt" />
 <xsl:template match="/">
-/*
-* FLAME GPU v 1.4.0 for CUDA 6
-* Copyright 2015 University of Sheffield.
-* Author: Dr Paul Richmond
-* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
-*
-* University of Sheffield retain all intellectual property and
-* proprietary rights in and to this software and related documentation.
-* Any use, reproduction, disclosure, or distribution of this software
-* and related documentation without an express license agreement from
-* University of Sheffield is strictly prohibited.
-*
-* For terms of licence agreement please attached licence or view licence
-* on www.flamegpu.com website.
-*
-*/
+<xsl:call-template name="copyrightNotice"></xsl:call-template>
 
 // includes, project
 #include &lt;cuda_runtime.h&gt;
@@ -35,12 +21,15 @@
 #include "header.h"
 #include "visualisation.h"
 
+#define FOVY 45.0
+
 // bo variables
 GLuint sphereVerts;
 GLuint sphereNormals;
 
 //Simulation output buffers/textures
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
+cudaGraphicsResource_t <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr;
 GLuint <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo;
 GLuint <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_displacementTex;
 </xsl:for-each>
@@ -50,6 +39,13 @@ int mouse_old_x, mouse_old_y;
 int mouse_buttons = 0;
 float rotate_x = 0.0, rotate_y = 0.0;
 float translate_z = -VIEW_DISTANCE;
+
+// keyboard controls
+#if defined(PAUSE_ON_START)
+bool paused = true;
+#else
+bool paused = false;
+#endif
 
 // vertex Shader
 GLuint vertexShader;
@@ -76,11 +72,13 @@ int initGL();
 void initShader();
 void createVBO( GLuint* vbo, GLuint size);
 void deleteVBO( GLuint* vbo);
-void createTBO( GLuint* tbo, GLuint* tex, GLuint size);
-void deleteTBO( GLuint* tbo);
+void createTBO( cudaGraphicsResource_t* cudaResource, GLuint* tbo, GLuint* tex, GLuint size);
+void deleteTBO( cudaGraphicsResource_t* cudaResource, GLuint* tbo);
 void setVertexBufferData();
+void reshape(int width, int height);
 void display();
 void keyboard( unsigned char key, int x, int y);
+void special(int key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 void runCuda();
@@ -119,21 +117,23 @@ const char vertexShaderSource[] =
     "{																			\n"
 	"	vec4 position = gl_Vertex;											    \n"
 	"	vec4 lookup = texelFetchBuffer(displacementMap, (int)mapIndex);		    \n"
-    "	if (lookup.w &gt; 6.5)	                								\n"
+    "	if (lookup.w &gt; 7.5)	                								\n"
+	"		colour = vec4(0.518, 0.353, 0.02, 0.0);						    	\n"
+    "	else if (lookup.w &gt; 6.5)	               								\n"
 	"		colour = vec4(1.0, 1.0, 1.0, 0.0);								    \n"
-    "	else if (lookup.w &gt; 5.5)	                								\n"
+    "	else if (lookup.w &gt; 5.5)	                							\n"
 	"		colour = vec4(1.0, 0.0, 1.0, 0.0);								    \n"
-	"	else if (lookup.w &gt; 4.5)	                								\n"
+	"	else if (lookup.w &gt; 4.5)	                							\n"
 	"		colour = vec4(0.0, 1.0, 1.0, 0.0);								    \n"
-    "	else if (lookup.w &gt; 3.5)	                								\n"
+    "	else if (lookup.w &gt; 3.5)	                							\n"
 	"		colour = vec4(1.0, 1.0, 0.0, 0.0);								    \n"
-	"	else if (lookup.w &gt; 2.5)	                								\n"
+	"	else if (lookup.w &gt; 2.5)	                							\n"
 	"		colour = vec4(0.0, 0.0, 1.0, 0.0);								    \n"
-	"	else if (lookup.w &gt; 1.5)	                								\n"
+	"	else if (lookup.w &gt; 1.5)	                							\n"
 	"		colour = vec4(0.0, 1.0, 0.0, 0.0);								    \n"
-    "	else if (lookup.w &gt; 0.5)	                								\n"
+    "	else if (lookup.w &gt; 0.5)	                							\n"
 	"		colour = vec4(1.0, 0.0, 0.0, 0.0);								    \n"
-    "	else                      	                								\n"
+    "	else                      	                							\n"
 	"		colour = vec4(0.0, 0.0, 0.0, 0.0);								    \n"
 	"																    		\n"
 	"	lookup.w = 1.0;												    		\n"
@@ -153,8 +153,8 @@ const char fragmentShaderSource[] =
 	"void main (void)															\n"
 	"{																			\n"
 	"	// Defining The Material Colors											\n"
-	"	vec4 AmbientColor = vec4(0.25, 0.0, 0.0, 1.0);					\n"
-	"	vec4 DiffuseColor = colour;					                	\n"
+	"	vec4 AmbientColor = vec4(0.25, 0.0, 0.0, 1.0);							\n"
+	"	vec4 DiffuseColor = colour;					            		    	\n"
 	"																			\n"
 	"	// Scaling The Input Vector To Length 1									\n"
 	"	vec3 n_normal = normalize(normal);							        	\n"
@@ -180,36 +180,39 @@ __global__ void output_<xsl:value-of select="xmml:name"/>_agent_to_VBO(xmachine_
 	vbo[index].y = 0.0;
 	vbo[index].z = 0.0;
 	
-	<xsl:choose>
-		<xsl:when test="xmml:memory/gpu:variable/xmml:name='x'">vbo[index].x = agents->x[index] - centralise.x;</xsl:when>
+    <xsl:choose>
+    <xsl:when test="xmml:memory/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">vbo[index].x = agents->position[index].x - centralise.x;</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='x'">vbo[index].x = agents->x[index] - centralise.x;</xsl:when>
     <xsl:when test="gpu:type='discrete' and xmml:memory/gpu:variable/xmml:name='location_id'">vbo[index].x = (agents->location_id[index] % population_width) - centralise.x;</xsl:when>
-		<xsl:otherwise>vbo[index].x = 0.0;</xsl:otherwise>
-	</xsl:choose><xsl:text>
-	</xsl:text><xsl:choose>
-		<xsl:when test="xmml:memory/gpu:variable/xmml:name='y'">vbo[index].y = agents->y[index] - centralise.y;</xsl:when>
+    <xsl:otherwise>vbo[index].x = 0.0;</xsl:otherwise>
+    </xsl:choose><xsl:text>
+    </xsl:text><xsl:choose>
+    <xsl:when test="xmml:memory/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">vbo[index].y = agents->position[index].y - centralise.x;</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='y'">vbo[index].y = agents->y[index] - centralise.y;</xsl:when>
     <xsl:when test="gpu:type='discrete' and xmml:memory/gpu:variable/xmml:name='location_id'">vbo[index].y = floor((float)agents->location_id[index] / (float)population_width) - centralise.y;</xsl:when>
-		<xsl:otherwise>vbo[index].y = 0.0;</xsl:otherwise>
-	</xsl:choose><xsl:text>
-	</xsl:text><xsl:choose>
-		<xsl:when test="xmml:memory/gpu:variable/xmml:name='z'">vbo[index].z = agents->z[index] - centralise.z;</xsl:when>
-		<xsl:otherwise>vbo[index].z = 0.0;</xsl:otherwise>
-	</xsl:choose><xsl:text>
-	</xsl:text><xsl:choose>
-		<xsl:when test="xmml:memory/gpu:variable/xmml:name='state'">vbo[index].w = agents->state[index];</xsl:when>
-        <xsl:when test="xmml:memory/gpu:variable/xmml:name='type'">vbo[index].w = agents->type[index];</xsl:when>
-		<xsl:otherwise>vbo[index].w = 1.0;</xsl:otherwise>
-	</xsl:choose>
+    <xsl:otherwise>vbo[index].y = 0.0;</xsl:otherwise>
+    </xsl:choose><xsl:text>
+    </xsl:text><xsl:choose>
+    <xsl:when test="xmml:memory/gpu:variable[xmml:name='position' and contains(xmml:type, '3')]">vbo[index].z = agents->position[index].z - centralise.x;</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='z'">vbo[index].z = agents->z[index] - centralise.z;</xsl:when>
+    <xsl:otherwise>vbo[index].z = 0.0;</xsl:otherwise>
+    </xsl:choose><xsl:text>
+    </xsl:text><xsl:choose>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='colour'">vbo[index].w = agents->colour[index];</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='state'">vbo[index].w = agents->state[index];</xsl:when>
+    <xsl:when test="xmml:memory/gpu:variable/xmml:name='type'">vbo[index].w = agents->type[index];</xsl:when>
+    <xsl:otherwise>vbo[index].w = 1.0;</xsl:otherwise>
+    </xsl:choose>
 }
 </xsl:for-each>
 
 void initVisualisation()
 {
-	//set the CUDA GL device: Will cause an error without this since CUDA 3.0
-	cudaGLSetGLDevice(0);
-
 	// Create GL context
 	int   argc   = 1;
-	char *argv[] = {"GLUT application", NULL};
+        char glutString[] = "GLUT application"; 
+	char *argv[] = {glutString, NULL};
+	//char *argv[] = {"GLUT application", NULL};
 	glutInit( &amp;argc, argv);
 	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize( WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -222,8 +225,10 @@ void initVisualisation()
 	initShader();
 
 	// register callbacks
+	glutReshapeFunc( reshape);
 	glutDisplayFunc( display);
 	glutKeyboardFunc( keyboard);
+	glutSpecialFunc( special);
 	glutMouseFunc( mouse);
 	glutMotionFunc( motion);
     
@@ -233,7 +238,7 @@ void initVisualisation()
 	setVertexBufferData();
 
 	// create TBO<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-	createTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_displacementTex, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX * sizeof( glm::vec4));
+	createTBO(&amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_displacementTex, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX * sizeof( glm::vec4));
 	</xsl:for-each>
 
 	//set shader uniforms
@@ -254,6 +259,7 @@ void runVisualisation(){
 ////////////////////////////////////////////////////////////////////////////////
 void runCuda()
 {
+	if(!paused){
 #ifdef SIMULATION_DELAY
 	delay_count++;
 	if (delay_count == SIMULATION_DELAY){
@@ -263,6 +269,7 @@ void runCuda()
 #else
 	singleIteration();
 #endif
+	}
 
 	//kernals sizes
 	int threads_per_tile = 256;
@@ -278,7 +285,9 @@ void runCuda()
 	if (get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count() > 0)
 	{
 		// map OpenGL buffer object for writing from CUDA
-		gpuErrchk(cudaGLMapBufferObject( (void**)&amp;dptr, <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo));
+        size_t accessibleBufferSize = 0;
+        gpuErrchk(cudaGraphicsMapResources(1, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&amp;dptr, &amp;accessibleBufferSize, <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr));
 		//cuda block size
 		tile_size = (int) ceil((float)get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()/threads_per_tile);
 		grid = dim3(tile_size, 1, 1);
@@ -299,7 +308,7 @@ void runCuda()
 		output_<xsl:value-of select="../../xmml:name"/>_agent_to_VBO&lt;&lt;&lt; grid, threads&gt;&gt;&gt;(get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), dptr, centralise<xsl:if test="../../gpu:type='discrete'">, population_width</xsl:if>);
 		gpuErrchkLaunch();
 		// unmap buffer object
-		gpuErrchk(cudaGLUnmapBufferObject(<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo));
+        gpuErrchk(cudaGraphicsUnmapResources(1, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr));
 	}
 	</xsl:for-each>
 }
@@ -313,7 +322,7 @@ int initGL()
 	glewInit();
 	if (! glewIsSupported( "GL_VERSION_2_0 " 
 		"GL_ARB_pixel_buffer_object")) {
-		fprintf( stderr, "ERROR: Support for necessary OpenGL extensions missing.");
+		fprintf( stderr, "ERROR: Support for necessary OpenGL extensions missing.\n");
 		fflush( stderr);
 		return 1;
 	}
@@ -322,14 +331,7 @@ int initGL()
 	glClearColor( 1.0, 1.0, 1.0, 1.0);
 	glEnable( GL_DEPTH_TEST);
 
-	// viewport
-	glViewport( 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-	// projection
-	glMatrixMode( GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0, (GLfloat)WINDOW_WIDTH / (GLfloat) WINDOW_HEIGHT, NEAR_CLIP, FAR_CLIP);
-
+	reshape(WINDOW_WIDTH, WINDOW_HEIGHT);
 	checkGLError();
 
 	//lighting
@@ -422,7 +424,7 @@ void deleteVBO( GLuint* vbo)
 ////////////////////////////////////////////////////////////////////////////////
 //! Create TBO
 ////////////////////////////////////////////////////////////////////////////////
-void createTBO(GLuint* tbo, GLuint* tex, GLuint size)
+void createTBO(cudaGraphicsResource_t* cudaResource, GLuint* tbo, GLuint* tex, GLuint size)
 {
 	// create buffer object
 	glGenBuffers( 1, tbo);
@@ -438,7 +440,7 @@ void createTBO(GLuint* tbo, GLuint* tex, GLuint size)
 	glBindBuffer(GL_TEXTURE_BUFFER_EXT, 0);
 
     // register buffer object with CUDA
-    gpuErrchk(cudaGLRegisterBufferObject(*tbo));
+    gpuErrchk(cudaGraphicsGLRegisterBuffer(cudaResource, *tbo, cudaGraphicsMapFlagsWriteDiscard)); 
 
     checkGLError();
 }
@@ -446,12 +448,13 @@ void createTBO(GLuint* tbo, GLuint* tex, GLuint size)
 ////////////////////////////////////////////////////////////////////////////////
 //! Delete TBO
 ////////////////////////////////////////////////////////////////////////////////
-void deleteTBO( GLuint* tbo)
+void deleteTBO(cudaGraphicsResource_t* cudaResource,  GLuint* tbo)
 {
-	glBindBuffer( 1, *tbo);
-	glDeleteBuffers( 1, tbo);
+    gpuErrchk(cudaGraphicsUnregisterResource(*cudaResource));
+    *cudaResource = 0;
 
-	gpuErrchk(cudaGLUnregisterBufferObject(*tbo));
+    glBindBuffer( 1, *tbo);
+    glDeleteBuffers( 1, tbo);
 
 	*tbo = 0;
 }
@@ -519,6 +522,25 @@ void setVertexBufferData()
 		}
     }
 	glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! Reshape callback
+////////////////////////////////////////////////////////////////////////////////
+
+void reshape(int width, int height){
+	// viewport
+	glViewport( 0, 0, width, height);
+
+	// projection
+	glMatrixMode( GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(FOVY, (GLfloat)width / (GLfloat) height, NEAR_CLIP, FAR_CLIP);
+
+	checkGLError();
 }
 
 
@@ -608,17 +630,36 @@ void display()
 void keyboard( unsigned char key, int /*x*/, int /*y*/)
 {
 	switch( key) {
-	case( 27) :
+	// Space == 32
+    case(32):
+        paused = !paused;
+        break;
+    // Esc == 27
+	case(27) :
 		deleteVBO( &amp;sphereVerts);
 		deleteVBO( &amp;sphereNormals);
 		<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-		deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
+		deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
 		</xsl:for-each>
 		cudaEventDestroy(start);
-    cudaEventDestroy(stop);
-		exit( 0);
+		cudaEventDestroy(stop);
+		exit(EXIT_SUCCESS);
 	}
 }
+
+
+
+
+void special(int key, int x, int y){
+    switch (key)
+    {
+    case(GLUT_KEY_RIGHT) :
+        singleIteration();
+        fflush(stdout);
+        break;
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //! Mouse event handlers

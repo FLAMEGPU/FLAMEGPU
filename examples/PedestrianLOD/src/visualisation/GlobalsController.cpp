@@ -23,20 +23,29 @@
 #include "GlobalsController.h"
 #include "CustomVisualisation.h"
 
+#ifdef _MSC_VER
+// Disable _CRT_SECURE_NO_WARNINGS warnings
+#pragma warning(disable:4996)
+#endif
 
-float timeScaler = INITIAL_TIME_SCALER;
-
-float steerWeight = INITIAL_STEER_WEIGHT;
-float avoidWeight = INITIAL_AVOID_WEIGHT;
-float collisionWeight = INITIAL_COLLISION_WEIGHT;
-float goalWeight = INITIAL_GOAL_WEIGHT;
+float timeScaler = 0;
+float steerWeight = 0;
+float avoidWeight = 0;
+float collisionWeight = 0;
+float goalWeight = 0;
 
 extern void set_TIME_SCALER(float* h_EMMISION_RATE);
-
 extern void set_STEER_WEIGHT(float* h_weight);
 extern void set_AVOID_WEIGHT(float* h_weight);
 extern void set_COLLISION_WEIGHT(float* h_weight);
 extern void set_GOAL_WEIGHT(float* h_weight);
+
+
+extern const float * get_TIME_SCALER();
+extern const float * get_STEER_WEIGHT();
+extern const float * get_AVOID_WEIGHT();
+extern const float * get_COLLISION_WEIGHT();
+extern const float * get_GOAL_WEIGHT();
 
 //private prototypes
 float getExitProbabilityCounts();
@@ -44,11 +53,11 @@ float getExitProbabilityCounts();
 
 void initGlobalsController()
 {
-	set_TIME_SCALER(&timeScaler);
-	set_STEER_WEIGHT(&steerWeight);
-	set_AVOID_WEIGHT(&avoidWeight);
-	set_COLLISION_WEIGHT(&collisionWeight);
-	set_GOAL_WEIGHT(&goalWeight);
+	timeScaler = *get_TIME_SCALER();
+	steerWeight = *get_STEER_WEIGHT();
+	avoidWeight = *get_AVOID_WEIGHT();
+	collisionWeight = *get_COLLISION_WEIGHT();
+	goalWeight = *get_GOAL_WEIGHT();
 }
 
 
@@ -62,6 +71,9 @@ void increaseTimeScaler()
 void decreaseTimeScaler()
 {
 	timeScaler -= TIME_SCALER_INCREMENT;
+	//prevent negative time scaler
+	if (timeScaler < 0)
+		timeScaler += TIME_SCALER_INCREMENT;
 	set_TIME_SCALER(&timeScaler);
 }
 

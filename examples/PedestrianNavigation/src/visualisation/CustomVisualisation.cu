@@ -27,10 +27,3 @@ extern void stepFLAMESimulation()
 {
 	singleIteration();
 }
-
-
-extern void setCudaDevice()
-{
-	//set the CUDA GL device: Will cause an error without this since CUDA 3.0
-    cudaGLSetGLDevice(0);
-}

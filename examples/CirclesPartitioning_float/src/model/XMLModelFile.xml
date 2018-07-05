@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
-        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>Optional </name>
   <gpu:environment>
-    <gpu:functionFiles> 
+    <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
   </gpu:environment>
@@ -127,6 +126,4 @@
       </gpu:layerFunction>
     </layer>
   </layers>
-
-
 </gpu:xmodel>

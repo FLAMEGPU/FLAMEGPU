@@ -5,13 +5,17 @@
 examples_private/
 bin_private/
 examples/**/x64
-cityModel.obj
-stadium.obj
-**/bin/**/*.exe
-**/bin/**/cudart*.dll
+*.obj
+**/bin/**
+**/iterations/**
 **/dynamic/*.cu
 **/dynamic/*.h
+**/dynamic/*.c
 *.zip
+*.png
+*.dat
+
+
 ######
 #CUDA#
 ######
@@ -60,6 +64,7 @@ local.properties
 *.suo
 *.user
 *.sln.docstates
+*.opendb
 
 # Build results
 

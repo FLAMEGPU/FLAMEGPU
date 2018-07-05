@@ -54,10 +54,11 @@ extern void runVisualisation();
 extern void initVisualisation()
 {
     // Create GL context
-	int   argc   = 1;
-    char *argv[] = {"GLUT application", NULL};
+    int   argc   = 1;
+    char glutString[] = "GLUT application"; 
+    char *argv[] = {glutString, NULL};
+   // char *argv[] = {"GLUT application", NULL};
 
-	setCudaDevice();
     glutInit(&argc, argv);
 
 
@@ -79,9 +80,6 @@ extern void initVisualisation()
 
 	//initialise input control
 	initInputConroller();
-
-	//init FLAME GPU globals controller
-	initGlobalsController();
 
 	//init menu
 	initMenuItems();
@@ -109,6 +107,11 @@ extern void initVisualisation()
 
 extern void runVisualisation()
 {
+    //init FLAME GPU globals controller after 0.xml has been processed.
+    initGlobalsController();
+    // Ensure all texts are updated
+    updateAllTexts();
+
     // start rendering mainloop
     glutMainLoop();
 }
