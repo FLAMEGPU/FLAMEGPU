@@ -22,6 +22,11 @@
 
 #include "OBJModel.h"
 
+#ifdef _MSC_VER
+// Disable _CRT_SECURE_NO_WARNINGS warnings
+#pragma warning(disable:4996)
+#endif
+
 
 void allocateObjModel(int vertex_count, int face_count, glm::vec3** vertices, glm::vec3** normals, glm::ivec3** faces){
 	*vertices = (glm::vec3*)malloc(vertex_count*sizeof(glm::vec3));
