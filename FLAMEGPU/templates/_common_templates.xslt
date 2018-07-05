@@ -25,6 +25,7 @@
 <xsl:template name="formatSpecifier">
     <xsl:param name="type"/>
     <xsl:choose>
+        <xsl:when test="$type='bool'">%d</xsl:when>
         <xsl:when test="$type='char'">%d</xsl:when>
         <xsl:when test="$type='unsigned char'">%u</xsl:when>
         <xsl:when test="$type='short'">%d</xsl:when>
