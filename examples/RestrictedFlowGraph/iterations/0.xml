@@ -1,0 +1,9 @@
+<states>
+	<itno>0</itno>
+    <environment>
+        <SEED>0</SEED>
+        <INIT_POPULATION>512</INIT_POPULATION>
+        <PARAM_MIN_SPEED>1.0</PARAM_MIN_SPEED>
+        <PARAM_MAX_SPEED>5.0</PARAM_MAX_SPEED>
+    </environment>
+</states>
