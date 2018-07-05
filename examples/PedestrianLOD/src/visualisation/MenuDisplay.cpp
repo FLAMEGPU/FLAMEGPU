@@ -25,8 +25,10 @@
 #include "GlobalsController.h"
 #include "CustomVisualisation.h"
 
+#ifdef _MSC_VER
 // Disable _CRT_SECURE_NO_WARNINGS warnings
 #pragma warning(disable:4996)
+#endif 
 
 //holder for window width and height
 int menu_width;

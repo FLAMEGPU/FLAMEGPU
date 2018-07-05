@@ -23,8 +23,10 @@
 #include "GlobalsController.h"
 #include "CustomVisualisation.h"
 
+#ifdef _MSC_VER
 // Disable _CRT_SECURE_NO_WARNINGS warnings
 #pragma warning(disable:4996)
+#endif
 
 //globals, initialised to 0 then loaded from the relevant variable as specified in the model or initial states file (or init function)
 float emmisionRateExit1 = 0;
