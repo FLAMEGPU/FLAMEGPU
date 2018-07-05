@@ -26,7 +26,7 @@ __constant__ int d_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl
 /* Message constants */
 <xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message">
 /* <xsl:value-of select="xmml:name"/> Message variables */
-<xsl:if test="gpu:partitioningNone or gpu:partitioningSpatial">/* Non partitioned and spatial partitioned message variables  */
+<xsl:if test="gpu:partitioningNone or gpu:partitioningSpatial or gpu:partitioningGraphEdge">/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_<xsl:value-of select="xmml:name"/>_count;         /**&lt; message list counter*/
 __constant__ int d_message_<xsl:value-of select="xmml:name"/>_output_type;   /**&lt; message output type (single or optional)*/
 </xsl:if><xsl:if test="gpu:partitioningSpatial">//Spatial Partitioning Variables
@@ -40,6 +40,21 @@ __constant__ int d_message_<xsl:value-of select="xmml:name"/>_width;     /**&lt;
 </xsl:if>
 </xsl:for-each>
 	
+
+/* Graph Constants */
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:graphs/gpu:staticGraph">
+__constant__ staticGraph_memory_<xsl:value-of select="gpu:name"/>* d_staticGraph_memory_<xsl:value-of select="gpu:name"/>_ptr;
+</xsl:for-each>
+
+/* Graph device array pointer(s) */
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:graphs/gpu:staticGraph">
+staticGraph_memory_<xsl:value-of select="gpu:name"/>* d_staticGraph_memory_<xsl:value-of select="gpu:name"/> = nullptr;
+</xsl:for-each>
+
+/* Graph host array pointer(s) */
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:graphs/gpu:staticGraph">
+staticGraph_memory_<xsl:value-of select="gpu:name"/>* h_staticGraph_memory_<xsl:value-of select="gpu:name"/> = nullptr;
+</xsl:for-each>
     
 //include each function file
 <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:functionFiles">
@@ -198,7 +213,7 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created <xsl:value-of select="xmml:name"/> agent functions */
+/* Dynamically created <xsl:value-of select="xmml:name"/> agent functions */
 
 /** reset_<xsl:value-of select="xmml:name"/>_scan_input
  * <xsl:value-of select="xmml:name"/> agent reset scan input function
@@ -356,9 +371,9 @@ __FLAME_GPU_FUNC__ void set_<xsl:value-of select="xmml:name"/>_agent_array_value
 	
 <xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message">
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created <xsl:value-of select="xmml:name"/> message functions */
+/* Dynamically created <xsl:value-of select="xmml:name"/> message functions */
 
-<xsl:if test="gpu:partitioningNone or gpu:partitioningSpatial">
+<xsl:if test="gpu:partitioningNone or gpu:partitioningSpatial or gpu:partitioningGraphEdge">
 /** add_<xsl:value-of select="xmml:name"/>_message
  * Add non partitioned or spatially partitioned <xsl:value-of select="xmml:name"/> message
  * @param messages xmachine_message_<xsl:value-of select="xmml:name"/>_list message list to add too<xsl:for-each select="xmml:variables/gpu:variable">
@@ -1145,9 +1160,154 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
 }
 
 </xsl:if>
-	
-</xsl:for-each>
 
+<xsl:if test="gpu:partitioningGraphEdge">
+<xsl:variable name="message_name" select="xmml:name" />
+<xsl:variable name="edge_variable_name" select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/>
+<xsl:variable name="edge_variable_type" select="xmml:variables/gpu:variable[xmml:name=$edge_variable_name]/xmml:type"/>
+/* Message functions */
+
+/*
+ * Load the next graph edge partitioned <xsl:value-of select="xmml:name"/> messag (either from SM or next batch load)
+ * @param messages message list 
+ * @param message_bounds edge graph messaging data structure
+ * @param <xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/> target edge index
+ * @param messageIndex index of the message
+ * @return boolean indicating if a message was loaded or not.
+ */
+__device__ bool load_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_bounds* message_bounds, unsigned int <xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/>, unsigned int messageIndex){
+	// Define smem stuff
+	extern __shared__ int sm_data[];
+	char* message_share = (char*)&amp;sm_data[0];
+
+	// If the taget message is greater than the number of messages return false.
+	if (messageIndex >= d_message_<xsl:value-of select="xmml:name"/>_count){
+		return false;
+	}
+	
+	// Load the max value from the boundary struct.
+	unsigned int firstMessageForEdge = message_bounds->start[<xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/>];
+	
+	unsigned int messageForNextEdge = firstMessageForEdge + message_bounds->count[<xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/>];
+
+
+	// If there are no other messages return false
+	if (messageIndex &lt; firstMessageForEdge || messageIndex &gt;= messageForNextEdge){
+		return false;
+	}
+
+	// Get the message data for the target message
+	xmachine_message_<xsl:value-of select="xmml:name"/> temp_message;
+	temp_message._position = messages-&gt;_position[messageIndex];
+	<xsl:for-each select="xmml:variables/gpu:variable">temp_message.<xsl:value-of select="xmml:name"/> = messages-&gt;<xsl:value-of select="xmml:name"/>[messageIndex];
+	</xsl:for-each>
+
+	// Load the message into shared memory. No sync?
+	<!-- @optimisation better use of shared memory - currently each thread pulls the same value into shared memory? -->
+	int message_index = SHARE_INDEX(threadIdx.y * blockDim.x + threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+	xmachine_message_<xsl:value-of select="xmml:name"/>* sm_message = ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
+	sm_message[0] = temp_message;
+	
+	return true;
+}
+
+/**
+ * Get the first message from the <xsl:value-of select="xmml:name"/> edge partitioned message list
+ * @param messages  the message list
+ * @param message_bounds boundary data structure for edge partitioned messages
+ * @param <xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/> target edge for messages
+ * @return pointer to the message.
+ */
+__device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_bounds* message_bounds, unsigned int <xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/>){
+
+	extern __shared__ int sm_data[];
+	char* message_share = (char*)&amp;sm_data[0];
+
+	// Get the first index for the target edge.
+	unsigned int firstMessageIndex = message_bounds-&gt;start[<xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/>];
+
+	if (load_<xsl:value-of select="xmml:name"/>_message(messages, message_bounds, <xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/>, firstMessageIndex))
+	{
+		unsigned int message_index = SHARE_INDEX(threadIdx.y*blockDim.x + threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+		return ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+/**
+ * Get the next message from the <xsl:value-of select="xmml:name"/> edge partitioned message list
+ * @param messages  the message list
+ * @param message_bounds boundary data structure for edge partitioned messages
+ * @return pointer to the message.
+ */
+__device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>* message, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages, xmachine_message_<xsl:value-of select="xmml:name"/>_bounds* message_bounds){
+	extern __shared__ int sm_data[];
+	char* message_share = (char*)&amp;sm_data[0];
+
+	if (load_<xsl:value-of select="xmml:name"/>_message(messages, message_bounds, message-&gt;<xsl:value-of select="gpu:partitioningGraphEdge/gpu:messageEdgeID"/>, message-&gt;_position + 1))
+	{
+		//get conflict free address of 
+		unsigned int message_index = SHARE_INDEX(threadIdx.y*blockDim.x + threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+		return ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
+	}
+	else {
+		return nullptr;
+	}
+	
+}
+
+/**
+ * Generate a histogram of <xsl:value-of select="xmml:name"/> messages per edge index
+ * @param local_index
+ * @param unsorted_index
+ * @param message_counts
+ * @param messages
+ * @param agent_count
+ */
+__global__ void hist_<xsl:value-of select="xmml:name"/>_messages(unsigned int* local_index, unsigned int * unsorted_index, unsigned int* message_counts, xmachine_message_<xsl:value-of select="xmml:name"/>_list * messages, unsigned int agent_count){
+	unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+
+	if (index &gt;= agent_count){
+		return;
+	}
+	<xsl:value-of select="$edge_variable_type"/><xsl:text> </xsl:text><xsl:value-of select="$edge_variable_name"/> = messages-&gt;<xsl:value-of select="$edge_variable_name"/>[index];
+	unsigned int bin_index = atomicInc((unsigned int*)&amp;message_counts[<xsl:value-of select="$edge_variable_name"/>], 0xFFFFFFFF);
+	local_index[index] = bin_index;
+	unsorted_index[index] = <xsl:value-of select="$edge_variable_name"/>;
+}
+
+/**
+ * Reorder <xsl:value-of select="xmml:name"/> messages for edge partitioned communication
+ * @param local_index
+ * @param unsorted_index
+ * @param start_index
+ * @param unordered_messages
+ * @param ordered_messages
+ * @param agent_count
+ */
+__global__ void reorder_<xsl:value-of select="xmml:name"/>_messages(unsigned int* local_index, unsigned int* unsorted_index, unsigned int* start_index, xmachine_message_<xsl:value-of select="xmml:name"/>_list* unordered_messages, xmachine_message_<xsl:value-of select="xmml:name"/>_list* ordered_messages, unsigned int agent_count){
+	unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+
+	if (index &gt;= agent_count){
+		return;
+	}
+
+	unsigned int sorted_index = local_index[index] + start_index[unsorted_index[index]];
+	
+	// The position value should be updated to reflect the new position.
+	ordered_messages->_position[sorted_index] = sorted_index;
+	ordered_messages->_scan_input[sorted_index] = unordered_messages-&gt;_scan_input[index];
+
+	<xsl:for-each select="xmml:variables/gpu:variable">ordered_messages-&gt;<xsl:value-of select="xmml:name"/>[sorted_index] = unordered_messages-&gt;<xsl:value-of select="xmml:name"/>[index];
+	</xsl:for-each>
+}
+
+</xsl:if>
+
+</xsl:for-each>
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Dynamically created GPU kernels  */
@@ -1158,7 +1318,7 @@ __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:va
  *
  */
 __global__ void GPUFLAME_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* agents<xsl:if test="xmml:xagentOutputs/gpu:xagentOutput">, xmachine_memory_<xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_list* <xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_agents</xsl:if>
-	<xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messagename" select="xmml:inputs/gpu:input/xmml:messageName"/>, xmachine_message_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_list* <xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_messages<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messagename]"><xsl:if test="gpu:partitioningSpatial">, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix</xsl:if></xsl:for-each></xsl:if>
+	<xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messagename" select="xmml:inputs/gpu:input/xmml:messageName"/>, xmachine_message_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_list* <xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_messages<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messagename]"><xsl:if test="gpu:partitioningSpatial">, xmachine_message_<xsl:value-of select="xmml:name"/>_PBM* partition_matrix</xsl:if><xsl:if test="gpu:partitioningGraphEdge">, xmachine_message_<xsl:value-of select="xmml:name"/>_bounds* message_bounds</xsl:if></xsl:for-each></xsl:if>
 	<xsl:if test="xmml:outputs/gpu:output">, xmachine_message_<xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_list* <xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_messages</xsl:if>
 	<xsl:if test="gpu:RNG='true'">, RNG_rand48* rand48</xsl:if>){
 	
@@ -1208,7 +1368,7 @@ __global__ void GPUFLAME_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl
 
 	//FLAME function call
 	<xsl:if test="../../gpu:type='continuous'">int dead = !</xsl:if><xsl:value-of select="xmml:name"/>(&amp;agent<xsl:if test="xmml:xagentOutputs/gpu:xagentOutput">, <xsl:value-of select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/>_agents</xsl:if>
-	<xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messagename" select="xmml:inputs/gpu:input/xmml:messageName"/>, <xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_messages<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messagename]"><xsl:if test="gpu:partitioningSpatial">, partition_matrix</xsl:if></xsl:for-each></xsl:if>
+	<xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messagename" select="xmml:inputs/gpu:input/xmml:messageName"/>, <xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>_messages<xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messagename]"><xsl:if test="gpu:partitioningSpatial">, partition_matrix</xsl:if><xsl:if test="gpu:partitioningGraphEdge">, message_bounds</xsl:if></xsl:for-each></xsl:if>
 	<xsl:if test="xmml:outputs/gpu:output">, <xsl:value-of select="xmml:outputs/gpu:output/xmml:messageName"/>_messages	</xsl:if>
 	<xsl:if test="gpu:RNG='true'">, rand48</xsl:if>);
 	
@@ -1228,6 +1388,75 @@ __global__ void GPUFLAME_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl
 </xsl:for-each>
 	
 	
+/* Graph utility functions */
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:graphs/gpu:staticGraph">
+<xsl:variable name="graph_name" select="gpu:name"/>
+__FLAME_GPU_HOST_FUNC__ __FLAME_GPU_FUNC__ unsigned int get_staticGraph_<xsl:value-of select="$graph_name"/>_vertex_count(){
+#if defined(__CUDA_ARCH__)
+	return d_staticGraph_memory_<xsl:value-of select="$graph_name"/>_ptr-&gt;vertex.count;
+#else
+	return h_staticGraph_memory_<xsl:value-of select="$graph_name"/>-&gt;vertex.count;
+#endif 
+}
+__FLAME_GPU_HOST_FUNC__ __FLAME_GPU_FUNC__ unsigned int get_staticGraph_<xsl:value-of select="$graph_name"/>_edge_count(){
+#if defined(__CUDA_ARCH__)
+	return d_staticGraph_memory_<xsl:value-of select="$graph_name"/>_ptr-&gt;edge.count;
+	#else
+	return h_staticGraph_memory_<xsl:value-of select="$graph_name"/>-&gt;edge.count;
+#endif 
+}
+__FLAME_GPU_HOST_FUNC__ __FLAME_GPU_FUNC__ unsigned int get_staticGraph_<xsl:value-of select="$graph_name"/>_vertex_first_edge_index(unsigned int vertexIndex){
+	if(vertexIndex &lt;= get_staticGraph_<xsl:value-of select="$graph_name"/>_vertex_count()){
+	#if defined(__CUDA_ARCH__)
+		return d_staticGraph_memory_<xsl:value-of select="$graph_name"/>_ptr-&gt;vertex.first_edge_index[vertexIndex];
+	#else
+		return h_staticGraph_memory_<xsl:value-of select="$graph_name"/>-&gt;vertex.first_edge_index[vertexIndex];
+	#endif 
+	} else {
+		// Return the buffer size, i.e. no messages can start here.
+		return staticGraph_<xsl:value-of select="$graph_name"/>_edge_bufferSize;
+	}
+}
+__FLAME_GPU_HOST_FUNC__ __FLAME_GPU_FUNC__ unsigned int get_staticGraph_<xsl:value-of select="$graph_name"/>_vertex_num_edges(unsigned int vertexIndex){
+if(vertexIndex &lt;= get_staticGraph_<xsl:value-of select="$graph_name"/>_vertex_count()){
+	#if defined(__CUDA_ARCH__)
+		return d_staticGraph_memory_<xsl:value-of select="$graph_name"/>_ptr-&gt;vertex.first_edge_index[vertexIndex + 1] - d_staticGraph_memory_<xsl:value-of select="$graph_name"/>_ptr-&gt;vertex.first_edge_index[vertexIndex];
+	#else
+		return h_staticGraph_memory_<xsl:value-of select="$graph_name"/>-&gt;vertex.first_edge_index[vertexIndex + 1] - h_staticGraph_memory_<xsl:value-of select="$graph_name"/>-&gt;vertex.first_edge_index[vertexIndex];
+	#endif 
+	} else {
+		return 0;
+	}
+}
+
+
+<xsl:for-each select="gpu:vertex/xmml:variables/gpu:variable">__FLAME_GPU_HOST_FUNC__ __FLAME_GPU_FUNC__ <xsl:value-of select="xmml:type" /> get_staticGraph_<xsl:value-of select="$graph_name" />_vertex_<xsl:value-of select="xmml:name" />(unsigned int vertexIndex<xsl:if test="xmml:arrayLength">, unsigned int arrayElement</xsl:if>){
+	if(vertexIndex &lt; get_staticGraph_<xsl:value-of select="$graph_name"/>_vertex_count()<xsl:if test="xmml:arrayLength"> &amp;&amp; arrayElement &lt; <xsl:value-of select="xmml:arrayLength" /></xsl:if>){
+	#if defined(__CUDA_ARCH__)
+		return d_staticGraph_memory_<xsl:value-of select="$graph_name"/>_ptr-&gt;vertex.<xsl:value-of select="xmml:name" />[<xsl:if test="xmml:arrayLength">(arrayElement * staticGraph_<xsl:value-of select="$graph_name"/>_vertex_bufferSize)</xsl:if> + vertexIndex];
+	#else
+		return h_staticGraph_memory_<xsl:value-of select="$graph_name"/>-&gt;vertex.<xsl:value-of select="xmml:name" />[<xsl:if test="xmml:arrayLength">(arrayElement * staticGraph_<xsl:value-of select="$graph_name"/>_vertex_bufferSize)</xsl:if> + vertexIndex];
+	#endif 
+	} else {
+		return <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/><xsl:with-param name="defaultValue" select="xmml:defaultValue" /></xsl:call-template>;
+	}
+}
+</xsl:for-each>
+<xsl:for-each select="gpu:edge/xmml:variables/gpu:variable">__FLAME_GPU_HOST_FUNC__ __FLAME_GPU_FUNC__ <xsl:value-of select="xmml:type" /> get_staticGraph_<xsl:value-of select="$graph_name" />_edge_<xsl:value-of select="xmml:name" />(unsigned int edgeIndex<xsl:if test="xmml:arrayLength">, unsigned int arrayElement</xsl:if>){
+	if(edgeIndex &lt; get_staticGraph_<xsl:value-of select="$graph_name"/>_edge_count()<xsl:if test="xmml:arrayLength"> &amp;&amp; arrayElement &lt; <xsl:value-of select="xmml:arrayLength" /></xsl:if>){
+	#if defined(__CUDA_ARCH__)
+		return d_staticGraph_memory_<xsl:value-of select="$graph_name"/>_ptr-&gt;edge.<xsl:value-of select="xmml:name" />[<xsl:if test="xmml:arrayLength">(arrayElement * staticGraph_<xsl:value-of select="$graph_name"/>_edge_bufferSize)</xsl:if> + edgeIndex];
+	#else
+		return h_staticGraph_memory_<xsl:value-of select="$graph_name"/>-&gt;edge.<xsl:value-of select="xmml:name" />[<xsl:if test="xmml:arrayLength">(arrayElement * staticGraph_<xsl:value-of select="$graph_name"/>_edge_bufferSize)</xsl:if> + edgeIndex];
+	#endif 
+	} else {
+		return <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/><xsl:with-param name="defaultValue" select="xmml:defaultValue" /></xsl:call-template>;
+	}
+}
+</xsl:for-each>
+</xsl:for-each>
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Rand48 functions */
 
