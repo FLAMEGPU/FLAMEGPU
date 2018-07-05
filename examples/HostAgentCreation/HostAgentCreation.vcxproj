@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{74309752-05AD-471A-B1A3-57EC7526402A}</ProjectGuid>
+    <ProjectGuid>{9A0E5E7B-795E-441F-B08B-D76B5AECB988}</ProjectGuid>
     <RootNamespace>HostAgentCreation_</RootNamespace>
     <ProjectName>HostAgentCreation</ProjectName>
   </PropertyGroup>

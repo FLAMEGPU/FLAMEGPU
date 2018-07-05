@@ -13,8 +13,8 @@
 
 #if defined __NVCC__
    // Disable annotation on defaulted function warnings (glm 0.9.9 and CUDA 9.0 introduced this warning)
-   #pragma diag_suppress = esa_on_defaulted_function_ignored 
-#endif 
+   #pragma diag_suppress esa_on_defaulted_function_ignored 
+#endif
 
 #define GLM_FORCE_NO_CTOR_INIT
 #include &lt;glm/glm.hpp&gt;

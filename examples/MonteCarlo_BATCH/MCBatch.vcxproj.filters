@@ -78,16 +78,14 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <FLAMEGPU_MCBatch_Build_Rule Include="src\model\XMLModelFile.xml">
-      <Filter>model</Filter>
-    </FLAMEGPU_MCBatch_Build_Rule>
-  </ItemGroup>
-  <ItemGroup>
     <Xsd Include="..\..\FLAMEGPU\schemas\XMML.xsd">
       <Filter>schemas</Filter>
     </Xsd>
     <Xsd Include="..\..\FLAMEGPU\schemas\XMMLGPU.xsd">
       <Filter>schemas</Filter>
     </Xsd>
+  </ItemGroup>
+  <ItemGroup>
+    <FLAMEGPU_Template_Build_Rule Include="src\model\XMLModelFile.xml" />
   </ItemGroup>
 </Project>

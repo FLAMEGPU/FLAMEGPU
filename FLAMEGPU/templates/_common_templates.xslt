@@ -147,6 +147,7 @@
 <xsl:template name="typeParserFunc">
     <xsl:param name="type"/>
     <xsl:choose>      
+    	<xsl:when test="$type='bool'">fpgu_strtol</xsl:when>
         <xsl:when test="$type='char'">fpgu_strtol</xsl:when>
         <xsl:when test="$type='unsigned char'">fpgu_strtoul</xsl:when>
         <xsl:when test="$type='short'">fpgu_strtol</xsl:when>

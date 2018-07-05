@@ -637,14 +637,14 @@ bool checkForDuplicates_staticGraph_<xsl:value-of select="$graph_name"/>(staticG
     // Sort vertices by id. 
     // Create a vector of pairs 
     <xsl:for-each select="gpu:vertex/xmml:variables/gpu:variable[xmml:name='id']">
-    std::vector&lt;std::pair&lt;size_t,<xsl:value-of select="xmml:type" />&gt;&gt; vertex_indices (coo-&gt;vertex.count);
+    std::vector&lt;std::pair&lt;unsigned int,<xsl:value-of select="xmml:type" />&gt;&gt; vertex_indices (coo-&gt;vertex.count);
     // Populate the pairs.
-    for(size_t i = 0; i &lt; coo-&gt;vertex.count; i++){
+    for(unsigned int i = 0; i &lt; coo-&gt;vertex.count; i++){
         vertex_indices.at(i).first = i;
         vertex_indices.at(i).second = coo-&gt;vertex.id[i] ;
     }
     // sort the vector of indices based on the value of the COO vertex ids.
-    std::sort(vertex_indices.begin(), vertex_indices.end(), [](const std::pair&lt;size_t,<xsl:value-of select="xmml:type" />&gt; &amp;left, const std::pair&lt;size_t,<xsl:value-of select="xmml:type" />&gt; &amp;right) {
+    std::sort(vertex_indices.begin(), vertex_indices.end(), [](const std::pair&lt;unsigned int,<xsl:value-of select="xmml:type" />&gt; &amp;left, const std::pair&lt;unsigned int,<xsl:value-of select="xmml:type" />&gt; &amp;right) {
         return left.second &lt; right.second;
     });
 
