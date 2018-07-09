@@ -16,7 +16,7 @@ The advantages of our contribution are three fold.
 
 ## Documentation
 
-The FLAME GPU documentation and user guide can be found at [http://dpcs.flamegpu.com](http://dpcs.flamegpu.com), with source hosted on GitHub at [FLAMEGPU/docs](https://github.com/FLAMEGPU/docs).
+The FLAME GPU documentation and user guide can be found at [http://docs.flamegpu.com](http://dpcs.flamegpu.com), with source hosted on GitHub at [FLAMEGPU/docs](https://github.com/FLAMEGPU/docs).
 
 
 ## Getting FLAME GPU
