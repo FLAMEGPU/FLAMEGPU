@@ -75,7 +75,7 @@
               <defaultValue>1.0f</defaultValue>
             </gpu:variable>
           </variables>
-          <gpu:bufferSize>1024256</gpu:bufferSize>
+          <gpu:bufferSize>256</gpu:bufferSize>
         </gpu:vertex>
         <gpu:edge>
           <variables>
