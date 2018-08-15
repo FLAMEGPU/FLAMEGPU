@@ -334,7 +334,7 @@ void initCUDA(int argc, char** argv){
 void runConsoleWithoutXMLOutput(int iterations){
 	PROFILE_SCOPED_RANGE("runConsoleWithoutXMLOutput");
 	// Iteratively tun the correct number of iterations.
-	for (int i=0; i&lt; iterations; i++)
+	for (int i=0; i&lt; iterations || iterations == 0; i++)
 	{
 		printf("Processing Simulation Step %i\n", i+1);
 		//single simulation iteration
@@ -347,7 +347,7 @@ void runConsoleWithoutXMLOutput(int iterations){
 void runConsoleWithXMLOutput(int iterations, int outputFrequency){
 	PROFILE_SCOPED_RANGE("runConsoleWithXMLOutput");
 	// Iteratively tun the correct number of iterations.
-	for (int i=0; i&lt; iterations; i++)
+	for (int i=0; i&lt; iterations || iterations == 0; i++)
 	{
 		printf("Processing Simulation Step %i\n", i+1);
 		//single simulation iteration
@@ -411,9 +411,9 @@ int main( int argc, char** argv)
 	
 	//Get the number of iterations
 	int iterations = atoi(argv[2]);
-	if (iterations &lt;= 0)
+	if (iterations &lt; 0)
 	{
-		printf("Second argument must be a positive integer (Number of Iterations)\n");
+		printf("Second argument must be a positive integer (Number of Iterations), or 0 for inifinite iterations\n");
 		exit(EXIT_FAILURE);
 	}
   
