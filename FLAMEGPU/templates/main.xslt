@@ -339,6 +339,8 @@ void runConsoleWithoutXMLOutput(int iterations){
 		printf("Processing Simulation Step %i\n", i+1);
 		//single simulation iteration
 		singleIteration();
+		
+		if (get_exit_early()) break;
 	}
 }
 
@@ -355,6 +357,8 @@ void runConsoleWithXMLOutput(int iterations, int outputFrequency){
 			saveIterationData(outputpath, i+1, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">get_host_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_device_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_agents(), get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()<xsl:choose><xsl:when test="position()=last()">);</xsl:when><xsl:otherwise>,</xsl:otherwise></xsl:choose></xsl:for-each>
 			printf("Iteration %i Saved to XML\n", i+1);
 		}
+		
+		if (get_exit_early()) break;
 	}
 
 	// If we did not yet output the final iteration, output the final iteration.
