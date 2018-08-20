@@ -17,7 +17,6 @@
 #define __PEDESTRIAN_POPULATION
 
 #include <cuda_gl_interop.h>
-#include <glm/glm.hpp>
 
 /** initPedestrianPopulation
  * Initialises the pedestrian population by loading model data and creating appropriate buffer objects and shaders

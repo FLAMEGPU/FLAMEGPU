@@ -13,7 +13,7 @@
  * on www.flamegpu.com website.
  * 
  */
-#if defined __NVCC__
+#if defined(__NVCC__) && defined(__CUDACC_VER_MAJOR__) && __CUDACC_VER_MAJOR__ >= 9
    // Disable annotation on defaulted function warnings (glm 0.9.9 and CUDA 9.0 introduced this warning)
    #pragma diag_suppress esa_on_defaulted_function_ignored 
 #endif 
