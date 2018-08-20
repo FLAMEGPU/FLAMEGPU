@@ -15,7 +15,7 @@
 #include &lt;cmath&gt;
 
 #include &lt;GL/glew.h&gt;
-#include &lt;GL/glut.h&gt;
+#include &lt;GL/freeglut.h&gt;
 #include &lt;cuda_gl_interop.h&gt;
 	    
 #include "header.h"
@@ -77,6 +77,7 @@ void deleteTBO( cudaGraphicsResource_t* cudaResource, GLuint* tbo);
 void setVertexBufferData();
 void reshape(int width, int height);
 void display();
+void close();
 void keyboard( unsigned char key, int x, int y);
 void special(int key, int x, int y);
 void mouse(int button, int state, int x, int y);
@@ -227,6 +228,7 @@ void initVisualisation()
 	// register callbacks
 	glutReshapeFunc( reshape);
 	glutDisplayFunc( display);
+    glutCloseFunc( close);
 	glutKeyboardFunc( keyboard);
 	glutSpecialFunc( special);
 	glutMouseFunc( mouse);
@@ -625,6 +627,24 @@ void display()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//! Window close callback
+////////////////////////////////////////////////////////////////////////////////
+void close()
+{
+    // Cleanup visualisation memory
+    deleteVBO( &amp;sphereVerts);
+    deleteVBO( &amp;sphereNormals);
+    <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
+    deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
+    </xsl:for-each>
+    // Destroy cuda events
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+    // Call exit functions and clean up simulation memory
+    cleanup();
+}
+
+////////////////////////////////////////////////////////////////////////////////
 //! Keyboard events handler
 ////////////////////////////////////////////////////////////////////////////////
 void keyboard( unsigned char key, int /*x*/, int /*y*/)
@@ -637,18 +657,7 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
     // Esc == 27
 	case(27) :
     case('q') :
-        // Cleanup visualisation memory
-		deleteVBO( &amp;sphereVerts);
-		deleteVBO( &amp;sphereNormals);
-		<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-		deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
-		</xsl:for-each>
-        // Destroy cuda events
-		cudaEventDestroy(start);
-		cudaEventDestroy(stop);
-        // Call exit functions and clean up simulation memory
-        cleanup();
-        // Exit
+        // Exit, and therefore call the close callback function.
 		exit(EXIT_SUCCESS);
 	}
 }

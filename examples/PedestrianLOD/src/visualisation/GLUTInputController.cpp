@@ -223,10 +223,8 @@ void keyboard( unsigned char key, int x, int y)
 		//exit
 		case('q') :
 		case(27) : // Esc
-		{
-			// Call exit functions and clean up after simulation
-			cleanupFLAMESimulation();
-			
+		{	
+			// Call exit, which in turn will call the close callback function.			
 			exit(EXIT_SUCCESS);
 			break;
 		}

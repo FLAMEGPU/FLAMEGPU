@@ -20,7 +20,7 @@
 #include <string.h>
 #include <cmath>
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <time.h>
 
 #include "CustomVisualisation.h"
@@ -99,6 +99,7 @@ extern void initVisualisation()
 
     // register callbacks
     glutDisplayFunc( display);
+    glutCloseFunc( close);
     glutKeyboardFunc( keyboard);
 	glutSpecialFunc( specialKeyboard);
     glutMouseFunc( mouse);
@@ -199,6 +200,14 @@ void display(void)
     glutSwapBuffers();
     glutPostRedisplay();
 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//! Close callback
+////////////////////////////////////////////////////////////////////////////////
+void close(){
+    // Call exit functions and clean up after simulation
+    cleanupFLAMESimulation();
 }
 
 void updateSimulationConstants(){
