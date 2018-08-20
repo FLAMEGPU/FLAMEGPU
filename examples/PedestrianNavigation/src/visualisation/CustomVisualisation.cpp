@@ -101,7 +101,8 @@ extern void initVisualisation()
     glutMouseFunc( mouse);
 
 
-
+    // Set the closing behaviour 
+    glutSetOption( GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS ); 
 
 
 }
@@ -112,7 +113,9 @@ extern void runVisualisation()
     initGlobalsController();
     // Ensure all texts are updated
     updateAllTexts();
-
+    // Flush outputs prior to glut main loop.
+    fflush(stdout);
+    fflush(stderr);
     // start rendering mainloop
     glutMainLoop();
 }

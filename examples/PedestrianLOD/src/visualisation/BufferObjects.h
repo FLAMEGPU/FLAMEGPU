@@ -17,7 +17,7 @@
 #define __BUFFER_OBJECTS
 
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <cuda_gl_interop.h>
 
 /** createVBO

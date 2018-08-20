@@ -233,6 +233,10 @@ void initVisualisation()
 	glutSpecialFunc( special);
 	glutMouseFunc( mouse);
 	glutMotionFunc( motion);
+	
+	// Set the closing behaviour 
+    glutSetOption( GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS ); 
+
     
 	// create VBO's
 	createVBO( &amp;sphereVerts, SPHERE_SLICES* (SPHERE_STACKS+1) * sizeof(glm::vec3));
@@ -252,6 +256,9 @@ void initVisualisation()
 }
 
 void runVisualisation(){
+	// Flush outputs prior to simulation loop.
+	fflush(stdout);
+	fflush(stderr);
 	// start rendering mainloop
 	glutMainLoop();
 }
@@ -657,8 +664,8 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
     // Esc == 27
 	case(27) :
     case('q') :
-        // Exit, and therefore call the close callback function.
-		exit(EXIT_SUCCESS);
+        // leave the glut main loop, closing the window and calling the callback function.
+        glutLeaveMainLoop();
 	}
 }
 

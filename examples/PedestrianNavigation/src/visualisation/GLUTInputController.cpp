@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <cmath>
 #include "GLUTInputController.h"
 #include "MenuDisplay.h"
@@ -273,8 +273,8 @@ void keyboard( unsigned char key, int x, int y)
 		case('q') :
 		case(27) : // Esc
 		{
-			// Call exit, which in turn will call the close callback function.			
-			exit(EXIT_SUCCESS);
+			// leave the glut main loop, closing the window and calling the callback function.
+			glutLeaveMainLoop();
 			break;
 		}
 

@@ -104,7 +104,8 @@ extern void initVisualisation()
 	glutSpecialFunc( specialKeyboard);
     glutMouseFunc( mouse);
 
-
+    // Set the closing behaviour 
+    glutSetOption( GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS ); 
 
 
 
@@ -116,7 +117,9 @@ extern void runVisualisation()
     initGlobalsController();
     // Update all menu texts
     updateAllMenuTexts();
-
+    // Flush outputs prior to glut main loop.
+    fflush(stdout);
+    fflush(stderr);
     // start rendering mainloop
     glutMainLoop();
 }
