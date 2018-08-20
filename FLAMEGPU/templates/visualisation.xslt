@@ -636,13 +636,19 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
         break;
     // Esc == 27
 	case(27) :
+    case('q') :
+        // Cleanup visualisation memory
 		deleteVBO( &amp;sphereVerts);
 		deleteVBO( &amp;sphereNormals);
 		<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
 		deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
 		</xsl:for-each>
+        // Destroy cuda events
 		cudaEventDestroy(start);
 		cudaEventDestroy(stop);
+        // Call exit functions and clean up simulation memory
+        cleanup();
+        // Exit
 		exit(EXIT_SUCCESS);
 	}
 }

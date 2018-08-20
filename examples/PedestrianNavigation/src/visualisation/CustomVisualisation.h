@@ -39,6 +39,7 @@ float getFPS();
 
 //external functions
 extern void stepFLAMESimulation();
+extern void cleanupFLAMESimulation();
 
 //common functions
 void checkGLError();

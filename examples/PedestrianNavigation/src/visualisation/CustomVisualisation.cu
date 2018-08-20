@@ -27,3 +27,7 @@ extern void stepFLAMESimulation()
 {
 	singleIteration();
 }
+extern void cleanupFLAMESimulation()
+{
+    cleanup();
+}

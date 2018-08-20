@@ -120,10 +120,9 @@ void updateRotationComponents()
 
 void rotate(int x, int y)
 {
-	float dx, dy;
 	//calc change in mouse movement
-	dx = x - mouse_old_x;
-	dy = y - mouse_old_y;
+	float dx = x - mouse_old_x;
+	float dy = y - mouse_old_y;
 
 	//update rotation component values
 	updateRotationComponents();
@@ -148,10 +147,9 @@ void rotate(int x, int y)
 
 void zoom(int x, int y)
 {
-	float dx, dy;
 	//calc change in mouse movement
-	dx = x - mouse_old_x;
-	dy = y - mouse_old_y;
+	// float dx = x - mouse_old_x;
+	float dy = y - mouse_old_y;
 
 	//update rotation component values
 	updateRotationComponents();
@@ -224,8 +222,12 @@ void keyboard( unsigned char key, int x, int y)
 
 		//exit
 		case('q') :
+		case(27) : // Esc
 		{
-			exit(0);
+			// Call exit functions and clean up after simulation
+			cleanupFLAMESimulation();
+			
+			exit(EXIT_SUCCESS);
 			break;
 		}
 
