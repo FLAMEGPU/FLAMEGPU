@@ -304,8 +304,8 @@ void runCuda()
         <xsl:choose>
         <xsl:when test="../../gpu:type='discrete'">//discrete variables
         int population_width = (int)floor(sqrt((float)get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()));
-		centralise.x = population_width / 2.0;
-        centralise.y = population_width / 2.0;
+		centralise.x = population_width / 2.0f;
+        centralise.y = population_width / 2.0f;
         centralise.z = 0.0;
         </xsl:when>
         <xsl:otherwise>
@@ -473,13 +473,13 @@ void deleteTBO(cudaGraphicsResource_t* cudaResource,  GLuint* tbo)
 ////////////////////////////////////////////////////////////////////////////////
 
 static void setSphereVertex(glm::vec3* data, int slice, int stack) {
-	float PI = 3.14159265358;
+	float PI = 3.14159265358f;
     
-	double sl = 2*PI*slice/SPHERE_SLICES;
-	double st = 2*PI*stack/SPHERE_STACKS;
+	float sl = 2*PI*slice/SPHERE_SLICES;
+	float st = 2*PI*stack/SPHERE_STACKS;
  
-	data-&gt;x = cos(st)*sin(sl) * SPHERE_RADIUS;
-	data-&gt;y = sin(st)*sin(sl) * SPHERE_RADIUS;
+	data-&gt;x = cos(st) * sin(sl) * SPHERE_RADIUS;
+	data-&gt;y = sin(st) * sin(sl) * SPHERE_RADIUS;
 	data-&gt;z = cos(sl) * SPHERE_RADIUS;
 }
 
@@ -489,10 +489,10 @@ static void setSphereVertex(glm::vec3* data, int slice, int stack) {
 ////////////////////////////////////////////////////////////////////////////////
 
 static void setSphereNormal(glm::vec3* data, int slice, int stack) {
-	float PI = 3.14159265358;
+	float PI = 3.14159265358f;
     
-	double sl = 2*PI*slice/SPHERE_SLICES;
-	double st = 2*PI*stack/SPHERE_STACKS;
+	float sl = 2*PI*slice/SPHERE_SLICES;
+	float st = 2*PI*stack/SPHERE_STACKS;
  
 	data-&gt;x = cos(st)*sin(sl);
 	data-&gt;y = sin(st)*sin(sl);
@@ -701,15 +701,14 @@ void mouse(int button, int state, int x, int y)
 
 void motion(int x, int y)
 {
-	float dx, dy;
-	dx = x - mouse_old_x;
-	dy = y - mouse_old_y;
+	float dx = (float) x - mouse_old_x;
+	float dy = (float) y - mouse_old_y;
 
 	if (mouse_buttons &amp; 1) {
-		rotate_x += dy * 0.2;
-		rotate_y += dx * 0.2;
+		rotate_x += dy * 0.2f;
+		rotate_y += dx * 0.2f;
 	} else if (mouse_buttons &amp; 4) {
-		translate_z += dy * VIEW_DISTANCE * 0.001;
+		translate_z += dy * VIEW_DISTANCE * 0.001f;
 	}
 
   mouse_old_x = x;

@@ -8,16 +8,16 @@ const unsigned int WINDOW_WIDTH = 512;
 const unsigned int WINDOW_HEIGHT = 512;
 
 //frustrum
-const double NEAR_CLIP = 0.1;
-const double FAR_CLIP = 100;
+const float NEAR_CLIP = 0.1f;
+const float FAR_CLIP = 100.0f;
 
 //Circle model fidelity
 const int SPHERE_SLICES = 20;
 const int SPHERE_STACKS = 20;
-const double SPHERE_RADIUS = 0.0025;
+const float SPHERE_RADIUS = 0.0025f;
 
 //Viewing Distance
-const double VIEW_DISTANCE = 1.5;
+const float VIEW_DISTANCE = 1.5f;
 
 //light position
 GLfloat LIGHT_POSITION[] = {10.0f, 10.0f, 10.0f, 1.0f};

@@ -121,8 +121,8 @@ void updateRotationComponents()
 void rotate(int x, int y)
 {
 	//calc change in mouse movement
-	float dx = x - mouse_old_x;
-	float dy = y - mouse_old_y;
+	float dx = (float) (x - mouse_old_x);
+	float dy = (float) (y - mouse_old_y);
 
 	//update rotation component values
 	updateRotationComponents();
@@ -148,8 +148,8 @@ void rotate(int x, int y)
 void zoom(int x, int y)
 {
 	//calc change in mouse movement
-	// float dx = x - mouse_old_x;
-	float dy = y - mouse_old_y;
+	// float dx = (float) (x - mouse_old_x);
+	float dy = (float) (y - mouse_old_y);
 
 	//update rotation component values
 	updateRotationComponents();
@@ -170,10 +170,9 @@ void zoom(int x, int y)
 
 void translate(int x, int y)
 {
-	float dx, dy;
 	//calc change in mouse movement
-	dx = x - mouse_old_x;
-	dy = y - mouse_old_y;
+	float dx = (float) (x - mouse_old_x);
+	float dy = (float) (y - mouse_old_y);
 
 	//update rotation component values
 	updateRotationComponents();
