@@ -42,6 +42,7 @@ void updateSimulationConstants();
 //external functions
 extern void stepFLAMESimulation();
 extern void cleanupFLAMESimulation();
+extern bool getExitFLAMESimulation();
 
 
 //common functions

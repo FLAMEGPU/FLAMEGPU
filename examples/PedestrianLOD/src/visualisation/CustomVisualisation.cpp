@@ -203,6 +203,11 @@ void display(void)
     glutSwapBuffers();
     glutPostRedisplay();
 
+    // If an early exit has been requested, close the visualisation by leaving the main loop.
+    if(getExitFLAMESimulation()){
+        glutLeaveMainLoop();
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

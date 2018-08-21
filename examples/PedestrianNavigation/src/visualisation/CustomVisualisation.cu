@@ -31,3 +31,7 @@ extern void cleanupFLAMESimulation()
 {
     cleanup();
 }
+extern bool getExitFLAMESimulation()
+{
+    return get_exit_early();
+}

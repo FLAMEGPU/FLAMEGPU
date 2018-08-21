@@ -631,6 +631,10 @@ void display()
 	glutSwapBuffers();
 	glutPostRedisplay();
 
+    // If an early exit has been requested, close the visualisation by leaving the main loop.
+    if(get_exit_early()){
+        glutLeaveMainLoop();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -664,8 +668,8 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
     // Esc == 27
 	case(27) :
     case('q') :
-        // leave the glut main loop, closing the window and calling the callback function.
-        glutLeaveMainLoop();
+        // Set the flag indicating we wish to exit the simulation.
+        set_exit_early();
 	}
 }
 

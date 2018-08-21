@@ -299,7 +299,7 @@ RNG_rand48* h_rand48;    /**&lt; Pointer to RNG_rand48 seed list on host*/
 RNG_rand48* d_rand48;    /**&lt; Pointer to RNG_rand48 seed list on device*/
 
 /* Early simulation exit*/
-bool b_exit_early;
+bool g_exit_early;
 
 /* Cuda Event Timers for Instrumentation */
 #if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
@@ -412,7 +412,7 @@ void initialise(char * inputfile){
   
 		// Initialise some global variables
 		g_iterationNumber = 0;
-		b_exit_early = false;
+		g_exit_early = false;
 
     // Initialise variables for tracking which iterations' data is accessible on the host.
     <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/><xsl:for-each select="xmml:states/gpu:state"><xsl:variable name="agent_state" select="xmml:name"/><xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type" />h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration = 0;
@@ -858,11 +858,11 @@ PROFILE_SCOPED_RANGE("singleIteration");
 
 /* finish whole simulation after this step */
 void set_exit_early() {
-	b_exit_early = true;
+	g_exit_early = true;
 }
 
 bool get_exit_early() {
-	return b_exit_early;
+	return g_exit_early;
 }
 
 /* Environment functions */
