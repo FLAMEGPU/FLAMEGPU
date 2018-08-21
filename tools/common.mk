@@ -189,7 +189,7 @@ else
 		NVCCLDFLAGS += -L$(LIB_DIR)
 		LDFLAGS += --enable-new-dtags,-rpath,"\$$ORIGIN/../$(LIB_DIR)",-rpath,"\$$ORIGIN"
 		# Specify linux specific shared libraries to link against
-		LINK_ARCHIVES_VISUALISATION := -lfreeglut -lGLEW -lGLU -lGL
+		LINK_ARCHIVES_VISUALISATION := -lglut -lGLEW -lGLU -lGL
 	endif
 endif
 
