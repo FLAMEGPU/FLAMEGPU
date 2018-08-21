@@ -298,6 +298,9 @@ int h_<xsl:value-of select="../xmml:name"/>_condition_count;
 RNG_rand48* h_rand48;    /**&lt; Pointer to RNG_rand48 seed list on host*/
 RNG_rand48* d_rand48;    /**&lt; Pointer to RNG_rand48 seed list on device*/
 
+/* Early simulation exit*/
+bool b_exit_early;
+
 /* Cuda Event Timers for Instrumentation */
 #if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
 	cudaEvent_t instrument_iteration_start, instrument_iteration_stop;
@@ -407,8 +410,9 @@ void initialise(char * inputfile){
 	//set the padding and offset values depending on architecture and OS
 	setPaddingAndOffset();
   
-    // Initialise some global variables
-    g_iterationNumber = 0;
+		// Initialise some global variables
+		g_iterationNumber = 0;
+		b_exit_early = false;
 
     // Initialise variables for tracking which iterations' data is accessible on the host.
     <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:variable name="agent_name" select="xmml:name"/><xsl:for-each select="xmml:states/gpu:state"><xsl:variable name="agent_state" select="xmml:name"/><xsl:for-each select="../../xmml:memory/gpu:variable"><xsl:variable name="variable_name" select="xmml:name"/><xsl:variable name="variable_type" select="xmml:type" />h_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$agent_state"/>_variable_<xsl:value-of select="$variable_name"/>_data_iteration = 0;
@@ -850,6 +854,15 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventElapsedTime(&amp;instrument_iteration_milliseconds, instrument_iteration_start, instrument_iteration_stop);
 	printf("Instrumentation: Iteration Time = %f (ms)\n", instrument_iteration_milliseconds);
 #endif
+}
+
+/* finish whole simulation after this step */
+void set_exit_early() {
+	b_exit_early = true;
+}
+
+bool get_exit_early() {
+	return b_exit_early;
 }
 
 /* Environment functions */

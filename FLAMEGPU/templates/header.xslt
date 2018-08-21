@@ -540,6 +540,18 @@ extern void saveIterationData(char* outputpath, int iteration_number, <xsl:for-e
  </xsl:for-each>*/
 extern void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">xmachine_memory_<xsl:value-of select="xmml:name"/>_list* h_<xsl:value-of select="xmml:name"/>s, int* h_xmachine_memory_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>);
 
+/** set_exit_early
+ * exits the simulation on the step this is called
+ */
+extern void set_exit_early();
+
+/** get_exit_early
+ * gets whether the simulation is ending this simulation step
+ */
+extern bool get_exit_early();
+
+
+
 
 /* Return functions used by external code to get agent data from device */
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
