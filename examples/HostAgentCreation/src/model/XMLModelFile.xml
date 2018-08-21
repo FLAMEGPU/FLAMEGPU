@@ -55,7 +55,6 @@
         <gpu:variable>
           <type>ivec4</type>
           <name>example_vector</name>
-          <!-- <defaultValue>0,1,2,3</defaultValue> Does not currently work-->
         </gpu:variable>
       </memory>
       <functions>
