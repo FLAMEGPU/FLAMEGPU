@@ -15,7 +15,7 @@
 #include &lt;cmath&gt;
 
 #include &lt;GL/glew.h&gt;
-#include &lt;GL/glut.h&gt;
+#include &lt;GL/freeglut.h&gt;
 #include &lt;cuda_gl_interop.h&gt;
 	    
 #include "header.h"
@@ -77,6 +77,7 @@ void deleteTBO( cudaGraphicsResource_t* cudaResource, GLuint* tbo);
 void setVertexBufferData();
 void reshape(int width, int height);
 void display();
+void close();
 void keyboard( unsigned char key, int x, int y);
 void special(int key, int x, int y);
 void mouse(int button, int state, int x, int y);
@@ -227,10 +228,15 @@ void initVisualisation()
 	// register callbacks
 	glutReshapeFunc( reshape);
 	glutDisplayFunc( display);
+    glutCloseFunc( close);
 	glutKeyboardFunc( keyboard);
 	glutSpecialFunc( special);
 	glutMouseFunc( mouse);
 	glutMotionFunc( motion);
+	
+	// Set the closing behaviour 
+    glutSetOption( GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS ); 
+
     
 	// create VBO's
 	createVBO( &amp;sphereVerts, SPHERE_SLICES* (SPHERE_STACKS+1) * sizeof(glm::vec3));
@@ -250,6 +256,9 @@ void initVisualisation()
 }
 
 void runVisualisation(){
+	// Flush outputs prior to simulation loop.
+	fflush(stdout);
+	fflush(stderr);
 	// start rendering mainloop
 	glutMainLoop();
 }
@@ -295,8 +304,8 @@ void runCuda()
         <xsl:choose>
         <xsl:when test="../../gpu:type='discrete'">//discrete variables
         int population_width = (int)floor(sqrt((float)get_agent_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count()));
-		centralise.x = population_width / 2.0;
-        centralise.y = population_width / 2.0;
+		centralise.x = population_width / 2.0f;
+        centralise.y = population_width / 2.0f;
         centralise.z = 0.0;
         </xsl:when>
         <xsl:otherwise>
@@ -464,13 +473,13 @@ void deleteTBO(cudaGraphicsResource_t* cudaResource,  GLuint* tbo)
 ////////////////////////////////////////////////////////////////////////////////
 
 static void setSphereVertex(glm::vec3* data, int slice, int stack) {
-	float PI = 3.14159265358;
+	float PI = 3.14159265358f;
     
-	double sl = 2*PI*slice/SPHERE_SLICES;
-	double st = 2*PI*stack/SPHERE_STACKS;
+	float sl = 2*PI*slice/SPHERE_SLICES;
+	float st = 2*PI*stack/SPHERE_STACKS;
  
-	data-&gt;x = cos(st)*sin(sl) * SPHERE_RADIUS;
-	data-&gt;y = sin(st)*sin(sl) * SPHERE_RADIUS;
+	data-&gt;x = cos(st) * sin(sl) * SPHERE_RADIUS;
+	data-&gt;y = sin(st) * sin(sl) * SPHERE_RADIUS;
 	data-&gt;z = cos(sl) * SPHERE_RADIUS;
 }
 
@@ -480,10 +489,10 @@ static void setSphereVertex(glm::vec3* data, int slice, int stack) {
 ////////////////////////////////////////////////////////////////////////////////
 
 static void setSphereNormal(glm::vec3* data, int slice, int stack) {
-	float PI = 3.14159265358;
+	float PI = 3.14159265358f;
     
-	double sl = 2*PI*slice/SPHERE_SLICES;
-	double st = 2*PI*stack/SPHERE_STACKS;
+	float sl = 2*PI*slice/SPHERE_SLICES;
+	float st = 2*PI*stack/SPHERE_STACKS;
  
 	data-&gt;x = cos(st)*sin(sl);
 	data-&gt;y = sin(st)*sin(sl);
@@ -622,6 +631,28 @@ void display()
 	glutSwapBuffers();
 	glutPostRedisplay();
 
+    // If an early exit has been requested, close the visualisation by leaving the main loop.
+    if(get_exit_early()){
+        glutLeaveMainLoop();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//! Window close callback
+////////////////////////////////////////////////////////////////////////////////
+void close()
+{
+    // Cleanup visualisation memory
+    deleteVBO( &amp;sphereVerts);
+    deleteVBO( &amp;sphereNormals);
+    <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
+    deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
+    </xsl:for-each>
+    // Destroy cuda events
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+    // Call exit functions and clean up simulation memory
+    cleanup();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -636,14 +667,9 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
         break;
     // Esc == 27
 	case(27) :
-		deleteVBO( &amp;sphereVerts);
-		deleteVBO( &amp;sphereNormals);
-		<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">
-		deleteTBO( &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_cgr, &amp;<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_tbo);
-		</xsl:for-each>
-		cudaEventDestroy(start);
-		cudaEventDestroy(stop);
-		exit(EXIT_SUCCESS);
+    case('q') :
+        // Set the flag indicating we wish to exit the simulation.
+        set_exit_early();
 	}
 }
 
@@ -679,15 +705,14 @@ void mouse(int button, int state, int x, int y)
 
 void motion(int x, int y)
 {
-	float dx, dy;
-	dx = x - mouse_old_x;
-	dy = y - mouse_old_y;
+	float dx = (float) x - mouse_old_x;
+	float dy = (float) y - mouse_old_y;
 
 	if (mouse_buttons &amp; 1) {
-		rotate_x += dy * 0.2;
-		rotate_y += dx * 0.2;
+		rotate_x += dy * 0.2f;
+		rotate_y += dx * 0.2f;
 	} else if (mouse_buttons &amp; 4) {
-		translate_z += dy * VIEW_DISTANCE * 0.001;
+		translate_z += dy * VIEW_DISTANCE * 0.001f;
 	}
 
   mouse_old_x = x;

@@ -19,7 +19,7 @@
 #include <string.h>
 #include <cmath>
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 
 #include "MenuDisplay.h"
 #include "GlobalsController.h"

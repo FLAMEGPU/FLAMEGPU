@@ -20,7 +20,7 @@
 #include <string.h>
 #include <cmath>
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <time.h>
 
 #include "CustomVisualisation.h"
@@ -95,12 +95,14 @@ extern void initVisualisation()
 
     // register callbacks
     glutDisplayFunc( display);
+    glutCloseFunc( close);
     glutKeyboardFunc( keyboard);
 	glutSpecialFunc( specialKeyboard);
     glutMouseFunc( mouse);
 
 
-
+    // Set the closing behaviour 
+    glutSetOption( GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS ); 
 
 
 }
@@ -111,7 +113,9 @@ extern void runVisualisation()
     initGlobalsController();
     // Ensure all texts are updated
     updateAllTexts();
-
+    // Flush outputs prior to glut main loop.
+    fflush(stdout);
+    fflush(stderr);
     // start rendering mainloop
     glutMainLoop();
 }
@@ -195,6 +199,19 @@ void display(void)
     glutSwapBuffers();
     glutPostRedisplay();
 
+    // If an early exit has been requested, close the visualisation by leaving the main loop.
+    if(getExitFLAMESimulation()){
+        glutLeaveMainLoop();
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//! Close callback
+////////////////////////////////////////////////////////////////////////////////
+void close(){
+    // Call exit functions and clean up after simulation
+    cleanupFLAMESimulation();
 }
 
 void windowResize(int width, int height){

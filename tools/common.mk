@@ -173,7 +173,7 @@ ifeq ($(OS),Windows_NT)
 	# Pass directory to lib files
 	NVCCLDFLAGS += -L "$(LIB_DIR)"
 	# Specify windows specific shared libraries to link against.
-	LINK_ARCHIVES_VISUALISATION := -lglut32 -lglut64 -lglew64
+	LINK_ARCHIVES_VISUALISATION := -lfreeglut -lglew64
 else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Linux)

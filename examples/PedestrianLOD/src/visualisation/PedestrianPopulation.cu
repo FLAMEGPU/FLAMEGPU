@@ -24,7 +24,7 @@
 #include <string.h>
 #include <cmath>
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <cuda_gl_interop.h>
 #include <thrust/device_ptr.h>
 #include <thrust/scan.h>

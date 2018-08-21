@@ -33,12 +33,15 @@ typedef enum TOGGLE_STATE TOGGLE_STATE;
 // prototypes
 int initGL();
 void display(void);
+void close(void);
 void windowResize(int width, int height);
 void toggleFullScreenMode();
 float getFPS();
 
 //external functions
 extern void stepFLAMESimulation();
+extern void cleanupFLAMESimulation();
+extern bool getExitFLAMESimulation();
 
 //common functions
 void checkGLError();

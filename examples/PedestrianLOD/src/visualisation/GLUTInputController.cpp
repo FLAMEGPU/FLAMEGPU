@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <cmath>
 #include "CustomVisualisation.h"
 #include "GLUTInputController.h"
@@ -120,10 +120,9 @@ void updateRotationComponents()
 
 void rotate(int x, int y)
 {
-	float dx, dy;
 	//calc change in mouse movement
-	dx = x - mouse_old_x;
-	dy = y - mouse_old_y;
+	float dx = (float) (x - mouse_old_x);
+	float dy = (float) (y - mouse_old_y);
 
 	//update rotation component values
 	updateRotationComponents();
@@ -148,10 +147,9 @@ void rotate(int x, int y)
 
 void zoom(int x, int y)
 {
-	float dx, dy;
 	//calc change in mouse movement
-	dx = x - mouse_old_x;
-	dy = y - mouse_old_y;
+	// float dx = (float) (x - mouse_old_x);
+	float dy = (float) (y - mouse_old_y);
 
 	//update rotation component values
 	updateRotationComponents();
@@ -172,10 +170,9 @@ void zoom(int x, int y)
 
 void translate(int x, int y)
 {
-	float dx, dy;
 	//calc change in mouse movement
-	dx = x - mouse_old_x;
-	dy = y - mouse_old_y;
+	float dx = (float) (x - mouse_old_x);
+	float dy = (float) (y - mouse_old_y);
 
 	//update rotation component values
 	updateRotationComponents();
@@ -224,8 +221,10 @@ void keyboard( unsigned char key, int x, int y)
 
 		//exit
 		case('q') :
-		{
-			exit(0);
+		case(27) : // Esc
+		{	
+			// leave the glut main loop, closing the window and calling the callback function.
+			glutLeaveMainLoop();
 			break;
 		}
 
