@@ -31,7 +31,7 @@
 #define __FLAME_GPU_HOST_FUNC__ __host__
 
 #define USE_CUDA_STREAMS
-#define FAST_ATOMIC_SORTING
+<!-- #define FAST_ATOMIC_SORTING -->
 
 // FLAME GPU Version Macros.
 #define FLAME_GPU_MAJOR_VERSION 1

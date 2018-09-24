@@ -250,8 +250,14 @@ int h_message_<xsl:value-of select="xmml:name"/>_output_type;   /**&lt; message 
 #else
 	uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys;	  /**&lt; message sort identifier keys*/
 	uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_values;  /**&lt; message sort identifier values */
-#endif
-xmachine_message_<xsl:value-of select="xmml:name"/>_PBM * d_<xsl:value-of select="xmml:name"/>_partition_matrix;  /**&lt; Pointer to PCB matrix */
+  uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys_swap;	  /**&lt; message sort identifier keys*/
+  uint * d_xmachine_message_<xsl:value-of select="xmml:name"/>_values_swap;  /**&lt; message sort identifier values */
+
+  size_t CUB_temp_storage_bytes_<xsl:value-of select="xmml:name"/> = 0;
+  void *d_CUB_temp_storage_<xsl:value-of select="xmml:name"/> = nullptr;
+  const unsigned int binCountBits_<xsl:value-of select="xmml:name"/> = (unsigned int)ceil(log(xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size) / log(2));
+  #endif
+  xmachine_message_<xsl:value-of select="xmml:name"/>_PBM * d_<xsl:value-of select="xmml:name"/>_partition_matrix;  /**&lt; Pointer to PCB matrix */
 glm::vec3 h_message_<xsl:value-of select="xmml:name"/>_min_bounds;           /**&lt; min bounds (x,y,z) of partitioning environment */
 glm::vec3 h_message_<xsl:value-of select="xmml:name"/>_max_bounds;           /**&lt; max bounds (x,y,z) of partitioning environment */
 glm::ivec3 h_message_<xsl:value-of select="xmml:name"/>_partitionDim;           /**&lt; partition dimensions (x,y,z) of partitioning environment */
@@ -538,6 +544,10 @@ void initialise(char * inputfile){
 #else
 	gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
 	gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
+    gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys_swap, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
+    gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_values_swap, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
+    cub::DeviceRadixSort::SortPairs(d_CUB_temp_storage_<xsl:value-of select="xmml:name"/>, CUB_temp_storage_bytes_<xsl:value-of select="xmml:name"/>, d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys_swap, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values_swap, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX, 0, binCountBits_<xsl:value-of select="xmml:name"/>);
+    gpuErrchk(cudaMalloc((void**)&amp;d_CUB_temp_storage_<xsl:value-of select="xmml:name"/>, CUB_temp_storage_bytes_<xsl:value-of select="xmml:name"/>));
 #endif</xsl:if><xsl:if test="gpu:partitioningGraphEdge">
   gpuErrchk(cudaMalloc((void**)&amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_bounds, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>_bounds)));
   gpuErrchk(cudaMalloc((void**)&amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_scatterer, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>_scatterer)));
@@ -742,7 +752,10 @@ void cleanup(){
 #else
 	gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys));
 	gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_values));
-#endif</xsl:if><xsl:if test="gpu:partitioningGraphEdge">
+    gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys_swap));
+    gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_values_swap));
+    gpuErrchk(cudaFree(d_CUB_temp_storage_<xsl:value-of select="xmml:name"/>));
+    #endif</xsl:if><xsl:if test="gpu:partitioningGraphEdge">
   gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_bounds));
   gpuErrchk(cudaFree(d_xmachine_message_<xsl:value-of select="xmml:name"/>_scatterer));
   gpuErrchk(cudaFree(d_temp_scan_storage_xmachine_message_<xsl:value-of select="xmml:name"/>));
@@ -1744,12 +1757,22 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, hash_<xsl:value-of select="xmml:name"/>_messages, no_sm, h_message_<xsl:value-of select="xmml:name"/>_count); 
 	  gridSize = (h_message_<xsl:value-of select="xmml:name"/>_count + blockSize - 1) / blockSize;
 	  hash_<xsl:value-of select="xmml:name"/>_messages&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_<xsl:value-of select="xmml:name"/>s);
-	  gpuErrchkLaunch();
-	  //Sort
-	  thrust::sort_by_key(thrust::cuda::par.on(stream), thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys),  thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys) + h_message_<xsl:value-of select="xmml:name"/>_count,  thrust::device_pointer_cast(d_xmachine_message_<xsl:value-of select="xmml:name"/>_values));
-	  gpuErrchkLaunch();
-	  //reorder and build pcb
-	  gpuErrchk(cudaMemset(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, 0xffffffff, xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size* sizeof(int)));
+    gpuErrchkLaunch();
+    //Sort
+    cub::DeviceRadixSort::SortPairs(d_CUB_temp_storage_<xsl:value-of select="xmml:name"/>, CUB_temp_storage_bytes_<xsl:value-of select="xmml:name"/>, d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys, d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys_swap, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, d_xmachine_message_<xsl:value-of select="xmml:name"/>_values_swap, h_message_<xsl:value-of select="xmml:name"/>_count, 0, binCountBits_<xsl:value-of select="xmml:name"/>, stream);
+    {
+    unsigned int *_t = d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys;
+    d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys = d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys_swap;
+    d_xmachine_message_<xsl:value-of select="xmml:name"/>_keys_swap = _t;
+    }
+    {
+    unsigned int *_t = d_xmachine_message_<xsl:value-of select="xmml:name"/>_values;
+    d_xmachine_message_<xsl:value-of select="xmml:name"/>_values = d_xmachine_message_<xsl:value-of select="xmml:name"/>_values_swap;
+    d_xmachine_message_<xsl:value-of select="xmml:name"/>_values_swap = _t;
+    }
+    gpuErrchkLaunch();
+    //reorder and build pcb
+    gpuErrchk(cudaMemset(d_<xsl:value-of select="xmml:name"/>_partition_matrix->start, 0xffffffff, xmachine_message_<xsl:value-of select="xmml:name"/>_grid_size* sizeof(int)));
 	  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reorder_<xsl:value-of select="xmml:name"/>_messages, reorder_messages_sm_size, h_message_<xsl:value-of select="xmml:name"/>_count); 
 	  gridSize = (h_message_<xsl:value-of select="xmml:name"/>_count + blockSize - 1) / blockSize;
 	  int reorder_sm_size = reorder_messages_sm_size(blockSize);
