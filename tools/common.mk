@@ -136,6 +136,11 @@ LDFLAGS     :=
 # By default, the mode type is relase and build director
 Mode_TYPE := Release
 
+# If the user specified any flags, pass them through.
+ifneq ($(DEFINES),)
+$(foreach DEF,$(DEFINES),$(eval NVCCFLAGS += -D$(DEF) ))
+endif
+
 # Release/Debug specific build flags and variables
 ifeq ($(debug),1)
 	NVCCFLAGS += -g -G -DDEBIG -D_DEBUG
