@@ -51,6 +51,9 @@ EXAMPLE_BUILD_DIR := ./build
 # TRANSFORM_MAIN_XSLT_DISABLED := 1
 # TRANSFORM_VISUALISTION_XSLT_DISABLED := 1
 
+# Optionally pass extra compile time flags
+# DEFINES ?= 
+
 # Include the comman makefile from the tools directory.
 # If you wish to make a standalone project, you can simply replace this line with the contents of the common.mk file
 include $(FLAMEGPU_ROOT)tools/common.mk

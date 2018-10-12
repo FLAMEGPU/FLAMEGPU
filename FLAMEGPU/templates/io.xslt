@@ -76,7 +76,7 @@ void readArrayInput( T (*parseFunc)(const char*), char* buffer, T *array, unsign
     token = strtok_r(buffer, s, &amp;end_str);
     while (token != NULL){
         if (i>=expected_items){
-            printf("Error: variable array %s-&gt;%s has too many items (%d), expected %d!\n", agent_name, variable_name, i, expected_items);
+            fprintf(stderr, "Error: variable array %s-&gt;%s has too many items (%d), expected %d!\n", agent_name, variable_name, i, expected_items);
             exit(EXIT_FAILURE);
         }
         
@@ -84,10 +84,12 @@ void readArrayInput( T (*parseFunc)(const char*), char* buffer, T *array, unsign
         
         token = strtok_r(NULL, s, &amp;end_str);
     }
+    #if ! defined(SUPPRESS_VARIABLE_ARRAY_ELEMENT_WARNING)
     if (i != expected_items){
-        printf("Error: variable array %s-&gt;%s has %d items, expected %d!\n", agent_name, variable_name, i, expected_items);
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Warning: variable array %s-&gt;%s has %d items, expected %d!\n", agent_name, variable_name, i, expected_items);
+        <!-- exit(EXIT_FAILURE); -->
     }
+    #endif
 }
 
 //templated class function to read array inputs from supported types
@@ -101,7 +103,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     token = strtok_r(buffer, s, &amp;end_str);
     while (token != NULL){
         if (i>=expected_items){
-            printf("Error: variable array of vectors %s-&gt;%s has too many items (%d), expected %d!\n", agent_name, variable_name, i, expected_items);
+            fprintf(stderr, "Error: variable array of vectors %s-&gt;%s has too many items (%d), expected %d!\n", agent_name, variable_name, i, expected_items);
         }
         
         //read vector type as an array
@@ -111,10 +113,12 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
         
         token = strtok_r(NULL, s, &amp;end_str);
     }
+    #if ! defined(SUPPRESS_VARIABLE_ARRAY_ELEMENT_WARNING)
     if (i != expected_items){
-        printf("Error: variable array of vectors %s-&gt;%s has %d items, expected %d!\n", agent_name, variable_name, i, expected_items);
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Warning: variable array of vectors %s-&gt;%s has %d items, expected %d!\n", agent_name, variable_name, i, expected_items);
+        <!-- exit(EXIT_FAILURE); -->
     }
+    #endif
 }
 
 void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:states/gpu:state">xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* h_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>, int h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count<xsl:if test="position()!=last()">,</xsl:if></xsl:for-each>)
