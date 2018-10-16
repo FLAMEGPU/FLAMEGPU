@@ -237,4 +237,32 @@
 </xsl:otherwise>
 </xsl:choose>)</xsl:template>
 
+<!-- Template outputs a non zero value if the type is an integer. -->
+<xsl:template name="typeIsInteger">
+    <xsl:param name="type"/>
+    <xsl:choose>
+        <xsl:when test="$type='short'">true</xsl:when>
+        <xsl:when test="$type='unsigned short'">true</xsl:when>
+        <xsl:when test="$type='int'">true</xsl:when>
+        <xsl:when test="$type='unsigned int'">true</xsl:when>
+        <xsl:when test="$type='long long int'">true</xsl:when>
+        <xsl:when test="$type='unsigned long long int'">true</xsl:when>
+        <xsl:otherwise>false</xsl:otherwise> <!-- if not an integer type, return nothing. -->
+    </xsl:choose>
+</xsl:template>
+
+<!-- Template outputs a non zero value if the type is an integer. -->
+<xsl:template name="maximumIntegerValue">
+    <xsl:param name="type"/>
+    <xsl:choose>
+        <xsl:when test="$type='short'">SHRT_MAX</xsl:when>
+        <xsl:when test="$type='unsigned short'">USHRT_MAX</xsl:when>
+        <xsl:when test="$type='int'">INT_MAX</xsl:when>
+        <xsl:when test="$type='unsigned int'">UINT_MAX</xsl:when>
+        <xsl:when test="$type='long long int'">LLONG_MAX</xsl:when>
+        <xsl:when test="$type='unsigned long long int'">ULLONG_MAX</xsl:when>
+        <xsl:otherwise></xsl:otherwise> <!-- if not an integer type, return nothing. -->
+    </xsl:choose>
+</xsl:template>
+
 </xsl:stylesheet>

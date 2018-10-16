@@ -1387,6 +1387,31 @@ __global__ void GPUFLAME_<xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl
 }
 </xsl:for-each>
 	
+
+/* Agent ID Generation functions implemented in simulation.cu and FLAMEGPU_kernals.cu*/
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:variable name="agent_name" select="xmml:name" />
+<xsl:for-each select="xmml:memory/gpu:variable">
+<xsl:variable name="variable_name" select="xmml:name" />
+<xsl:variable name="variable_type" select="xmml:type" />
+<xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+<!-- If the agent has a variable name id, of a single integer type -->
+<xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+__FLAME_GPU_HOST_FUNC__ __FLAME_GPU_FUNC__ <xsl:value-of select="$variable_type"/> generate_<xsl:value-of select="$agent_name"/>_id(){
+#if defined(__CUDA_ARCH__)
+	// On the device, use atomicAdd to increment the ID, wrapping at overflow. Does not use atomicInc which only supports unsigned
+	<xsl:value-of select="$variable_type"/> new_id = atomicAdd(&amp;d_current_value_generate_<xsl:value-of select="$agent_name"/>_id, 1);
+	return new_id;	
+#else
+	// On the host, get the current value to be returned and increment the host value.
+	<xsl:value-of select="$variable_type"/> new_id = h_current_value_generate_<xsl:value-of select="$agent_name"/>_id;
+	h_current_value_generate_<xsl:value-of select="$agent_name"/>_id++; 
+	return new_id;
+#endif
+}
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
 	
 /* Graph utility functions */
 <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:graphs/gpu:staticGraph">

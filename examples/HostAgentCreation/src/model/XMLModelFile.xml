@@ -62,6 +62,12 @@
           <name>update</name>
           <currentState>default</currentState>
           <nextState>default</nextState>
+          <xagentOutputs>
+            <gpu:xagentOutput>
+              <xagentName>Agent</xagentName>
+              <state>default</state>
+            </gpu:xagentOutput>
+          </xagentOutputs>
           <gpu:reallocate>true</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
