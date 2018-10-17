@@ -300,6 +300,41 @@ size_t temp_scan_storage_bytes_<xsl:value-of select="xmml:name" />;
 int h_<xsl:value-of select="../xmml:name"/>_condition_count;
 </xsl:for-each>
 
+/* Agent ID Generation functions implemented in simulation.cu and FLAMEGPU_kernals.cu*/
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:variable name="agent_name" select="xmml:name" />
+<xsl:for-each select="xmml:memory/gpu:variable">
+<xsl:variable name="variable_name" select="xmml:name" />
+<xsl:variable name="variable_type" select="xmml:type" />
+<xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+<!-- If the agent has a variable name id, of a single integer type -->
+<xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+<xsl:value-of select="$variable_type"/> h_current_value_generate_<xsl:value-of select="$agent_name"/>_id = 0;
+
+// Track the last value returned from the device, to enable copying to the device after a step function.
+<xsl:value-of select="$variable_type"/> h_last_value_generate_<xsl:value-of select="$agent_name"/>_id = <xsl:call-template name="maximumIntegerValue"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template>;
+
+void set_initial_<xsl:value-of select="$agent_name"/>_id(<xsl:value-of select="$variable_type" /> firstID){
+  h_current_value_generate_<xsl:value-of select="$agent_name"/>_id = firstID;
+}
+
+// Function to copy from the host to the device in the default stream
+void update_device_generate_<xsl:value-of select="$agent_name"/>_id(){
+// If the last device value doesn't match the current value, update the device value. 
+  if(h_current_value_generate_<xsl:value-of select="$agent_name"/>_id != h_last_value_generate_<xsl:value-of select="$agent_name"/>_id){
+    gpuErrchk(cudaMemcpyToSymbol( d_current_value_generate_<xsl:value-of select="$agent_name"/>_id, &amp;h_current_value_generate_<xsl:value-of select="$agent_name"/>_id, sizeof(<xsl:value-of select="$variable_type" />)));
+  }
+}
+// Function to copy from the device to the host in the default stream
+void update_host_generate_<xsl:value-of select="$agent_name"/>_id(){
+  gpuErrchk(cudaMemcpyFromSymbol( &amp;h_current_value_generate_<xsl:value-of select="$agent_name"/>_id, d_current_value_generate_<xsl:value-of select="$agent_name"/>_id, sizeof(<xsl:value-of select="$variable_type" />)));
+  h_last_value_generate_<xsl:value-of select="$agent_name"/>_id = h_current_value_generate_<xsl:value-of select="$agent_name"/>_id;
+}
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
+
+
 /* RNG rand48 */
 RNG_rand48* h_rand48;    /**&lt; Pointer to RNG_rand48 seed list on host*/
 RNG_rand48* d_rand48;    /**&lt; Pointer to RNG_rand48 seed list on device*/
@@ -655,6 +690,20 @@ void initialise(char * inputfile){
 	printf("Instrumentation: <xsl:value-of select="gpu:name"/> = %f (ms)\n", instrument_milliseconds);
 #endif
 	</xsl:for-each>
+
+  /* If any Agents can generate IDs, update the device value after init functions have executed */
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:variable name="agent_name" select="xmml:name" />
+<xsl:for-each select="xmml:memory/gpu:variable">
+<xsl:variable name="variable_name" select="xmml:name" />
+<xsl:variable name="variable_type" select="xmml:type" />
+<xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+<!-- If the agent has a variable name id, of a single integer type -->
+<xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+  update_device_generate_<xsl:value-of select="$agent_name"/>_id();
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
   
   /* Init CUDA Streams for function layers */
   <xsl:for-each select="gpu:xmodel/xmml:layers/xmml:layer">
@@ -837,6 +886,20 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	</xsl:for-each></xsl:for-each>cudaDeviceSynchronize();
   </xsl:for-each>
+
+  /* If any Agents can generate IDs, update the host value after agent functions have executed */
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:variable name="agent_name" select="xmml:name" />
+<xsl:for-each select="xmml:memory/gpu:variable">
+<xsl:variable name="variable_name" select="xmml:name" />
+<xsl:variable name="variable_type" select="xmml:type" />
+<xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+<!-- If the agent has a variable name id, of a single integer type -->
+<xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+  update_host_generate_<xsl:value-of select="$agent_name"/>_id();
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
     
     /* Call all step functions */
 	<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:stepFunctions/gpu:stepFunction">
@@ -853,6 +916,20 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventElapsedTime(&amp;instrument_milliseconds, instrument_start, instrument_stop);
 	printf("Instrumentation: <xsl:value-of select="gpu:name"/> = %f (ms)\n", instrument_milliseconds);
 #endif</xsl:for-each>
+
+/* If any Agents can generate IDs, update the device value after step functions have executed */
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:variable name="agent_name" select="xmml:name" />
+<xsl:for-each select="xmml:memory/gpu:variable">
+<xsl:variable name="variable_name" select="xmml:name" />
+<xsl:variable name="variable_type" select="xmml:type" />
+<xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+<!-- If the agent has a variable name id, of a single integer type -->
+<xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+  update_device_generate_<xsl:value-of select="$agent_name"/>_id();
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
 
 #if defined(OUTPUT_POPULATION_PER_ITERATION) &amp;&amp; OUTPUT_POPULATION_PER_ITERATION
 	// Print the agent population size of all agents in all states
@@ -1647,8 +1724,8 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	</xsl:for-each>
 	</xsl:if>
 	</xsl:if>
-	
-	<xsl:if test="xmml:xagentOutputs/gpu:xagentOutput">
+
+  <xsl:if test="xmml:xagentOutputs/gpu:xagentOutput">
 	<xsl:variable name="xagent_output" select="xmml:xagentOutputs/gpu:xagentOutput/xmml:xagentName"/><xsl:if test="../../../gpu:xagent[xmml:name=$xagent_output]/gpu:type='continuous'">
     //COPY ANY AGENT COUNT BEFORE <xsl:value-of select="../../xmml:name"/> AGENTS ARE KILLED (needed for scatter)
 	int <xsl:value-of select="../../xmml:name"/>s_pre_death_count = h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count;

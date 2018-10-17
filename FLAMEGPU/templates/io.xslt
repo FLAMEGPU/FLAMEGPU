@@ -297,6 +297,21 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     </xsl:when><xsl:otherwise>env_<xsl:value-of select="xmml:name"/> = <xsl:call-template name="defaultInitialiser"><xsl:with-param name="type" select="xmml:type"/><xsl:with-param name="defaultValue" select="xmml:defaultValue" /></xsl:call-template>;
     </xsl:otherwise></xsl:choose>
     </xsl:for-each>
+
+
+    // Declare and initialise variables tracking the maximum agent id for each agent type from the initial population
+    <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+    <xsl:variable name="agent_name" select="xmml:name" />
+    <xsl:for-each select="xmml:memory/gpu:variable">
+    <xsl:variable name="variable_name" select="xmml:name" />
+    <xsl:variable name="variable_type" select="xmml:type" />
+    <xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+    <!-- If the agent has a variable name id, of a single integer type -->
+    <xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+    <xsl:value-of select="$variable_type" /> max_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$variable_name" /> = 0;
+    </xsl:if>
+    </xsl:for-each>
+    </xsl:for-each>
     
     // If no input path was specified, issue a message and return.
     if(inputpath[0] == '\0'){
@@ -491,6 +506,17 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
                         </xsl:choose>
                       </xsl:otherwise>
                     </xsl:choose>
+                    <!-- If this variable corresponds to an integer id, update the tracked maximum -->
+                    <xsl:variable name="agent_name" select="../../xmml:name" />
+                    <xsl:variable name="variable_name" select="xmml:name" />
+                    <xsl:variable name="variable_type" select="xmml:type" />
+                    <xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+                    <!-- If the agent has a variable name id, of a single integer type -->
+                    <xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+                    if(<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$variable_name" /> > max_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$variable_name" />){
+                        max_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$variable_name" /> = <xsl:value-of select="$agent_name"/>_<xsl:value-of select="$variable_name" />;
+                    }
+                    </xsl:if>
                 }
 				</xsl:for-each>
             }
@@ -569,6 +595,29 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
 
 	/* Close the file */
 	fclose(file);
+
+    // IF required, set the first id value to maximum plus one.
+    <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+    <xsl:variable name="agent_name" select="xmml:name" />
+    <xsl:for-each select="xmml:memory/gpu:variable">
+    <xsl:variable name="variable_name" select="xmml:name" />
+    <xsl:variable name="variable_type" select="xmml:type" />
+    <xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+    <!-- If the agent has a variable name id, of a single integer type -->
+    <xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+    // If any agents of this type were found, use the maximum value +1
+    if(h_xmachine_memory_<xsl:value-of select="$agent_name"/>_count > 0){
+        set_initial_<xsl:value-of select="$agent_name"/>_id(max_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$variable_name" /> + 1);
+
+    } else {
+    // Otherwise use 0.
+        set_initial_<xsl:value-of select="$agent_name"/>_id(0);
+    }
+
+
+    </xsl:if>
+    </xsl:for-each>
+    </xsl:for-each>
 }
 
 glm::vec3 getMaximumBounds(){

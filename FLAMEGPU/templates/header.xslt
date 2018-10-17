@@ -489,6 +489,23 @@ __FLAME_GPU_FUNC__ void set_<xsl:value-of select="xmml:name"/>_agent_array_value
     
 </xsl:for-each>
 
+/* Agent ID Generation functions implemented in simulation.cu and FLAMEGPU_kernals.cu*/
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:variable name="agent_name" select="xmml:name" />
+<xsl:for-each select="xmml:memory/gpu:variable">
+<xsl:variable name="variable_name" select="xmml:name" />
+<xsl:variable name="variable_type" select="xmml:type" />
+<xsl:variable name="type_is_integer"><xsl:call-template name="typeIsInteger"><xsl:with-param name="type" select="$variable_type"/></xsl:call-template></xsl:variable>
+<!-- If the agent has a variable name id, of a single integer type -->
+<xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
+extern <xsl:value-of select="$variable_type"/> h_current_value_generate_<xsl:value-of select="$agent_name"/>_id;
+__device__ <xsl:value-of select="$variable_type"/> d_current_value_generate_<xsl:value-of select="$agent_name"/>_id;
+__FLAME_GPU_HOST_FUNC__ __FLAME_GPU_FUNC__ <xsl:value-of select="$variable_type"/> generate_<xsl:value-of select="$agent_name"/>_id();
+void set_initial_<xsl:value-of select="$agent_name"/>_id(<xsl:value-of select="$variable_type" /> firstID);
+</xsl:if>
+</xsl:for-each>
+</xsl:for-each>
+
 /* Graph loading function prototypes implemented in io.cu */
 <xsl:for-each select="gpu:xmodel/gpu:environment/gpu:graphs/gpu:staticGraph">
 <xsl:if test="gpu:loadFromFile/gpu:json">void load_staticGraph_<xsl:value-of select="gpu:name"/>_from_json(const char* file, staticGraph_memory_<xsl:value-of select="gpu:name"/>* h_staticGraph_memory_<xsl:value-of select="gpu:name"/>);

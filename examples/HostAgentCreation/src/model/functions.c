@@ -71,7 +71,8 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
 	xmachine_memory_Agent * h_agent = h_allocate_agent_Agent();
 
 	// Set values as required for the single agent.
-	h_agent->id = getNextID();
+	h_agent->id = generate_Agent_id();
+	// printf("h_agent->id = %u\n", h_agent->id);
 	h_agent->time_alive = rand() % (*get_MAX_LIFESPAN());
 	for (unsigned int i = 0; i < xmachine_memory_Agent_example_array_LENGTH; i++) {
 		h_agent->example_array[i] = rand() / (double)RAND_MAX;
@@ -108,7 +109,8 @@ __FLAME_GPU_STEP_FUNC__ void generateAgentStep(){
 		}
 		// Populate data as required
 		for (unsigned int i = 0; i < count; i++) {
-			h_agent_AoS[i]->id = getNextID();
+			h_agent_AoS[i]->id = generate_Agent_id();
+			// printf("h_agent_AoS[i]->id = %u\n", h_agent_AoS[i]->id);
 			h_agent_AoS[i]->time_alive = rand() % (*get_MAX_LIFESPAN());
 			for (unsigned int j = 0; j < xmachine_memory_Agent_example_array_LENGTH; j++) {
 				h_agent_AoS[i]->example_array[j] = rand() / (double)RAND_MAX;
@@ -188,8 +190,7 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction(){
  * Simple agent function, incrementing the time of life of the agent. 
  * If the agent has exceeded the maximum life span, it dies.
  */
-__FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent)
-{
+__FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, xmachine_memory_Agent_list* Agent_agents){
 	// Increment time alive
 	agent->time_alive++;
 	/*if(threadIdx.x + blockDim.x * blockIdx.x < 64){
@@ -207,10 +208,16 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent)
 	}*/
 	// If agent has been alive long enough, kill them.
 	if (agent->time_alive > MAX_LIFESPAN){
+		// Create a new agent, after generating new values
+		unsigned int new_id = generate_Agent_id();
+		// printf("tid %d new_id = %u\n", tid, new_id);
+	    unsigned int new_time_alive = 12;
+	    ivec4 new_example_vector = {0,0,0,0};
+	    
+	    add_Agent_agent(Agent_agents, new_id, new_time_alive, new_example_vector);
 		return 1;
 	}	
 	return 0;
 }
-
 
 #endif // #ifndef _FUNCTIONS_H_
