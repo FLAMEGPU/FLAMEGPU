@@ -17,6 +17,7 @@
 #endif
 
 #define GLM_FORCE_NO_CTOR_INIT
+#define GLM_FORCE_PURE
 #include &lt;glm/glm.hpp&gt;
 
 /* General standard definitions */
