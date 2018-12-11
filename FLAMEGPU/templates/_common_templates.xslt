@@ -265,4 +265,22 @@
     </xsl:choose>
 </xsl:template>
 
+<!-- Template to output the absolute value of a number, not available natively in XSLT 1.0 -->
+<xsl:template name="abs">
+    <xsl:param name="value" />
+    <xsl:variable name="result" select="$value * ($value &gt;= 0.0) - $value * ($value &lt; 0.0)"/>
+    <xsl:value-of select="$result" />
+</xsl:template>
+
+<!-- Template to perform an epsilon equality test, outputting the truthfullness of the test -->
+<xsl:template name="epsilonEquals">
+    <xsl:param name="left" />
+    <xsl:param name="right" />
+    <xsl:param name="epsilon" />
+    <xsl:variable name="delta" select="$left - $right" />
+    <xsl:variable name="absDelta"><xsl:call-template name="abs"><xsl:with-param name="value" select="$delta"/></xsl:call-template></xsl:variable>
+    <xsl:variable name="truth" select="$absDelta &lt; $epsilon" />
+    <xsl:value-of select="$truth" />
+</xsl:template>
+
 </xsl:stylesheet>

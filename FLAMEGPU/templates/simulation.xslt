@@ -38,16 +38,40 @@
 <xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message/gpu:partitioningSpatial">
 <!-- Calculate some values. -->
 <xsl:variable name="message_name" select="../xmml:name"/>
-<xsl:variable name="x_dim"><xsl:value-of select="ceiling((gpu:xmax - gpu:xmin) div gpu:radius)"/></xsl:variable>
-<xsl:variable name="y_dim"><xsl:value-of select="ceiling((gpu:ymax - gpu:ymin) div gpu:radius)"/></xsl:variable>
-<xsl:variable name="z_dim"><xsl:value-of select="ceiling((gpu:zmax - gpu:zmin) div gpu:radius)"/></xsl:variable>
-<!-- If radius is not a factor of the partitioning dimensions as this causes partitioning to execute incorrectly-->
-<xsl:if test="(gpu:xmax - gpu:xmin) != (floor((gpu:xmax - gpu:xmin ) div gpu:radius ) * gpu:radius)">
-#error "XML model spatial partitioning radius for for message <xsl:value-of select="$message_name" /> must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Xmin: <xsl:value-of select="gpu:xmin"/>, Xmax: <xsl:value-of select="gpu:xmax"/>"
-</xsl:if><xsl:if test="(gpu:ymax - gpu:ymin) != (floor((gpu:ymax - gpu:ymin ) div gpu:radius ) * gpu:radius)">
-#error "XML model spatial partitioning radius for for message <xsl:value-of select="$message_name" /> must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Ymin: <xsl:value-of select="gpu:ymin"/>, Ymax: <xsl:value-of select="gpu:ymax"/>"
-</xsl:if><xsl:if test="(gpu:zmax - gpu:zmin) != (floor((gpu:zmax - gpu:zmin ) div gpu:radius ) * gpu:radius)">
-#error "XML model spatial partitioning radius for for message <xsl:value-of select="$message_name" /> must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Zmin: <xsl:value-of select="gpu:zmin"/>, Zmax: <xsl:value-of select="gpu:zmax"/>"
+<!-- Number of bins in a given dimension is the range divided by the radius, rounded to an integer. Round is used in place of ceil or floor to account for odd floating point values, i.e 12.000...1 should only use 12 bins -->
+<xsl:variable name="x_dim"><xsl:value-of select="round((gpu:xmax - gpu:xmin) div gpu:radius)"/></xsl:variable>
+<xsl:variable name="y_dim"><xsl:value-of select="round((gpu:ymax - gpu:ymin) div gpu:radius)"/></xsl:variable>
+<xsl:variable name="z_dim"><xsl:value-of select="round((gpu:zmax - gpu:zmin) div gpu:radius)"/></xsl:variable>
+<!-- If radius is not a factor of the partitioning dimensions as this causes partitioning to execute incorrectly. Check using an epsilon equals xslt template for floating point noise -->
+<xsl:variable name="valid_x_dim_factor">
+  <xsl:call-template name="epsilonEquals">
+    <xsl:with-param name="left" select="gpu:xmax - gpu:xmin"/>
+    <xsl:with-param name="right" select="$x_dim * gpu:radius"/>
+    <xsl:with-param name="epsilon" select="1.0E-10"/>
+  </xsl:call-template>
+</xsl:variable>
+<xsl:if test="$valid_x_dim_factor='false'">
+#error "XML model spatial partitioning radius for for message <xsl:value-of select="$message_name" /> must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Xmin: <xsl:value-of select="gpu:xmin"/>, Xmax: <xsl:value-of select="gpu:xmax"/>, X_bins: <xsl:value-of select="$x_dim"/>
+</xsl:if>
+<xsl:variable name="valid_y_dim_factor">
+  <xsl:call-template name="epsilonEquals">
+    <xsl:with-param name="left" select="gpu:ymax - gpu:ymin"/>
+    <xsl:with-param name="right" select="$y_dim * gpu:radius"/>
+    <xsl:with-param name="epsilon" select="1.0E-10"/>
+  </xsl:call-template>
+</xsl:variable>
+<xsl:if test="$valid_y_dim_factor='false'">
+#error "XML model spatial partitioning radius for for message <xsl:value-of select="$message_name" /> must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Ymin: <xsl:value-of select="gpu:ymin"/>, Ymax: <xsl:value-of select="gpu:ymax"/>, Y_bins: <xsl:value-of select="$y_dim"/>"
+</xsl:if>
+<xsl:variable name="valid_z_dim_factor">
+  <xsl:call-template name="epsilonEquals">
+    <xsl:with-param name="left" select="gpu:zmax - gpu:zmin"/>
+    <xsl:with-param name="right" select="$z_dim * gpu:radius"/>
+    <xsl:with-param name="epsilon" select="1.0E-10"/>
+  </xsl:call-template>
+</xsl:variable>
+<xsl:if test="$valid_z_dim_factor='false'">
+#error "XML model spatial partitioning radius for for message <xsl:value-of select="$message_name" /> must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Zmin: <xsl:value-of select="gpu:zmin"/>, Zmax: <xsl:value-of select="gpu:zmax"/>, Z_bins: <xsl:value-of select="$z_dim"/>"
 </xsl:if>
 
 <!-- If the resulting number of bins in the X or Y planes is less than 3, generate a compile time error. -->
@@ -513,9 +537,9 @@ void initialise(char * inputfile){
 	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_min_bounds, &amp;h_message_<xsl:value-of select="xmml:name"/>_min_bounds, sizeof(glm::vec3)));	
 	h_message_<xsl:value-of select="xmml:name"/>_max_bounds = glm::vec3((float)<xsl:value-of select="gpu:partitioningSpatial/gpu:xmax"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:ymax"/>, (float)<xsl:value-of select="gpu:partitioningSpatial/gpu:zmax"/>);
 	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_max_bounds, &amp;h_message_<xsl:value-of select="xmml:name"/>_max_bounds, sizeof(glm::vec3)));	
-	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.x = (int)ceil((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.x - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.x)/h_message_<xsl:value-of select="xmml:name"/>_radius);
-	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.y = (int)ceil((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.y - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.y)/h_message_<xsl:value-of select="xmml:name"/>_radius);
-	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.z = (int)ceil((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.z - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.z)/h_message_<xsl:value-of select="xmml:name"/>_radius);
+	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.x = (int)round((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.x - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.x)/h_message_<xsl:value-of select="xmml:name"/>_radius);
+	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.y = (int)round((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.y - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.y)/h_message_<xsl:value-of select="xmml:name"/>_radius);
+	h_message_<xsl:value-of select="xmml:name"/>_partitionDim.z = (int)round((h_message_<xsl:value-of select="xmml:name"/>_max_bounds.z - h_message_<xsl:value-of select="xmml:name"/>_min_bounds.z)/h_message_<xsl:value-of select="xmml:name"/>_radius);
 	gpuErrchk(cudaMemcpyToSymbol( d_message_<xsl:value-of select="xmml:name"/>_partitionDim, &amp;h_message_<xsl:value-of select="xmml:name"/>_partitionDim, sizeof(glm::ivec3)));	
 	</xsl:if></xsl:for-each>
 	
