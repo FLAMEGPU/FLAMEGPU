@@ -137,7 +137,7 @@ void saveIterationData(char* outputpath, int iteration_number, <xsl:for-each sel
 	
 	/* Pointer to file */
 	FILE *file;
-	char data[100];
+	char data[MAX_FILEPATH_LENGTH];
 
 	sprintf(data, "%s%i.xml", outputpath, iteration_number);
 	//printf("Writing iteration %i data to %s\n", iteration_number, data);

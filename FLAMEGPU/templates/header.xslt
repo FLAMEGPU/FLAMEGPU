@@ -39,6 +39,10 @@
 #define FLAME_GPU_MINOR_VERSION 5
 #define FLAME_GPU_PATCH_VERSION 0
 
+/* Constant definitions */
+// Maximum length file path in windows is 260 (soon to be longer) and 4096 under linux (assuming ext4)
+#define MAX_FILEPATH_LENGTH 4096
+
 typedef unsigned int uint;
 
 //FLAME GPU vector types float, (i)nteger, (u)nsigned integer, (d)ouble

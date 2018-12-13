@@ -22,8 +22,8 @@ unsigned int g_profile_colour_id = 0;
 #endif
 
 /* IO Variables*/
-char inputfile[100];          /**&lt; Input path char buffer*/
-char outputpath[1000];         /**&lt; Output path char buffer*/
+char inputfile[MAX_FILEPATH_LENGTH];          /**&lt; Input path char buffer*/
+char outputpath[MAX_FILEPATH_LENGTH];         /**&lt; Output path char buffer*/
 
 // Define the default value indicating if XML output should be produced or not.
 #define OUTPUT_TO_XML 1
