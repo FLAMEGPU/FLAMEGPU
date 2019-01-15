@@ -47,7 +47,7 @@
   <xsl:call-template name="epsilonEquals">
     <xsl:with-param name="left" select="gpu:xmax - gpu:xmin"/>
     <xsl:with-param name="right" select="$x_dim * gpu:radius"/>
-    <xsl:with-param name="epsilon" select="1.0E-10"/>
+    <xsl:with-param name="epsilon" select="0.0000000001"/>
   </xsl:call-template>
 </xsl:variable>
 <xsl:if test="$valid_x_dim_factor='false'">
@@ -57,7 +57,7 @@
   <xsl:call-template name="epsilonEquals">
     <xsl:with-param name="left" select="gpu:ymax - gpu:ymin"/>
     <xsl:with-param name="right" select="$y_dim * gpu:radius"/>
-    <xsl:with-param name="epsilon" select="1.0E-10"/>
+    <xsl:with-param name="epsilon" select="0.0000000001"/>
   </xsl:call-template>
 </xsl:variable>
 <xsl:if test="$valid_y_dim_factor='false'">
@@ -67,7 +67,7 @@
   <xsl:call-template name="epsilonEquals">
     <xsl:with-param name="left" select="gpu:zmax - gpu:zmin"/>
     <xsl:with-param name="right" select="$z_dim * gpu:radius"/>
-    <xsl:with-param name="epsilon" select="1.0E-10"/>
+    <xsl:with-param name="epsilon" select="0.0000000001"/>
   </xsl:call-template>
 </xsl:variable>
 <xsl:if test="$valid_z_dim_factor='false'">
