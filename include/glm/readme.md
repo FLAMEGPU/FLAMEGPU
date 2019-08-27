@@ -52,6 +52,29 @@ glm::mat4 camera(float Translate, glm::vec2 const& Rotate)
 
 ## Release notes
 
+### [GLM 0.9.9.5](https://github.com/g-truc/glm/releases/tag/0.9.9.5) - 2019-04-01
+#### Fixes:
+- Fixed build errors when defining GLM_ENABLE_EXPERIMENTAL #884 #883
+- Fixed 'if constexpr' warning #887
+- Fixed missing declarations for frexp and ldexp #886
+
+### [GLM 0.9.9.4](https://github.com/g-truc/glm/releases/tag/0.9.9.4) - 2019-03-19
+#### Features:
+- Added mix implementation for matrices in EXT_matrix_common #842
+- Added BUILD_SHARED_LIBS and BUILD_STATIC_LIBS build options #871
+
+#### Improvements:
+- Added GLM_FORCE_INTRINSICS to enable SIMD instruction code path. By default, it's disabled allowing constexpr support by default. #865
+- Optimized inverseTransform #867
+
+#### Fixes:
+- Fixed in mat4x3 conversion #829
+- Fixed constexpr issue on GCC #832 #865
+- Fixed mix implementation to improve GLSL conformance #866
+- Fixed int8 being defined as unsigned char with some compiler #839
+- Fixed vec1 include #856
+- Ignore .vscode #848
+
 ### [GLM 0.9.9.3](https://github.com/g-truc/glm/releases/tag/0.9.9.3) - 2018-10-31
 #### Features:
 - Added equal and notEqual overload with max ULPs parameters for scalar numbers #121
@@ -143,7 +166,7 @@ glm::mat4 camera(float Translate, glm::vec2 const& Rotate)
 - Reduced warnings when using very strict compilation flags #646
 - length() member functions are constexpr #657
 - Added support of -Weverything with Clang #646
-- Improved exponential funtion test coverage
+- Improved exponential function test coverage
 - Enabled warnings as error with Clang unit tests
 - Conan package is an external repository: https://github.com/bincrafters/conan-glm
 - Clarify quat_cast documentation, applying on pure rotation matrices #759
