@@ -704,8 +704,8 @@ void initialise(char * inputfile){
 #if defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
-    <xsl:value-of select="gpu:name"/>();
     PROFILE_PUSH_RANGE("<xsl:value-of select="gpu:name"/>");
+    <xsl:value-of select="gpu:name"/>();
     PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
@@ -785,8 +785,8 @@ void cleanup(){
 	cudaEventRecord(instrument_start);
 #endif
 
-    <xsl:value-of select="gpu:name"/>();
     PROFILE_PUSH_RANGE("<xsl:value-of select="gpu:name"/>");
+    <xsl:value-of select="gpu:name"/>();
 	PROFILE_POP_RANGE();
 
 #if defined(INSTRUMENT_EXIT_FUNCTIONS) &amp;&amp; INSTRUMENT_EXIT_FUNCTIONS
