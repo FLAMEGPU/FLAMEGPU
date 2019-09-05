@@ -606,7 +606,7 @@ void readInitialStates(char* inputpath, <xsl:for-each select="gpu:xmodel/xmml:xa
     <!-- If the agent has a variable name id, of a single integer type -->
     <xsl:if test="$variable_name='id' and not(xmml:arrayLength) and $type_is_integer='true'" >
     // If any agents of this type were found, use the maximum value +1
-    if(h_xmachine_memory_<xsl:value-of select="$agent_name"/>_count > 0){
+    if((*h_xmachine_memory_<xsl:value-of select="$agent_name"/>_count) > 0){
         set_initial_<xsl:value-of select="$agent_name"/>_id(max_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$variable_name" /> + 1);
 
     } else {
