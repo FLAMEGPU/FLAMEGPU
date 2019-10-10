@@ -1426,7 +1426,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//FOR <xsl:value-of select="xmml:xagentName"/> AGENT OUTPUT, RESET THE AGENT NEW LIST SCAN INPUT
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reset_<xsl:value-of select="xmml:xagentName"/>_scan_input, no_sm, state_list_size); 
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	reset_<xsl:value-of select="xmml:xagentName"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="xmml:xagentName"/>s_new);
+	reset_<xsl:value-of select="xmml:xagentName"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="xmml:xagentName"/>s_new, state_list_size);
 	gpuErrchkLaunch();
 	</xsl:if></xsl:for-each></xsl:if>
 
@@ -1442,10 +1442,10 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//reset scan input for currentState
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reset_<xsl:value-of select="../../xmml:name"/>_scan_input, no_sm, state_list_size); 
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	reset_<xsl:value-of select="../../xmml:name"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>);
+	reset_<xsl:value-of select="../../xmml:name"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>, state_list_size);
 	gpuErrchkLaunch();
 	//reset scan input for working lists
-	reset_<xsl:value-of select="../../xmml:name"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s);
+	reset_<xsl:value-of select="../../xmml:name"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s, state_list_size);
 	gpuErrchkLaunch();
 
 	//APPLY FUNCTION FILTER
@@ -1533,7 +1533,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//reset scan input for currentState
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reset_<xsl:value-of select="../../xmml:name"/>_scan_input, no_sm, state_list_size); 
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	reset_<xsl:value-of select="../../xmml:name"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>);
+	reset_<xsl:value-of select="../../xmml:name"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>, state_list_size);
 	gpuErrchkLaunch();
 	
 	//APPLY FUNCTION FILTER
@@ -1662,7 +1662,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	<xsl:if test="$outputType='optional_message'">//message is optional so reset the swap
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reset_<xsl:value-of select="xmml:name"/>_swaps, no_sm, state_list_size); 
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	reset_<xsl:value-of select="xmml:name"/>_swaps&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="xmml:name"/>s); <!-- Twin Karmakharm Change - Bug found, need to reset the actual message array and not the swap array -->
+	reset_<xsl:value-of select="xmml:name"/>_swaps&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="xmml:name"/>s, state_list_size); <!-- Twin Karmakharm Change - Bug found, need to reset the actual message array and not the swap array -->
 	gpuErrchkLaunch();
 	</xsl:if></xsl:if></xsl:for-each>
 	</xsl:if></xsl:if>
@@ -1672,7 +1672,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//IF CONTINUOUS AGENT CAN REALLOCATE (process dead agents) THEN RESET AGENT SWAPS	
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, reset_<xsl:value-of select="../../xmml:name"/>_scan_input, no_sm, state_list_size); 
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	reset_<xsl:value-of select="../../xmml:name"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s);
+	reset_<xsl:value-of select="../../xmml:name"/>_scan_input&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s, state_list_size);
 	gpuErrchkLaunch();
 	</xsl:if></xsl:if>
 	

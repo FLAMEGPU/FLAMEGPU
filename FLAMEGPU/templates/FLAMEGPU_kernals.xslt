@@ -219,10 +219,12 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
  * <xsl:value-of select="xmml:name"/> agent reset scan input function
  * @param agents The xmachine_memory_<xsl:value-of select="xmml:name"/>_list agent list
  */
-__global__ void reset_<xsl:value-of select="xmml:name"/>_scan_input(xmachine_memory_<xsl:value-of select="xmml:name"/>_list* agents){
+__global__ void reset_<xsl:value-of select="xmml:name"/>_scan_input(xmachine_memory_<xsl:value-of select="xmml:name"/>_list* agents, int threadCt){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+    if(index &gt; threadCt) return;
 
 	agents->_position[index] = 0;
 	agents->_scan_input[index] = 0;
@@ -428,10 +430,12 @@ __global__ void scatter_optional_<xsl:value-of select="xmml:name"/>_messages(xma
  * Reset non partitioned or spatially partitioned <xsl:value-of select="xmml:name"/> message swaps (for scattering optional messages)
  * @param message_swap message list to reset _position and _scan_input values back to 0
  */
-__global__ void reset_<xsl:value-of select="xmml:name"/>_swaps(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages_swap){
+__global__ void reset_<xsl:value-of select="xmml:name"/>_swaps(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages_swap, int threadCt){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+    if(index &gt; threadCt) return;
 
 	messages_swap->_position[index] = 0;
 	messages_swap->_scan_input[index] = 0;
