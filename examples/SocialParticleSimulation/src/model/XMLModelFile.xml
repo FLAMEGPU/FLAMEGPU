@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+	<name>SPS-GPGPU</name>
+	<gpu:environment>
+		<gpu:functionFiles>
+			<file>functions.c</file>
+		</gpu:functionFiles>
+</gpu:environment>
+
+<xagents>
+	<gpu:xagent>
+		<name>agent</name>
+		<description>agent (C or D)</description>
+		<memory>
+			<gpu:variable>
+				<type>int</type>
+				<name>id</name>
+				<description>id-agent</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>x</name>
+				<description>x-coord</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>y</name>
+				<description>y-coord</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>z</name>
+				<description>z-coord</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>vx</name>
+				<description>Moving velocity on x-axis</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>vy</name>
+				<description>Moving velocity on y-axis</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>vz</name>
+				<description>Moving velocity on z-axis</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>steer_x</name>
+				<description>Steering force on x-axis</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>steer_y</name>
+				<description>Steering force on y-axis</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>steer_z</name>
+				<description>Steering force on z-axis</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>int</type>
+				<name>strategy</name>
+				<description>agent current strategy</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>coop_threshold</name>
+				<description>agent cooperation threshold</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>ce</name>
+				<description>agent prediction of neighboring cooperators</description>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>neighbors_score</name>
+				<description>sum of neighbors payoffs at iter i</description>
+			</gpu:variable>
+		</memory>
+
+		<functions>
+			<gpu:function>
+				<name>navigate</name>
+				<description>Random navigation</description>
+				<currentState>state1</currentState>
+				<nextState>state1</nextState>
+				<gpu:reallocate>false</gpu:reallocate>
+				<gpu:RNG>false</gpu:RNG>
+			</gpu:function>
+
+			<gpu:function>
+				<name>interact</name>
+				<description>Interact with the other agents and update the steering vector</description>
+				<currentState>state1</currentState>
+				<nextState>state1</nextState>
+				<inputs>
+					<gpu:input>
+						<messageName>agent_strategy</messageName>
+					</gpu:input>
+				</inputs>
+				<gpu:reallocate>false</gpu:reallocate>
+				<gpu:RNG>true</gpu:RNG>
+			</gpu:function>
+
+			<gpu:function>
+				<name>attract</name>
+				<description>Form cohesive groups (cooperative clustesrs)</description>
+				<currentState>state1</currentState>
+				<nextState>state1</nextState>
+				<inputs>
+					<gpu:input>
+						<messageName>agent_strategy</messageName>
+					</gpu:input>
+				</inputs>
+				<gpu:reallocate>false</gpu:reallocate>
+				<gpu:RNG>false</gpu:RNG>
+			</gpu:function>
+
+			<gpu:function>
+				<name>avoid</name>
+				<currentState>state1</currentState>
+				<nextState>state1</nextState>
+				<inputs>
+					<gpu:input>
+						<messageName>agent_strategy</messageName>
+					</gpu:input>
+				</inputs>
+				<gpu:reallocate>false</gpu:reallocate>
+				<gpu:RNG>false</gpu:RNG>
+			</gpu:function>
+
+			<gpu:function>
+				<name>align</name>
+				<currentState>state1</currentState>
+				<nextState>state1</nextState>
+				<inputs>
+					<gpu:input>
+						<messageName>agent_location</messageName>
+					</gpu:input>
+				</inputs>
+				<gpu:reallocate>false</gpu:reallocate>
+				<gpu:RNG>false</gpu:RNG>
+			</gpu:function>
+
+			<gpu:function>
+				<name>agent_output_location</name>
+				<description>Output agent location to other agents</description>
+				<currentState>state1</currentState>
+				<nextState>state1</nextState>
+				<outputs>
+					<gpu:output>
+						<messageName>agent_location</messageName>
+						<gpu:type>single_message</gpu:type>
+					</gpu:output>
+				</outputs>
+				<gpu:reallocate>false</gpu:reallocate>
+				<gpu:RNG>false</gpu:RNG>
+			</gpu:function>
+
+			<gpu:function>
+				<name>agent_output_strategy</name>
+				<description>Output agent current strategy to other agents</description>
+				<currentState>state1</currentState>
+				<nextState>state1</nextState>
+				<outputs>
+					<gpu:output>
+						<messageName>agent_strategy</messageName>
+						<gpu:type>single_message</gpu:type>
+					</gpu:output>
+				</outputs>
+				<gpu:reallocate>false</gpu:reallocate>
+				<gpu:RNG>false</gpu:RNG>
+			</gpu:function>
+
+			<gpu:function>
+				<name>set_next_strategy</name>
+				<description>Set next strategy (next strategy = f(coop_ratio))</description>
+				<currentState>state1</currentState>
+				<nextState>state1</nextState>
+				<inputs>
+					<gpu:input>
+						<messageName>agent_strategy</messageName>
+					</gpu:input>
+				</inputs>
+				<gpu:reallocate>false</gpu:reallocate>
+				<gpu:RNG>true</gpu:RNG>
+			</gpu:function>
+		</functions>
+
+		<states>
+			<gpu:state>
+				<name>state1</name>
+			</gpu:state>
+			<initialState>state1</initialState>
+		</states>
+
+		<gpu:type>continuous</gpu:type>
+		<gpu:bufferSize>1048576</gpu:bufferSize>
+	</gpu:xagent>
+</xagents>
+
+<messages>
+	<gpu:message>
+		<name>agent_location</name>
+		<description>Agent location</description>
+		<variables>
+			<gpu:variable>
+				<type>int</type>
+				<name>id</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>x</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>y</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>z</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>vx</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>vy</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>vz</name>
+			</gpu:variable>
+		</variables>
+		<gpu:partitioningSpatial>
+			<gpu:radius>1.0</gpu:radius>
+			<gpu:xmin>-2.0</gpu:xmin>
+			<gpu:xmax>2.0</gpu:xmax>
+			<gpu:ymin>-2.0</gpu:ymin>
+			<gpu:ymax>2.0</gpu:ymax>
+			<gpu:zmin>-2.0</gpu:zmin>
+			<gpu:zmax>2.0</gpu:zmax>
+		</gpu:partitioningSpatial>
+		<gpu:bufferSize>1048576</gpu:bufferSize>
+	</gpu:message>
+
+	<gpu:message>
+		<name>agent_strategy</name>
+		<description>Agent current strategy</description>
+		<variables>
+			<gpu:variable>
+				<type>int</type>
+				<name>id</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>int</type>
+				<name>strategy</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>x</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>y</name>
+			</gpu:variable>
+			<gpu:variable>
+				<type>float</type>
+				<name>z</name>
+			</gpu:variable>
+		</variables>
+		<gpu:partitioningSpatial>
+			<gpu:radius>1.0</gpu:radius>
+			<gpu:xmin>-2.0</gpu:xmin>
+			<gpu:xmax>2.0</gpu:xmax>
+			<gpu:ymin>-2.0</gpu:ymin>
+			<gpu:ymax>2.0</gpu:ymax>
+			<gpu:zmin>-2.0</gpu:zmin>
+			<gpu:zmax>2.0</gpu:zmax>
+		</gpu:partitioningSpatial>
+		<gpu:bufferSize>1048576</gpu:bufferSize>
+	</gpu:message>
+</messages>
+
+<layers>
+	<layer>
+		<gpu:layerFunction>
+			<name>agent_output_location</name>
+		</gpu:layerFunction>
+	</layer>
+
+	<layer>
+		<gpu:layerFunction>
+			<name>agent_output_strategy</name>
+		</gpu:layerFunction>
+	</layer>
+
+	<layer>
+		<gpu:layerFunction>
+			<name>set_next_strategy</name>
+		</gpu:layerFunction>
+	</layer>
+<layer>
+	<gpu:layerFunction>
+		<name>interact</name>
+	</gpu:layerFunction>
+</layer>
+</layers>
+</gpu:xmodel>
