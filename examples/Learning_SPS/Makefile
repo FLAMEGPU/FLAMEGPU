@@ -23,7 +23,7 @@
 ################################################################################
 
 # The name of the example (i.e. the name of the parent directory.)
-EXAMPLE := learning_SPS
+EXAMPLE := Learning_SPS
 
 # Flag indicating if a visualistion target should exist
 HAS_VISUALISATION := 1
