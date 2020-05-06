@@ -16,15 +16,21 @@ The paper outlining the and motivation behind the model and results can be found
 https://link.springer.com/article/10.1007/s10015-019-00558-6
 
 Other references:
+
 [1] Reynolds, C. (1999). Steering behaviors for autonomous characters. Proceedings of Game Developers Conference 1999, pages 763-782.
 
 Important consideration when using initial states files:
+
 (1) Take into consideration your hardware capacity when choosing the intial state file (5,000; 10,000 or 100,000 agents)
+
 (2) When choosing between the initial states, be sure to update the <gpu:bufferSize> of xagent and message accordingly as a power of two.
 
 Technical trivia:
+
 (1) This model uses 3D spatially partitioning scheme. 
+
 (2).a Simulations were smoothly run on a desktop computer with GeForce GTX 1080 Ti graphics card (up to 100,000 agents)
+
 (2).b Simulations were smoothly run on a laptop computer with GeForce 940MX laptop computer graphics card (up to 5,000 agents)
 
 
