@@ -147,6 +147,7 @@ Please cite FLAME GPU using
 
 ```
 @article{richmond2010high,
+  doi={10.1093/bib/bbp073},
   title={High performance cellular level agent-based simulation with FLAME for the GPU},
   author={Richmond, Paul and Walker, Dawn and Coakley, Simon and Romano, Daniela},
   journal={Briefings in bioinformatics},
@@ -158,7 +159,7 @@ Please cite FLAME GPU using
 }
 ```
 
-For an up to date list of publications related to FLAME GPU and it's use, [visit the flamegpu.com website](http://flamegpu.com).
+For an up to date list of publications related to FLAME GPU and it's use, [visit the flamegpu.com website](http://www.flamegpu.com).
 
 
 ## Authors
