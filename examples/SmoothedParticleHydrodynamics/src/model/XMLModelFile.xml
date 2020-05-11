@@ -3,6 +3,38 @@
 <gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>Smoothed Particle Hydrodynamics</name>
   <gpu:environment>
+    <gpu:constants>
+      <gpu:variable>
+        <type>float</type>
+        <name>TIMESTEP</name>
+        <description>How far in time each step of the simulation advances the system in seconds</description>
+        <defaultValue>0.001</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>GRAVITY</name>
+        <description>The acceleration due to gravity in m/s</description>
+        <defaultValue>-9.8</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>FLUID_REST_DENSITY</name>
+        <description>The resting density of the fluid in kg/m^3. The simulation parameters are tuned such that a density of 1000 will mean initial particle arrangement is stable.</description>
+        <defaultValue>1000.0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>VISCOSITY</name>
+        <description>The viscosity of the fluid.</description>
+        <defaultValue>10.0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>PRESSURE_COEFFICIENT</name>
+        <description>Describes the compressibility of the fluid.</description>
+        <defaultValue>0.9</defaultValue>
+      </gpu:variable>
+    </gpu:constants>
     <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
