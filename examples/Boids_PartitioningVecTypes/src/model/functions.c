@@ -37,15 +37,6 @@
 #define COLLISION_SCALE 0.75f
 #define MATCH_SCALE 1.25f
 
-inline __device__ float dot(fvec3 a, fvec3 b)
-{ 
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-inline __device__ float length(fvec3 v)
-{
-    return sqrtf(dot(v, v));
-}
 
 __FLAME_GPU_FUNC__ fvec3 boundPosition(fvec3 agent_position){
 	agent_position.x = (agent_position.x < MIN_POSITION)? MAX_POSITION: agent_position.x;
@@ -103,7 +94,7 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 
 		
 		if (location_message->id != xmemory->id){
-			float separation = length(xmemory->position - message_position);
+			float separation = glm::length(xmemory->position - message_position);
 			if (separation < (INTERACTION_RADIUS)){
 
 				//Update perceived centre
@@ -165,7 +156,7 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	xmemory->velocity += velocity_change;
 
 	//Bound velocity
-	float velocity_scale = length(xmemory->velocity);
+	float velocity_scale = glm::length(xmemory->velocity);
 	if (velocity_scale > 1){
 		xmemory->velocity /= velocity_scale; 
 	}
