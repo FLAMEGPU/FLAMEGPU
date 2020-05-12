@@ -113,11 +113,6 @@
 				<description>Form cohesive groups (cooperative clustesrs)</description>
 				<currentState>state1</currentState>
 				<nextState>state1</nextState>
-				<inputs>
-					<gpu:input>
-						<messageName>agent_strategy</messageName>
-					</gpu:input>
-				</inputs>
 				<gpu:reallocate>false</gpu:reallocate>
 				<gpu:RNG>false</gpu:RNG>
 			</gpu:function>
@@ -126,11 +121,6 @@
 				<name>avoid</name>
 				<currentState>state1</currentState>
 				<nextState>state1</nextState>
-				<inputs>
-					<gpu:input>
-						<messageName>agent_strategy</messageName>
-					</gpu:input>
-				</inputs>
 				<gpu:reallocate>false</gpu:reallocate>
 				<gpu:RNG>false</gpu:RNG>
 			</gpu:function>

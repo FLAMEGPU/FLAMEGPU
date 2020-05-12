@@ -1,7 +1,7 @@
 
 /*
- * Author: Dr Paul Richmond
  * Copyright 2011 University of Sheffield.
+ * Author: Dr Paul Richmond
  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
  *
  * University of Sheffield retain all intellectual property and
@@ -18,7 +18,7 @@
 #ifndef _FLAMEGPU_FUNCTIONS
 #define _FLAMEGPU_FUNCTIONS
 
-#include "header.h"
+#include <header.h>
 
 #include <stdlib.h>
 #include <math.h>
@@ -39,21 +39,17 @@
 // Simulation variables:
 #define DELTA_TIME 0.015f //original
 #define INTERACTION_RANGE 0.30000f
-//#define INTERACTION_RANGE 2.00000f
 
-#define MUTATION_RATE 0.000030f // Original value
+#define MUTATION_RATE 0.000030f
 //#define MUTATION_RATE 0.030f //----> Higher rate of explosions.Confirmed.
 
-#define TEMP 1.8000f // Temptation. 2.4 | 3.0 | -1
+#define TEMP 1.8000f
 #define REWARD 1.0000f
 #define SUCK -1.4000f
 #define PUNISH -1.0000f
 // 2R > T+S
 
 #define I_RATE 1.000000f // 1.0 | 0.5 | 0.05 | 0.01
-//#define I_RATE 0.005000f
-// .. 0.5 | 0.1 | 0.05 | 0.001
-
 
 /***************************************************************************************************
 |||																								 |||
@@ -157,13 +153,10 @@ __FLAME_GPU_FUNC__ int navigate(xmachine_memory_agent* agent)
   float3 steer_vector = float3(agent->steer_x, agent->steer_y, agent->steer_z);
 
   velocity_vector += steer_vector;
-	//printf("length: %f - trunc = %f\n", length(velocity_vector), trunc(length(velocity_vector)));
-
 
   float current_velocity = truncate(length(velocity_vector), 3);
 	if (current_velocity > 1.0f) {
     velocity_vector = normalize(velocity_vector);
-		//velocity_vector = limit(velocity_vector, 3.0f);
   }
 
   position_vector += velocity_vector * DELTA_TIME;
@@ -322,110 +315,84 @@ __FLAME_GPU_FUNC__ int interact(xmachine_memory_agent* agent, xmachine_message_a
  * attract FLAMEGPU Agent Function
  * Automatically generated using functions.xslt
  * @param agent Pointer to an agent structure of type xmachine_memory_agent. This represents a single agent instance and can be modified directly.
- * @param agent_strategy_messages  agent_strategy_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_agent_strategy_message and get_next_agent_strategy_message functions.* @param partition_matrix Pointer to the partition matrix of type xmachine_message_agent_strategy_PBM. Used within the get_first__message and get_next__message functions for spatially partitioned message access.
+
  */
-__FLAME_GPU_FUNC__ int attract(xmachine_memory_agent* agent, xmachine_message_agent_strategy_list* agent_strategy_messages, xmachine_message_agent_strategy_PBM* partition_matrix)
+__FLAME_GPU_FUNC__ int attract(xmachine_memory_agent* agent)
 {
-    float3 position_vector = float3(agent->x, agent->y, agent->z);
-    float3 velocity_vector = float3(agent->vx, agent->vy, agent->vz);
-    float3 steer_vector = float3(agent->steer_x, agent->steer_y, agent->steer_z);
+  float3 position_vector = float3(agent->x, agent->y, agent->z);
+  float3 velocity_vector = float3(agent->vx, agent->vy, agent->vz);
+  float3 steer_vector = float3(agent->steer_x, agent->steer_y, agent->steer_z);
 
-    float3 steering_force = float3(0.0f, 0.0f, 0.0f);
+  float3 steering_force = float3(0.0f, 0.0f, 0.0f);
 
-    float3 v1 = float3(1.0f, 0.0f, 0.0f);
-    float3 v2 = float3(0.0f, 1.0f,  0.0f);
-    float3 v3 = float3(0.0f, 0.0f, 1.0f);
-    float3 attraction_point = v1 - v2 + v3;
+  float3 v1 = float3(1.0f, 0.0f, 0.0f);
+  float3 v2 = float3(0.0f, 1.0f,  0.0f);
+  float3 v3 = float3(0.0f, 0.0f, 1.0f);
+  float3 attraction_point = v1 - v2 + v3;
 
-    xmachine_message_agent_strategy* current_message = get_first_agent_strategy_message(agent_strategy_messages,
-      partition_matrix,
-      agent->x,
-      agent->y,
-      agent->z);
-    float3 message_coordinates = float3(0.0f, 0.0f, 0.0f);
-    while(current_message)
-    {
-      float3 message_coordinates = float3(current_message->x, current_message->y, current_message->z);
-      current_message = get_next_agent_strategy_message(current_message, agent_strategy_messages, partition_matrix);
-    }
+  steering_force = attraction_point - position_vector;// steering force = (Desired_velocity - current_velocity) ~C. Reynolds.
+  steer_vector = float3(steering_force.x, steering_force.y, steering_force.z);
 
-    steering_force = attraction_point - position_vector;// steering force = (Desired_velocity - current_velocity) ~C. Reynolds.
-    steer_vector = float3(steering_force.x, steering_force.y, steering_force.z);
+  velocity_vector += steering_force;
+  float current_velocity = truncate(length(velocity_vector), 5);
 
-    velocity_vector += steering_force;
-    float current_velocity = truncate(length(velocity_vector), 5);
+  if (current_velocity > 1.0)
+  {
+    velocity_vector = normalize(velocity_vector);
+  }
+  position_vector += velocity_vector * DELTA_TIME;
 
-    if (current_velocity > 1.0)
-    {
-      velocity_vector = normalize(velocity_vector);
-    }
-    position_vector += velocity_vector * DELTA_TIME;
+  position_vector = boundPosition(position_vector);
 
-    position_vector = boundPosition(position_vector);
+  agent->x = position_vector.x;
+  agent->y = position_vector.y;
+  agent->z = position_vector.z;
 
-    agent->x = position_vector.x;
-    agent->y = position_vector.y;
-    agent->z = position_vector.z;
+  agent->vx = velocity_vector.x;
+  agent->vy = velocity_vector.y;
+  agent->vz = velocity_vector.z;
 
-    agent->vx = velocity_vector.x;
-    agent->vy = velocity_vector.y;
-    agent->vz = velocity_vector.z;
-    // Semi-explicit Euler
-
-    return 0;
+  return 0;
 }
 
 /**
  * avoid FLAMEGPU Agent Function
  * Automatically generated using functions.xslt
  * @param agent Pointer to an agent structure of type xmachine_memory_agent. This represents a single agent instance and can be modified directly.
- * @param agent_strategy_messages  agent_strategy_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_agent_strategy_message and get_next_agent_strategy_message functions.* @param partition_matrix Pointer to the partition matrix of type xmachine_message_agent_strategy_PBM. Used within the get_first__message and get_next__message functions for spatially partitioned message access.
+
  */
-__FLAME_GPU_FUNC__ int avoid(xmachine_memory_agent* agent, xmachine_message_agent_strategy_list* agent_strategy_messages, xmachine_message_agent_strategy_PBM* partition_matrix)
+__FLAME_GPU_FUNC__ int avoid(xmachine_memory_agent* agent)
 {
-    float3 position_vector = float3(agent->x, agent->y, agent->z);
-  	float3 velocity_vector = float3(agent->vx, agent->vy, agent->vz);
-  	float3 steer_vector = float3(agent->steer_x, agent->steer_y, agent->steer_z);
+  float3 position_vector = float3(agent->x, agent->y, agent->z);
+  float3 velocity_vector = float3(agent->vx, agent->vy, agent->vz);
+  float3 steer_vector = float3(agent->steer_x, agent->steer_y, agent->steer_z);
 
-  	float3 steering_force = float3(0.0f, 0.0f, 0.0f);
-  	float3 repulsion_point = float3(0.0f, 0.0f, 0.0f);
+  float3 steering_force = float3(0.0f, 0.0f, 0.0f);
+  float3 repulsion_point = float3(0.0f, 0.0f, 0.0f);
 
-  	xmachine_message_agent_strategy* current_message = get_first_agent_strategy_message(agent_strategy_messages,
-  		partition_matrix,
-  		agent->x,
-  		agent->y,
-  		agent->z);
-  	float3 message_coordinates = float3(0.0f, 0.0f, 0.0f);
-  	while(current_message)
-  	{
-      float3 message_coordinates = float3(current_message->x, current_message->y, current_message->z);
-  		current_message = get_next_agent_strategy_message(current_message, agent_strategy_messages, partition_matrix);
-  	 }
+  steering_force = position_vector - repulsion_point;// steering force = (current_velocity - desired_velocity) ~C. Reynolds.
+  steer_vector = float3(steering_force.x, steering_force.y, steering_force.z);
 
-    steering_force = position_vector - repulsion_point;// steering force = (current_velocity - desired_velocity) ~C. Reynolds.
-    steer_vector = float3(steering_force.x, steering_force.y, steering_force.z);
+  velocity_vector += steering_force;
+  float current_velocity = truncate(length(velocity_vector), 5);
 
-    velocity_vector += steering_force;
-    float current_velocity = truncate(length(velocity_vector), 5);
+  if(current_velocity > 1.0)
+  {
+     velocity_vector = normalize(velocity_vector);
+   }
+   position_vector += velocity_vector * DELTA_TIME;
 
-    if(current_velocity > 1.0)
-    {
-  	   velocity_vector = normalize(velocity_vector);
-     }
-     position_vector += velocity_vector * DELTA_TIME;
+   position_vector = boundPosition(position_vector);
 
-     position_vector = boundPosition(position_vector);
+   agent->x = position_vector.x;
+   agent->y = position_vector.y;
+   agent->z = position_vector.z;
 
-     agent->x = position_vector.x;
-     agent->y = position_vector.y;
-     agent->z = position_vector.z;
+   agent->vx = velocity_vector.x;
+   agent->vy = velocity_vector.y;
+   agent->vz = velocity_vector.z;
 
-     agent->vx = velocity_vector.x;
-     agent->vy = velocity_vector.y;
-     agent->vz = velocity_vector.z;
-     // Explicit Euler
-
-     return 0;
+   return 0;
 }
 
 /**
@@ -485,8 +452,8 @@ __FLAME_GPU_FUNC__ int align(xmachine_memory_agent* agent, xmachine_message_agen
  */
 __FLAME_GPU_FUNC__ int agent_output_location(xmachine_memory_agent* agent, xmachine_message_agent_location_list* agent_location_messages)
 {
-    add_agent_location_message(agent_location_messages, agent->id, agent->x, agent->y, agent->z, agent->vx, agent->vy, agent->vz);
-    return 0;
+  add_agent_location_message(agent_location_messages, agent->id, agent->x, agent->y, agent->z, agent->vx, agent->vy, agent->vz);
+  return 0;
 }
 
 /**
@@ -497,8 +464,8 @@ __FLAME_GPU_FUNC__ int agent_output_location(xmachine_memory_agent* agent, xmach
  */
 __FLAME_GPU_FUNC__ int agent_output_strategy(xmachine_memory_agent* agent, xmachine_message_agent_strategy_list* agent_strategy_messages)
 {
-    add_agent_strategy_message(agent_strategy_messages, agent->id, agent->strategy, agent->x, agent->y, agent->z);
-    return 0;
+  add_agent_strategy_message(agent_strategy_messages, agent->id, agent->strategy, agent->x, agent->y, agent->z);
+  return 0;
 }
 
 /**
@@ -548,12 +515,10 @@ __FLAME_GPU_FUNC__ int set_next_strategy(xmachine_memory_agent* agent, xmachine_
 		// With time, agents learn to approximate the ratio_of_cooperators (cr -> ce) withon proximity, using the following formula:
 			/* ce <- ce + L*(cr-ce). */
 		agent->ce += (ratio_of_coop - agent->ce) * I_RATE;
-		//agent->ct_e += (agent->coop_threshold - agent->ct_e) * I_RATE_TH;
 
-    if(agent->ce != 0) // ratio_of_coop
+    if(agent->ce != 0) // (ratio of) cooperators estimate
     {
       if(agent->ce > agent->coop_threshold) //threshold at which cooperation starts. // *** ratio_of_coop.
-			//if(agent->ce > agent->ct_e)
       {
         agent->strategy = 1;//C
       } else
