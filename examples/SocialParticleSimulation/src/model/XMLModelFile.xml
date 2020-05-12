@@ -86,15 +86,6 @@
 
 		<functions>
 			<gpu:function>
-				<name>navigate</name>
-				<description>Random navigation</description>
-				<currentState>state1</currentState>
-				<nextState>state1</nextState>
-				<gpu:reallocate>false</gpu:reallocate>
-				<gpu:RNG>false</gpu:RNG>
-			</gpu:function>
-
-			<gpu:function>
 				<name>interact</name>
 				<description>Interact with the other agents and update the steering vector</description>
 				<currentState>state1</currentState>
@@ -106,36 +97,6 @@
 				</inputs>
 				<gpu:reallocate>false</gpu:reallocate>
 				<gpu:RNG>true</gpu:RNG>
-			</gpu:function>
-
-			<gpu:function>
-				<name>attract</name>
-				<description>Form cohesive groups (cooperative clustesrs)</description>
-				<currentState>state1</currentState>
-				<nextState>state1</nextState>
-				<gpu:reallocate>false</gpu:reallocate>
-				<gpu:RNG>false</gpu:RNG>
-			</gpu:function>
-
-			<gpu:function>
-				<name>avoid</name>
-				<currentState>state1</currentState>
-				<nextState>state1</nextState>
-				<gpu:reallocate>false</gpu:reallocate>
-				<gpu:RNG>false</gpu:RNG>
-			</gpu:function>
-
-			<gpu:function>
-				<name>align</name>
-				<currentState>state1</currentState>
-				<nextState>state1</nextState>
-				<inputs>
-					<gpu:input>
-						<messageName>agent_location</messageName>
-					</gpu:input>
-				</inputs>
-				<gpu:reallocate>false</gpu:reallocate>
-				<gpu:RNG>false</gpu:RNG>
 			</gpu:function>
 
 			<gpu:function>

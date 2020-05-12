@@ -84,28 +84,6 @@ __FLAME_GPU_FUNC__ float truncate(float num, int num_after_point)
 	return result;
 }
 
-__FLAME_GPU_FUNC__ float3 limit(float3 vec, int n)
-{
-	float3 norm_vect = normalize(vec);
-	float x = n * norm_vect.x;
-	float y = n * norm_vect.y;
-	float z = n * norm_vect.z;
-
-	float3 resulting_vect = float3(x,y,z);
-	return resulting_vect;
-}
-
-__FLAME_GPU_FUNC__ float3 limit(float3 vec, float f)
-{
-	float3 norm_vect = normalize(vec);
-	float x = f * norm_vect.x;
-	float y = f * norm_vect.y;
-	float z = f * norm_vect.z;
-
-	float3 resulting_vect = float3(x,y,z);
-	return resulting_vect;
-}
-
 __FLAME_GPU_FUNC__ float getCurrentPayoff(int agentStrat, int neighStrat, float defaultPayoff)
 {
 	float payoff = defaultPayoff;//if 's' is neigher 0 nor 1 , pick a random value from payoff matrix. Much unlikely, but we gotta make sure all contengencies are taken care of xD.
@@ -140,41 +118,6 @@ __FLAME_GPU_FUNC__ float getCurrentPayoff(int agentStrat, int neighStrat, float 
 	return payoff;
 }
 
-/**
- * navigate FLAMEGPU Agent Function
- * Automatically generated using functions.xslt
- * @param agent Pointer to an agent structure of type xmachine_memory_agent. This represents a single agent instance and can be modified directly.
-
- */
-__FLAME_GPU_FUNC__ int navigate(xmachine_memory_agent* agent)
-{
-  float3 position_vector = float3(agent->x, agent->y, agent->z);
-  float3 velocity_vector = float3(agent->vx, agent->vy, agent->vz);
-  float3 steer_vector = float3(agent->steer_x, agent->steer_y, agent->steer_z);
-
-  velocity_vector += steer_vector;
-
-  float current_velocity = truncate(length(velocity_vector), 3);
-	if (current_velocity > 1.0f) {
-    velocity_vector = normalize(velocity_vector);
-  }
-
-  position_vector += velocity_vector * DELTA_TIME;
-
-  //Bound coordinates to the environement
-  position_vector = boundPosition(position_vector);
-
-  // Update position and velocity vectors
-  agent->x = position_vector.x;
-  agent->y = position_vector.y;
-  agent->z = position_vector.z;
-
-  agent->vx = velocity_vector.x;
-  agent->vy = velocity_vector.y;
-  agent->vz = velocity_vector.z;
-
-  return 0;
-}
 
 /**
  * interact FLAMEGPU Agent Function
@@ -202,7 +145,7 @@ __FLAME_GPU_FUNC__ int interact(xmachine_memory_agent* agent, xmachine_message_a
 	//================== Random steering coefficients ============================
 	float3 steer_vector = float3(0.0f, 0.0f, 0.0f);
 
-	//random steering (x, y, z)
+	//random steering directions (x, y, z)
 	float r1 = truncate(rnd<CONTINUOUS>(rand48), 7);
 	float r2 = truncate(rnd<CONTINUOUS>(rand48), 7);
 	float r3 = truncate(rnd<CONTINUOUS>(rand48), 7);
@@ -229,6 +172,7 @@ __FLAME_GPU_FUNC__ int interact(xmachine_memory_agent* agent, xmachine_message_a
 			message_coordinates = float3(current_message->x, current_message->y, current_message->z);
 			distance = truncate(length(position_vector - message_coordinates), 5);
 
+      //count neighbors in proximity and set target coordinates (attraction/repulsion)
 			if((distance <= INTERACTION_RANGE) && (agent->id != current_message->id) && (distance != 0))
 			{
 				count_neighbors += 1;
@@ -237,26 +181,26 @@ __FLAME_GPU_FUNC__ int interact(xmachine_memory_agent* agent, xmachine_message_a
 
 				//....................................................................................
 				// no-memory case: (Default settings)
-				default_payoff = (int)(truncate(rnd<CONTINUOUS>(rand48), 1) * 10) % 4;//the un-eventual picked payoff in case (s != {0,1})
+				default_payoff = (int)(truncate(rnd<CONTINUOUS>(rand48), 1) * 10) % 4;//initial payoff in case the strategy is not set(s != {0,1})
 				float currentPayoff = getCurrentPayoff(agent->strategy, current_message->strategy, payoffs[default_payoff]);
 
-				agent->neighbors_score += (currentPayoff / distance); // agent-agent relationship is relevant
+				agent->neighbors_score += (currentPayoff / distance); // calculate the total_score of the agent.
 			}
 			current_message = get_next_agent_strategy_message(current_message, agent_strategy_messages, partition_matrix);
 		}
 
 		if (count_neighbors != 0)
 		{
-			if(agent->neighbors_score >= 0) // Attraction
+			if(agent->neighbors_score >= 0) // if the score is positive, then the agent steers towards the centre of mass of its neighbors (attraction)
 			{
-				attraction_point /= count_neighbors;
-				attraction_vector = attraction_point - position_vector;// steering (attr.) = (desired - current) ~C. Reynolds.
+				attraction_point /= count_neighbors;//target coordinates (desired_target)
+				attraction_vector = attraction_point - position_vector;// steering_force_vector(attraction_vector) = (desired_target - current_location) ~C. Reynolds.
 
 				steer_vector = float3(attraction_vector.x, attraction_vector.y, attraction_vector.z);
-			} else  // Repulsion
+			} else  // if the score is positive, then the agent steers away from the centre of mass of its neighbors (repulsion)
 			{
-				repulsion_point /= count_neighbors;
-				avoidance_vector = position_vector - repulsion_point;// steering (repul.) = (current - desired) ~C. Reynolds.
+				repulsion_point /= count_neighbors; //coordinates of the point  from which to move away (repulsion_point)
+				avoidance_vector = position_vector - repulsion_point;//  steering_force_vector(repulsion_vector) = (current_location - repulsion_point) ~C. Reynolds.
 
 				steer_vector = float3(avoidance_vector.x, avoidance_vector.y, avoidance_vector.z);
 			}
@@ -275,14 +219,7 @@ __FLAME_GPU_FUNC__ int interact(xmachine_memory_agent* agent, xmachine_message_a
 				agent->steer_z = (-1 * agent->steer_z);
 			}
 			steer_vector = random_steer_vector; // force vector
-
-			//steer_vector = init_steer_vector;
 		}
-
-		/*float force_scale = truncate(length(steer_vector), 8);
-		if (force_scale >= 0.0300f){ // original: 0.0300f
-			steer_vector = limit(steer_vector, 0.0300f);
-		}*/
 
 		velocity_vector += steer_vector;
 
@@ -304,144 +241,8 @@ __FLAME_GPU_FUNC__ int interact(xmachine_memory_agent* agent, xmachine_message_a
 		agent->x = position_vector.x;
 		agent->y = position_vector.y;
 		agent->z = position_vector.z;
-		// Explicit Euler integration
-
-		//agent->neighbors_score = 0.0f; //reset score after each iteration.
 
 		return 0;
-}
-
-/**
- * attract FLAMEGPU Agent Function
- * Automatically generated using functions.xslt
- * @param agent Pointer to an agent structure of type xmachine_memory_agent. This represents a single agent instance and can be modified directly.
-
- */
-__FLAME_GPU_FUNC__ int attract(xmachine_memory_agent* agent)
-{
-  float3 position_vector = float3(agent->x, agent->y, agent->z);
-  float3 velocity_vector = float3(agent->vx, agent->vy, agent->vz);
-  float3 steer_vector = float3(agent->steer_x, agent->steer_y, agent->steer_z);
-
-  float3 steering_force = float3(0.0f, 0.0f, 0.0f);
-
-  float3 v1 = float3(1.0f, 0.0f, 0.0f);
-  float3 v2 = float3(0.0f, 1.0f,  0.0f);
-  float3 v3 = float3(0.0f, 0.0f, 1.0f);
-  float3 attraction_point = v1 - v2 + v3;
-
-  steering_force = attraction_point - position_vector;// steering force = (Desired_velocity - current_velocity) ~C. Reynolds.
-  steer_vector = float3(steering_force.x, steering_force.y, steering_force.z);
-
-  velocity_vector += steering_force;
-  float current_velocity = truncate(length(velocity_vector), 5);
-
-  if (current_velocity > 1.0)
-  {
-    velocity_vector = normalize(velocity_vector);
-  }
-  position_vector += velocity_vector * DELTA_TIME;
-
-  position_vector = boundPosition(position_vector);
-
-  agent->x = position_vector.x;
-  agent->y = position_vector.y;
-  agent->z = position_vector.z;
-
-  agent->vx = velocity_vector.x;
-  agent->vy = velocity_vector.y;
-  agent->vz = velocity_vector.z;
-
-  return 0;
-}
-
-/**
- * avoid FLAMEGPU Agent Function
- * Automatically generated using functions.xslt
- * @param agent Pointer to an agent structure of type xmachine_memory_agent. This represents a single agent instance and can be modified directly.
-
- */
-__FLAME_GPU_FUNC__ int avoid(xmachine_memory_agent* agent)
-{
-  float3 position_vector = float3(agent->x, agent->y, agent->z);
-  float3 velocity_vector = float3(agent->vx, agent->vy, agent->vz);
-  float3 steer_vector = float3(agent->steer_x, agent->steer_y, agent->steer_z);
-
-  float3 steering_force = float3(0.0f, 0.0f, 0.0f);
-  float3 repulsion_point = float3(0.0f, 0.0f, 0.0f);
-
-  steering_force = position_vector - repulsion_point;// steering force = (current_velocity - desired_velocity) ~C. Reynolds.
-  steer_vector = float3(steering_force.x, steering_force.y, steering_force.z);
-
-  velocity_vector += steering_force;
-  float current_velocity = truncate(length(velocity_vector), 5);
-
-  if(current_velocity > 1.0)
-  {
-     velocity_vector = normalize(velocity_vector);
-   }
-   position_vector += velocity_vector * DELTA_TIME;
-
-   position_vector = boundPosition(position_vector);
-
-   agent->x = position_vector.x;
-   agent->y = position_vector.y;
-   agent->z = position_vector.z;
-
-   agent->vx = velocity_vector.x;
-   agent->vy = velocity_vector.y;
-   agent->vz = velocity_vector.z;
-
-   return 0;
-}
-
-/**
- * align FLAMEGPU Agent Function
- * Automatically generated using functions.xslt
- * @param agent Pointer to an agent structure of type xmachine_memory_agent. This represents a single agent instance and can be modified directly.
- * @param agent_location_messages  agent_location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_agent_location_message and get_next_agent_location_message functions.* @param partition_matrix Pointer to the partition matrix of type xmachine_message_agent_location_PBM. Used within the get_first__message and get_next__message functions for spatially partitioned message access.
- */
-__FLAME_GPU_FUNC__ int align(xmachine_memory_agent* agent, xmachine_message_agent_location_list* agent_location_messages, xmachine_message_agent_location_PBM* partition_matrix)
-{
-  float3 position_vector = float3(agent->x, agent->y, agent->z);
-  float3 mean_velocity = float3(0.0f, 0.0f, 0.0f);
-
-  float3 match_velocity_vector = float3(0.0f, 0.0f, 0.0f);
-  int count_neighbors = 0;
-
-  xmachine_message_agent_location* current_message = get_first_agent_location_message(agent_location_messages,
-    partition_matrix,
-    agent->x,
-    agent->y,
-    agent->z);
-    float distance = 0.0f;
-    float3 message_coordinates = float3(0.0f, 0.0f, 0.0f);
-    float3 message_velocity = float3(0.0f, 0.0f, 0.0f); //fetch velocity of neighbors
-    while(current_message)
-    {
-      message_coordinates = float3(current_message->x, current_message->y, current_message->z);
-      message_velocity = float3(current_message->vx, current_message->vy, current_message->vz);
-      distance = length(position_vector - message_coordinates);
-
-      if((distance <= INTERACTION_RANGE) && (agent->id != current_message->id))
-      {
-        mean_velocity += message_velocity;
-        count_neighbors += 1;
-      }
-      current_message = get_next_agent_location_message(current_message, agent_location_messages, partition_matrix);
-    }
-
-    if (count_neighbors)
-    {
-      mean_velocity /= count_neighbors;
-      match_velocity_vector = mean_velocity;
-    }
-
-    agent->steer_x = match_velocity_vector.x;
-    agent->steer_y = match_velocity_vector.y;
-    agent->steer_z = match_velocity_vector.z;
-
-    return 0;
 }
 
 /**
@@ -512,13 +313,13 @@ __FLAME_GPU_FUNC__ int set_next_strategy(xmachine_memory_agent* agent, xmachine_
 
 
     ratio_of_coop = (num_neigh != 0) ? truncate(((float)num_coop / (float)num_neigh ), 6) : 0.000000f;
-		// With time, agents learn to approximate the ratio_of_cooperators (cr -> ce) withon proximity, using the following formula:
-			/* ce <- ce + L*(cr-ce). */
+		// With time, agents learn to approximate the estimate of ratio of the neighboring cooperators (ce), using the following formula:
+			/* ce_@[t+1] <- ce@[t] + I*(rc-ce@[t]).   || rc:the actual ratio of neighboring cooperators || I:the information update rate about other neighbors*/
 		agent->ce += (ratio_of_coop - agent->ce) * I_RATE;
 
-    if(agent->ce != 0) // (ratio of) cooperators estimate
+    if(agent->ce != 0) // estimate of the ratio of neighboring cooperators (ce:cooperators estimate)
     {
-      if(agent->ce > agent->coop_threshold) //threshold at which cooperation starts. // *** ratio_of_coop.
+      if(agent->ce > agent->coop_threshold) //threshold at which cooperation starts (pre-set in the states file)
       {
         agent->strategy = 1;//C
       } else
@@ -531,5 +332,6 @@ __FLAME_GPU_FUNC__ int set_next_strategy(xmachine_memory_agent* agent, xmachine_
 
     return 0;
 }
+
 
 #endif //_FLAMEGPU_FUNCTIONS
