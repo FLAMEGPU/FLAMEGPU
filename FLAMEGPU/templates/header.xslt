@@ -46,6 +46,9 @@
 typedef unsigned int uint;
 
 //FLAME GPU vector types float, (i)nteger, (u)nsigned integer, (d)ouble
+typedef glm::vec2 vec2;
+typedef glm::vec3 vec3;
+typedef glm::vec4 vec4;
 typedef glm::vec2 fvec2;
 typedef glm::vec3 fvec3;
 typedef glm::vec4 fvec4;
