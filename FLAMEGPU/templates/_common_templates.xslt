@@ -35,21 +35,42 @@
         <xsl:when test="$type='long long int'">%lld</xsl:when>
         <xsl:when test="$type='unsigned long long int'">%llu</xsl:when>
         
+        <xsl:when test="$type='vec2'">%f, %f</xsl:when>
         <xsl:when test="$type='ivec2'">%d, %d</xsl:when>
         <xsl:when test="$type='uvec2'">%u, %u</xsl:when>
         <xsl:when test="$type='fvec2'">%f, %f</xsl:when>
         <xsl:when test="$type='dvec2'">%f, %f</xsl:when>
         
+        <xsl:when test="$type='vec3'">%f, %f, %f</xsl:when>
         <xsl:when test="$type='ivec3'">%d, %d, %d</xsl:when>
         <xsl:when test="$type='uvec3'">%u, %u, %u</xsl:when>
         <xsl:when test="$type='fvec3'">%f, %f, %f</xsl:when>
         <xsl:when test="$type='dvec3'">%f, %f, %f</xsl:when>
         
+        <xsl:when test="$type='vec4'">%f, %f, %f, %f</xsl:when>
         <xsl:when test="$type='ivec4'">%d, %d, %d, %d</xsl:when>
         <xsl:when test="$type='uvec4'">%u, %u, %u, %u</xsl:when>
         <xsl:when test="$type='fvec4'">%f, %f, %f, %f</xsl:when>
         <xsl:when test="$type='dvec4'">%f, %f, %f, %f</xsl:when>
+
+        <xsl:when test="$type='glm::vec2'">%f, %f</xsl:when>
+        <xsl:when test="$type='glm::ivec2'">%d, %d</xsl:when>
+        <xsl:when test="$type='glm::uvec2'">%u, %u</xsl:when>
+        <xsl:when test="$type='glm::fvec2'">%f, %f</xsl:when>
+        <xsl:when test="$type='glm::dvec2'">%f, %f</xsl:when>
         
+        <xsl:when test="$type='glm::vec3'">%f, %f, %f</xsl:when>
+        <xsl:when test="$type='glm::ivec3'">%d, %d, %d</xsl:when>
+        <xsl:when test="$type='glm::uvec3'">%u, %u, %u</xsl:when>
+        <xsl:when test="$type='glm::fvec3'">%f, %f, %f</xsl:when>
+        <xsl:when test="$type='glm::dvec3'">%f, %f, %f</xsl:when>
+        
+        <xsl:when test="$type='glm::vec4'">%f, %f, %f, %f</xsl:when>
+        <xsl:when test="$type='glm::ivec4'">%d, %d, %d, %d</xsl:when>
+        <xsl:when test="$type='glm::uvec4'">%u, %u, %u, %u</xsl:when>
+        <xsl:when test="$type='glm::fvec4'">%f, %f, %f, %f</xsl:when>
+        <xsl:when test="$type='glm::dvec4'">%f, %f, %f, %f</xsl:when>      
+
         <xsl:otherwise>%f</xsl:otherwise> <!-- default output format is float -->
     </xsl:choose>
 </xsl:template>
@@ -159,20 +180,41 @@
         <xsl:when test="$type='double'">fpgu_strtod</xsl:when>
         <xsl:when test="$type='float'">fgpu_atof</xsl:when>
       
+        <xsl:when test="$type='vec2'">fgpu_atof</xsl:when>
         <xsl:when test="$type='ivec2'">fpgu_strtol</xsl:when>
         <xsl:when test="$type='uvec2'">fpgu_strtoul</xsl:when>
         <xsl:when test="$type='fvec2'">fgpu_atof</xsl:when>
         <xsl:when test="$type='dvec2'">fpgu_strtod</xsl:when>
         
+        <xsl:when test="$type='vec3'">fgpu_atof</xsl:when>
         <xsl:when test="$type='ivec3'">fpgu_strtol</xsl:when>
         <xsl:when test="$type='uvec3'">fpgu_strtoul</xsl:when>
         <xsl:when test="$type='fvec3'">fgpu_atof</xsl:when>
         <xsl:when test="$type='dvec3'">fpgu_strtod</xsl:when>
       
+        <xsl:when test="$type='vec4'">fgpu_atof</xsl:when>
         <xsl:when test="$type='ivec4'">fpgu_strtol</xsl:when>
         <xsl:when test="$type='uvec4'">fpgu_strtoul</xsl:when>
         <xsl:when test="$type='fvec4'">fgpu_atof</xsl:when>
         <xsl:when test="$type='dvec4'">fpgu_strtod</xsl:when>
+
+        <xsl:when test="$type='glm::vec2'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='glm::ivec2'">fpgu_strtol</xsl:when>
+        <xsl:when test="$type='glm::uvec2'">fpgu_strtoul</xsl:when>
+        <xsl:when test="$type='glm::fvec2'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='glm::dvec2'">fpgu_strtod</xsl:when>
+        
+        <xsl:when test="$type='glm::vec3'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='glm::ivec3'">fpgu_strtol</xsl:when>
+        <xsl:when test="$type='glm::uvec3'">fpgu_strtoul</xsl:when>
+        <xsl:when test="$type='glm::fvec3'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='glm::dvec3'">fpgu_strtod</xsl:when>
+      
+        <xsl:when test="$type='glm::vec4'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='glm::ivec4'">fpgu_strtol</xsl:when>
+        <xsl:when test="$type='glm::uvec4'">fpgu_strtoul</xsl:when>
+        <xsl:when test="$type='glm::fvec4'">fgpu_atof</xsl:when>
+        <xsl:when test="$type='glm::dvec4'">fpgu_strtod</xsl:when>
       
         <xsl:otherwise>atof</xsl:otherwise> <!-- default parse function as float -->
     </xsl:choose>
@@ -182,20 +224,41 @@
 <xsl:template name="vectorBaseType">
     <xsl:param name="type"/>
     <xsl:choose>        
+        <xsl:when test="$type='vec2'">float</xsl:when>
         <xsl:when test="$type='ivec2'">int</xsl:when>
         <xsl:when test="$type='uvec2'">unsigned int</xsl:when>
         <xsl:when test="$type='fvec2'">float</xsl:when>
         <xsl:when test="$type='dvec2'">double</xsl:when>
         
+        <xsl:when test="$type='vec3'">float</xsl:when>
         <xsl:when test="$type='ivec3'">int</xsl:when>
         <xsl:when test="$type='uvec3'">unsigned int</xsl:when>
         <xsl:when test="$type='fvec3'">float</xsl:when>
         <xsl:when test="$type='dvec3'">double</xsl:when>
       
+        <xsl:when test="$type='vec4'">float</xsl:when>
         <xsl:when test="$type='ivec4'">int</xsl:when>
         <xsl:when test="$type='uvec4'">unsigned int</xsl:when>
         <xsl:when test="$type='fvec4'">float</xsl:when>
         <xsl:when test="$type='dvec4'">double</xsl:when>
+
+        <xsl:when test="$type='glm::vec2'">float</xsl:when>
+        <xsl:when test="$type='glm::ivec2'">int</xsl:when>
+        <xsl:when test="$type='glm::uvec2'">unsigned int</xsl:when>
+        <xsl:when test="$type='glm::fvec2'">float</xsl:when>
+        <xsl:when test="$type='glm::dvec2'">double</xsl:when>
+        
+        <xsl:when test="$type='glm::vec3'">float</xsl:when>
+        <xsl:when test="$type='glm::ivec3'">int</xsl:when>
+        <xsl:when test="$type='glm::uvec3'">unsigned int</xsl:when>
+        <xsl:when test="$type='glm::fvec3'">float</xsl:when>
+        <xsl:when test="$type='glm::dvec3'">double</xsl:when>
+      
+        <xsl:when test="$type='glm::vec4'">float</xsl:when>
+        <xsl:when test="$type='glm::ivec4'">int</xsl:when>
+        <xsl:when test="$type='glm::uvec4'">unsigned int</xsl:when>
+        <xsl:when test="$type='glm::fvec4'">float</xsl:when>
+        <xsl:when test="$type='glm::dvec4'">double</xsl:when>
       
         <xsl:otherwise>float</xsl:otherwise> <!-- default base type of float -->
     </xsl:choose>
