@@ -39,6 +39,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MCBatch", "MonteCarlo_BATCH
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MC_MSMPR", "MonteCarlo_MSMPR\MC_MSMPR.vcxproj", "{86858B8C-54FF-41D1-84C8-CE14FC1BEF0E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "learning_SPS", "SocialParticleSimulation\learning_SPS.vcxproj", "{30485930-14E9-49C0-86E7-110290F5AF5E}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EmptyExample", "EmptyExample\EmptyExample.vcxproj", "{DEF4AA63-5C4A-42DA-B791-C87F6D47EE14}"
 EndProject
 Global
@@ -193,6 +195,14 @@ Global
 		{86858B8C-54FF-41D1-84C8-CE14FC1BEF0E}.Release_Console|x64.Build.0 = Release_Console|x64
 		{86858B8C-54FF-41D1-84C8-CE14FC1BEF0E}.Release_Visualisation|x64.ActiveCfg = Release_Console|x64
 		{86858B8C-54FF-41D1-84C8-CE14FC1BEF0E}.Release_Visualisation|x64.Build.0 = Release_Console|x64
+		{30485930-14E9-49C0-86E7-110290F5AF5E}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
+		{30485930-14E9-49C0-86E7-110290F5AF5E}.Debug_Console|x64.Build.0 = Debug_Console|x64
+		{30485930-14E9-49C0-86E7-110290F5AF5E}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
+		{30485930-14E9-49C0-86E7-110290F5AF5E}.Debug_Visualisation|x64.Build.0 = Debug_Visualisation|x64
+		{30485930-14E9-49C0-86E7-110290F5AF5E}.Release_Console|x64.ActiveCfg = Release_Console|x64
+		{30485930-14E9-49C0-86E7-110290F5AF5E}.Release_Console|x64.Build.0 = Release_Console|x64
+		{30485930-14E9-49C0-86E7-110290F5AF5E}.Release_Visualisation|x64.ActiveCfg = Release_Visualisation|x64
+		{30485930-14E9-49C0-86E7-110290F5AF5E}.Release_Visualisation|x64.Build.0 = Release_Visualisation|x64
 		{DEF4AA63-5C4A-42DA-B791-C87F6D47EE14}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
 		{DEF4AA63-5C4A-42DA-B791-C87F6D47EE14}.Debug_Console|x64.Build.0 = Debug_Console|x64
 		{DEF4AA63-5C4A-42DA-B791-C87F6D47EE14}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
