@@ -37,12 +37,12 @@
 #define COLLISION_SCALE 0.75f
 #define MATCH_SCALE 1.25f
 
-inline __device__ float dot(glm::vec3 a, glm::vec3 b)
+inline __FLAME_GPU_FUNC__ float dot(glm::vec3 a, glm::vec3 b)
 { 
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline __device__ float length(glm::vec3 v)
+inline __FLAME_GPU_FUNC__ float length(glm::vec3 v)
 {
     return sqrtf(dot(v, v));
 }
