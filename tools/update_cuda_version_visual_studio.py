@@ -44,63 +44,53 @@ def findAllVcxprojFiles(examples_dir):
     examples = os.listdir(examples_dir)
     # For each example, list files.
     for example in examples:
-        # Look for the file
-        expected_vcxproj_filename = PROJECT_FILE_FMT.format(example)
-        expected_vcxproj_path = os.path.join(examples_dir, os.path.join(example, expected_vcxproj_filename))
-        if os.path.isfile(expected_vcxproj_path):
-            names.append(example)
-
+        example_dir = os.path.join(examples_dir, example)
+        # Look for any .vcxproj in the first level.
+        if os.path.isdir(example_dir):
+            for file in os.listdir(example_dir):
+                if file.endswith(VCXPROJ_EXT):
+                    names.append(os.path.join(example_dir, file))
     return names
 
 
-def updateCudaVersionInVsproj(name, cuda_version, examples_dir):
+def updateCudaVersionInVsproj(example_vcxproj, cuda_version, examples_dir):
 
     for d in REPLACEMENTS:
         if d["regex"] is None:
             d["regex"] = re.compile(d["pattern"])
 
-    # Get the path to the project file.
-    example_dir = os.path.join(examples_dir, name)
-    # Check the example dir exists.
-    if os.path.isdir(example_dir):
-        example_vcxproj = os.path.join(example_dir, PROJECT_FILE_FMT.format(name))
-        # Check it exists
-        if os.path.isfile(example_vcxproj):
-            # If the file exist - do something.
-
-            content = None
-            try:
-                with open(example_vcxproj, "r") as file:
-                    content = file.readlines()
-            except Exception as e: 
-                print("Exception whilst reading {:}\n > {:}".format(fpath, e))
-                return False
-
-            try:
-                with open(example_vcxproj, "w") as file:
-                    for line in content:
-                        newline = line
-                        for d in REPLACEMENTS:
-                            match = d["regex"].match(line)
-                            if match:
-                                newline = ""
-                                for i, group in enumerate(match.groups()):
-                                    if i+1 == d["group"]:
-                                        newline += cuda_version
-                                    else:
-                                        newline += group
-                        file.write(newline)
-            except Exception as e:
-                print("Exception whilst writing {:}\n > {:}".format(fpathe))
-                return False
-
-            return True
-
-        else:
-            print("Error: Example project file {:} does not exist.".format(example_vcxproj))
+    # Check the vcxproj exists
+    if os.path.isfile(example_vcxproj):
+        content = None
+        try:
+            with open(example_vcxproj, "r") as file:
+                content = file.readlines()
+        except Exception as e: 
+            print("Exception whilst reading {:}\n > {:}".format(fpath, e))
             return False
+
+        try:
+            with open(example_vcxproj, "w") as file:
+                for line in content:
+                    newline = line
+                    for d in REPLACEMENTS:
+                        match = d["regex"].match(line)
+                        if match:
+                            newline = ""
+                            for i, group in enumerate(match.groups()):
+                                if i+1 == d["group"]:
+                                    newline += cuda_version
+                                else:
+                                    newline += group
+                    file.write(newline)
+        except Exception as e:
+            print("Exception whilst writing {:}\n > {:}".format(fpath, e))
+            return False
+
+        return True
+
     else:
-        print("Error: Example directory {:} does not exist.".format(example_dir))
+        print("Error: Example project file {:} does not exist.".format(example_vcxproj))
         return False
 
 

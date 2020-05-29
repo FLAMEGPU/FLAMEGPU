@@ -15,6 +15,7 @@ examples/**/x64
 *.png
 *.dat
 
+.vs/
 
 ######
 #CUDA#
