@@ -1,0 +1,1 @@
+"Release_Console\SmoothedParticleHydrodynamics.exe" "..\..\examples\SmoothedParticleHydrodynamics\iterations\0.xml" 1
