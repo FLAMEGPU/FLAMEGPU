@@ -38,7 +38,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MCBatch", "MonteCarlo_BATCH
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MC_MSMPR", "MonteCarlo_MSMPR\MC_MSMPR.vcxproj", "{86858B8C-54FF-41D1-84C8-CE14FC1BEF0E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "learning_SPS", "SocialParticleSimulation\learning_SPS.vcxproj", "{30485930-14E9-49C0-86E7-110290F5AF5E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SocialParticleSimulation", "SocialParticleSimulation\SocialParticleSimulation.vcxproj", "{30485930-14E9-49C0-86E7-110290F5AF5E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmoothedParticleHydrodynamics", "SmoothedParticleHydrodynamics\SmoothedParticleHydrodynamics.vcxproj", "{E6EA73EB-F133-4103-B375-768E6086339A}"
 EndProject
