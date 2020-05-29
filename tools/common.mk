@@ -25,9 +25,10 @@
 ################################################################################
 
 # Define the default values for SMS depedning on cuda version.
-DEFAULT_SMS_CUDA_9 := 30 35 37 50 60 70
-DEFAULT_SMS_CUDA_8 := 30 35 37 50 60
-DEFAULT_SMS_CUDA_6 := 30 35 37 50
+DEFAULT_SMS_CUDA_10 := 30 35 50 60 70 75
+DEFAULT_SMS_CUDA_9  := 30 35 37 50 60 70
+DEFAULT_SMS_CUDA_8  := 30 35 37 50 60
+DEFAULT_SMS_CUDA_6  := 30 35 37 50
 
 # Use .o as the default object extions.
 OBJ_EXT := .o
@@ -95,8 +96,9 @@ NVCC := nvcc
 NVCC_MAJOR = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\2/p')
 NVCC_MINOR = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\3/p')
 NVCC_PATCH = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\4/p')
-NVCC_GE_9_0 = $(shell [ $(NVCC_MAJOR) -ge 9 ] && echo true)
-NVCC_GE_8_0 = $(shell [ $(NVCC_MAJOR) -ge 8 ] && echo true)
+NVCC_GE_10_0 = $(shell [ $(NVCC_MAJOR) -ge 10 ] && echo true)
+NVCC_GE_9_0  = $(shell [ $(NVCC_MAJOR) -ge 9 ] && echo true)
+NVCC_GE_8_0  = $(shell [ $(NVCC_MAJOR) -ge 8 ] && echo true)
 
 
 # If SM has been specified in place of SMS, set the value appropriately.
@@ -108,7 +110,9 @@ endif
 endif
 
 # For the appropriate CUDA version, assign default SMS if required.
-ifeq ($(NVCC_GE_9_0),true)
+ifeq ($(NVCC_GE_10_0),true)
+SMS ?= $(DEFAULT_SMS_CUDA_10)
+else ifeq ($(NVCC_GE_9_0),true)
 SMS ?= $(DEFAULT_SMS_CUDA_9)
 else ifeq ($(NVCC_GE_8_0),true)
 SMS ?= $(DEFAULT_SMS_CUDA_8)
