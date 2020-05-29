@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Boids_BruteForce", "Boids_BruteForce\Boids_BruteForce.vcxproj", "{E6EA73EB-F133-4103-B375-768E6086339A}"
 EndProject
@@ -40,7 +40,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MC_MSMPR", "MonteCarlo_MSMP
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SocialParticleSimulation", "SocialParticleSimulation\SocialParticleSimulation.vcxproj", "{30485930-14E9-49C0-86E7-110290F5AF5E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmoothedParticleHydrodynamics", "SmoothedParticleHydrodynamics\SmoothedParticleHydrodynamics.vcxproj", "{E6EA73EB-F133-4103-B375-768E6086339A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmoothedParticleHydrodynamics", "SmoothedParticleHydrodynamics\SmoothedParticleHydrodynamics.vcxproj", "{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EmptyExample", "EmptyExample\EmptyExample.vcxproj", "{DEF4AA63-5C4A-42DA-B791-C87F6D47EE14}"
 EndProject
@@ -52,14 +52,6 @@ Global
 		Release_Visualisation|x64 = Release_Visualisation|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
-		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Console|x64.Build.0 = Debug_Console|x64
-		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
-		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Visualisation|x64.Build.0 = Debug_Visualisation|x64
-		{E6EA73EB-F133-4103-B375-768E6086339A}.Release_Console|x64.ActiveCfg = Release_Console|x64
-		{E6EA73EB-F133-4103-B375-768E6086339A}.Release_Console|x64.Build.0 = Release_Console|x64
-		{E6EA73EB-F133-4103-B375-768E6086339A}.Release_Visualisation|x64.ActiveCfg = Release_Visualisation|x64
-		{E6EA73EB-F133-4103-B375-768E6086339A}.Release_Visualisation|x64.Build.0 = Release_Visualisation|x64
 		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
 		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Console|x64.Build.0 = Debug_Console|x64
 		{E6EA73EB-F133-4103-B375-768E6086339A}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
@@ -212,6 +204,14 @@ Global
 		{30485930-14E9-49C0-86E7-110290F5AF5E}.Release_Console|x64.Build.0 = Release_Console|x64
 		{30485930-14E9-49C0-86E7-110290F5AF5E}.Release_Visualisation|x64.ActiveCfg = Release_Visualisation|x64
 		{30485930-14E9-49C0-86E7-110290F5AF5E}.Release_Visualisation|x64.Build.0 = Release_Visualisation|x64
+		{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
+		{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}.Debug_Console|x64.Build.0 = Debug_Console|x64
+		{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
+		{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}.Debug_Visualisation|x64.Build.0 = Debug_Visualisation|x64
+		{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}.Release_Console|x64.ActiveCfg = Release_Console|x64
+		{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}.Release_Console|x64.Build.0 = Release_Console|x64
+		{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}.Release_Visualisation|x64.ActiveCfg = Release_Visualisation|x64
+		{A863F3C2-B668-4A61-A6A8-EA54DAB7C319}.Release_Visualisation|x64.Build.0 = Release_Visualisation|x64
 		{DEF4AA63-5C4A-42DA-B791-C87F6D47EE14}.Debug_Console|x64.ActiveCfg = Debug_Console|x64
 		{DEF4AA63-5C4A-42DA-B791-C87F6D47EE14}.Debug_Console|x64.Build.0 = Debug_Console|x64
 		{DEF4AA63-5C4A-42DA-B791-C87F6D47EE14}.Debug_Visualisation|x64.ActiveCfg = Debug_Visualisation|x64
@@ -223,5 +223,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8A8D6DA-415E-4ACC-A230-AA857A404E8E}
 	EndGlobalSection
 EndGlobal
