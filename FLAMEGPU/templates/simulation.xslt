@@ -898,7 +898,11 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) &amp;&amp; INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
-	<xsl:variable name="function" select="xmml:name"/><xsl:variable name="stream_num" select="position()"/><xsl:for-each select="../../../xmml:xagents/gpu:xagent/xmml:functions/gpu:function[xmml:name=$function]">
+	<xsl:variable name="function" select="xmml:name"/><xsl:variable name="stream_num" select="position()"/>
+	<xsl:choose><xsl:when test="../../../xmml:xagents/gpu:xagent/xmml:functions/gpu:function[xmml:name=$function]"></xsl:when>
+	<xsl:otherwise>#error "Layer <xsl:value-of select="position()"/> contains layerFunction '<xsl:value-of select="$function" />' which is not defined by any agent type."
+	</xsl:otherwise></xsl:choose>
+	<xsl:for-each select="../../../xmml:xagents/gpu:xagent/xmml:functions/gpu:function[xmml:name=$function]">
     PROFILE_PUSH_RANGE("<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>");
 	<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>(stream<xsl:value-of select="$stream_num"/>);
     PROFILE_POP_RANGE();
