@@ -25,6 +25,7 @@
 ################################################################################
 
 # Define the default values for SMS depedning on cuda version.
+DEFAULT_SMS_CUDA_11 := 52 60 70 75 80
 DEFAULT_SMS_CUDA_10 := 30 35 50 60 70 75
 DEFAULT_SMS_CUDA_9  := 30 35 37 50 60 70
 DEFAULT_SMS_CUDA_8  := 30 35 37 50 60
@@ -57,6 +58,7 @@ BUILD_DIR := $(EXAMPLE_BUILD_DIR)/$(OS_BUILD_DIR)
 
 # Path to FLAME GPU include directory
 INCLUDE_DIR := $(FLAMEGPU_ROOT)include
+INCLUDE_DIR_CUB := $(FLAMEGPU_ROOT)include_cub
 # Path to FLAME GPU Lib directory (OS specific)
 LIB_DIR := $(FLAMEGPU_ROOT)lib/
 
@@ -96,6 +98,7 @@ NVCC := nvcc
 NVCC_MAJOR = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\2/p')
 NVCC_MINOR = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\3/p')
 NVCC_PATCH = $(shell ""$(NVCC)"" --version | sed -n -r 's/.*(V([0-9]+).([0-9]+).([0-9]+))/\4/p')
+NVCC_GE_11_0 = $(shell [ $(NVCC_MAJOR) -ge 11 ] && echo true)
 NVCC_GE_10_0 = $(shell [ $(NVCC_MAJOR) -ge 10 ] && echo true)
 NVCC_GE_9_0  = $(shell [ $(NVCC_MAJOR) -ge 9 ] && echo true)
 NVCC_GE_8_0  = $(shell [ $(NVCC_MAJOR) -ge 8 ] && echo true)
@@ -110,7 +113,9 @@ endif
 endif
 
 # For the appropriate CUDA version, assign default SMS if required.
-ifeq ($(NVCC_GE_10_0),true)
+ifeq ($(NVCC_GE_11_0),true)
+SMS ?= $(DEFAULT_SMS_CUDA_11)
+else ifeq ($(NVCC_GE_10_0),true)
 SMS ?= $(DEFAULT_SMS_CUDA_10)
 else ifeq ($(NVCC_GE_9_0),true)
 SMS ?= $(DEFAULT_SMS_CUDA_9)
@@ -126,6 +131,14 @@ empty:=
 space:= $(empty) $(empty)
 TMP_SMS:= $(subst $(comma),$(space),$(SMS))
 override SMS = $(TMP_SMS)
+
+
+# CUDA 11.0+ requires local versions of CUB to not be included (as it ships with CUDA), so only add it for CUDA < 11.0.
+# Unsure how to do this for visual studio.
+ifneq ($(NVCC_GE_11_0),true)
+INCLUDE_DIRS += \
+	$(INCLUDE_DIR_CUB)
+endif
 
 # Flags used for compilation.
 # NVCC compiler flags
@@ -190,7 +203,15 @@ else
 		XSLTPROC := $(shell command -v xsltproc 2> /dev/null)
 		XMLLINT := $(shell command -v xmllint 2> /dev/null)
 		# Pass specific nvcc flags for linux
-		NVCCFLAGS += -std=c++11
+		ifeq ($(NVCC_GE_11_0),true)
+			# CUDA 11 Thrust requires c++14
+			NVCCFLAGS += -std=c++14
+			# CUDA 11.0RC adds deprecation annotations to old texture introp methods.
+			NVCCFLAGS += -Xcompiler "-Wno-deprecated-declarations"
+		else
+			# Use c++11 otherwise to avoid breaking older compilers.
+			NVCCFLAGS += -std=c++11
+		endif
 		CCFLAGS += -Wall
 		# On linux we generate a runpath via -rpath and --enable-new-dtags. This enables a simple location for users who cannot install system wide dependencies a sensible place to put lib files.
 		# Library files are looked for in LD_LIBRARY_PATH, the LIB_DIR, then system paths.
