@@ -80,7 +80,7 @@
         <initialState>default</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
-      <gpu:bufferSize>65536</gpu:bufferSize>
+      <gpu:bufferSize>32768</gpu:bufferSize>
     </gpu:xagent>
   </xagents>
   <messages>
@@ -118,7 +118,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>65536</gpu:bufferSize>
+      <gpu:bufferSize>32768</gpu:bufferSize>
     </gpu:message>
   </messages>
   <layers>

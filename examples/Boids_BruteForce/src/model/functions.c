@@ -21,7 +21,7 @@
 #include <random>
 
 // Runtime generated population size, must be <= the buffer size. Environment bounds/comm bounds may need adjusting to compensate.
-#define AGENT_COUNT 65536
+#define AGENT_COUNT 32768
 #define MAX_INITIAL_SPEED 1.0f
 #define MIN_INITIAL_SPEED 0.01f
 
