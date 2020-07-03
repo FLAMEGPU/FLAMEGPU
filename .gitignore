@@ -23,6 +23,8 @@ examples/**/x64
 *.tlog
 *.deps
 *.o
+*.nvvp
+*.qdrep
 
 #################
 ## Eclipse

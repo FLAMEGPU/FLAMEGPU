@@ -18,6 +18,12 @@
 #define _FUNCTIONS_H_
 
 #include "header.h"
+#include <random>
+
+// Runtime generated population size, must be <= the buffer size. Environment bounds/comm bounds may need adjusting to compensate.
+#define AGENT_COUNT 65536
+#define MAX_INITIAL_SPEED 1.0f
+#define MIN_INITIAL_SPEED 0.01f
 
 //Environment Bounds
 #define MIN_POSITION -0.5f
@@ -60,6 +66,85 @@ __FLAME_GPU_FUNC__ glm::vec3 boundPosition(glm::vec3 agent_position){
 	return agent_position;
 }
 
+// Clamp the position instead of wrapping, to match FLAMEGPU2 for profiling.
+__FLAME_GPU_FUNC__ glm::vec3 clampPosition(glm::vec3 agent_position) {
+    agent_position.x = (agent_position.x < MIN_POSITION) ? MIN_POSITION : agent_position.x;
+    agent_position.x = (agent_position.x > MAX_POSITION) ? MAX_POSITION : agent_position.x;
+    agent_position.y = (agent_position.y < MIN_POSITION) ? MIN_POSITION : agent_position.y;
+    agent_position.y = (agent_position.y > MAX_POSITION) ? MAX_POSITION : agent_position.y;
+    agent_position.z = (agent_position.z < MIN_POSITION) ? MIN_POSITION : agent_position.z;
+    agent_position.z = (agent_position.z > MAX_POSITION) ? MAX_POSITION : agent_position.z;
+    return agent_position;
+}
+
+// Initialise a random population from the host, if none is provided from xml.
+// @todo - this is somewhat crude and probably less than optimal.
+// @todo - different distributions for each dimension? Better vector gen? Maybe spherical initial position gen?.
+__FLAME_GPU_INIT_FUNC__ void generatePopulation() {
+
+    // If no boid agents exist, create the desired number of them.
+    if (get_agent_Boid_default_count() == 0) {
+        unsigned int agent_count = AGENT_COUNT;
+        if (agent_count > xmachine_memory_Boid_MAX) {
+            printf("Error: AGENT_COUNT %u > BufferSize %u. Using BufferSize.\n", agent_count, xmachine_memory_Boid_MAX);
+            agent_count = xmachine_memory_Boid_MAX;
+        }
+
+        // Allocate host buffer
+        xmachine_memory_Boid **h_agents = h_allocate_agent_Boid_array(agent_count);
+
+        // Uniformly distribute agents within space, with uniformly distributed initial velocity.
+        std::mt19937 rng(12); // @todo - non hardcoded initialisation random seed.
+        std::uniform_real_distribution<float> pos_dist(MIN_POSITION, MAX_POSITION);
+        std::uniform_real_distribution<float> velocity_dist(-1, 1);
+        std::uniform_real_distribution<float> velocity_magnitude(MIN_INITIAL_SPEED, MAX_INITIAL_SPEED);
+
+        // Initialise Data
+        for (unsigned int idx = 0; idx < agent_count; idx++) {
+            // New ID.
+            h_agents[idx]->id = generate_Boid_id();
+
+            // Random position in 3D space (cube)
+            h_agents[idx]->x = pos_dist(rng);
+            h_agents[idx]->y = pos_dist(rng);
+            h_agents[idx]->z = pos_dist(rng);
+
+            // random velocity direction
+            glm::vec3 f = {
+                velocity_dist(rng),
+                velocity_dist(rng),
+                velocity_dist(rng)};
+            // random velocity magnitude
+            float fmagnitude = velocity_magnitude(rng);
+            // Normalize the direction, and scale by the magnitude.
+            f = glm::normalize(f);
+            f = f * fmagnitude;
+
+            // Set for the agent.
+            h_agents[idx]->fx = f.x;
+            h_agents[idx]->fy = f.y;
+            h_agents[idx]->fz = f.z;
+
+            // printf("agent %u (%f %f %f) (%f %f %f)\n",
+            // 	h_agents[idx]->id,
+            // 	h_agents[idx]->x,
+            // 	h_agents[idx]->y,
+            // 	h_agents[idx]->z,
+            // 	h_agents[idx]->fx,
+            // 	h_agents[idx]->fy,
+            // 	h_agents[idx]->fz
+            // );
+        }
+
+        // Transfer to Device
+        h_add_agents_Boid_default(h_agents, agent_count);
+
+        // Free host buffer.
+        h_free_agent_Boid_array(&h_agents, agent_count);
+
+        printf("Generated %u Boids agents\n", agent_count);
+    }
+}
 
 //Boid Agent Functions
 
@@ -178,7 +263,10 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	agent_position += agent_velocity * TIME_SCALE;
 
 	//Bound position
-	agent_position = boundPosition(agent_position);
+	// agent_position = boundPosition(agent_position);
+
+	// Clamp position instead of wrapping for comparison with F2.
+	agent_position = clampPosition(agent_position);
 	
 	//Update agent structure
 	xmemory->x = agent_position.x;

@@ -6,6 +6,11 @@
     <gpu:functionFiles>
       <file>functions.c</file>
     </gpu:functionFiles>
+    <gpu:initFunctions>
+      <gpu:initFunction>
+        <gpu:name>generatePopulation</gpu:name>
+      </gpu:initFunction>
+    </gpu:initFunctions>
   </gpu:environment>
   <xagents>
     <gpu:xagent>
@@ -75,7 +80,7 @@
         <initialState>default</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>65536</gpu:bufferSize>
     </gpu:xagent>
   </xagents>
   <messages>
@@ -121,7 +126,7 @@
         <gpu:zmin>-0.5</gpu:zmin>
         <gpu:zmax>0.5</gpu:zmax>
       </gpu:partitioningSpatial>
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>65536</gpu:bufferSize>
     </gpu:message>
   </messages>
   <layers>
