@@ -182,7 +182,8 @@ __FLAME_GPU_FUNC__ int inputdata(xmachine_memory_Boid* xmemory, xmachine_message
 	glm::vec3 collision_centre = glm::vec3(0.0f, 0.0f, 0.0f);
 	int collision_count = 0;
 
-	xmachine_message_location* location_message = get_first_location_message(location_messages);
+    xmachine_message_location empty_message;
+	xmachine_message_location* location_message = get_first_location_message(&empty_message, location_messages);
 	int count = 0;
 	
     while(location_message)

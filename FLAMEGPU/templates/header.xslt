@@ -396,7 +396,7 @@ __FLAME_GPU_FUNC__ int <xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:v
  * @param <xsl:value-of select="xmml:name"/>_messages message list
  * @return        returns the first message from the message list (offset depending on agent block)
  */
-__FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_first_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* <xsl:value-of select="xmml:name"/>_messages);
+__FLAME_GPU_FUNC__ xmachine_message_<xsl:value-of select="xmml:name"/> * get_first_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>* message, xmachine_message_<xsl:value-of select="xmml:name"/>_list* <xsl:value-of select="xmml:name"/>_messages);
 
 /** get_next_<xsl:value-of select="xmml:name"/>_message
  * Get first message function for non partitioned (brute force) messages

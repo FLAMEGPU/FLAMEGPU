@@ -1368,7 +1368,7 @@ int <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_
   <xsl:if test="xmml:inputs/gpu:input"><xsl:variable name="messageName" select="xmml:inputs/gpu:input/xmml:messageName"/>
 	<xsl:if test="../../gpu:type='continuous'"><xsl:for-each select="../../../../xmml:messages/gpu:message[xmml:name=$messageName]">
 	<xsl:if test="gpu:partitioningNone">//Continuous agent and message input has no partitioning
-	sm_size += (blockSize * sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
+	sm_size += 0;
 	</xsl:if><xsl:if test="gpu:partitioningDiscrete">//Continuous agent and message input has discrete partitioning
 	//Will be reading using texture lookups so sm size can stay the same but need to hold range and width
 	sm_size += (blockSize * sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));

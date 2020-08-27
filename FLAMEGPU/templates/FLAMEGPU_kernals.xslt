@@ -442,81 +442,25 @@ __global__ void reset_<xsl:value-of select="xmml:name"/>_swaps(xmachine_message_
 <xsl:if test="gpu:partitioningNone">
 /* Message functions */
 
-__device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages){
-
-	extern __shared__ int sm_data [];
-	char* message_share = (char*)&amp;sm_data[0];
-	
-	//wrap size is the number of tiles required to load all messages
-	int wrap_size = (ceil((float)d_message_<xsl:value-of select="xmml:name"/>_count/ blockDim.x)* blockDim.x);
-
-	//if no messages then return a null pointer (false)
-	if (wrap_size == 0)
-		return nullptr;
-
-	//global thread index
-	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
-
-	//global thread index
-	int index = WRAP(global_index, wrap_size);
-
+__device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_first_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>* message, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages){
 	//SoA to AoS - xmachine_message_<xsl:value-of select="xmml:name"/> Coalesced memory read
-	xmachine_message_<xsl:value-of select="xmml:name"/> temp_message;
-	temp_message._position = messages->_position[index];<xsl:for-each select="xmml:variables/gpu:variable">
-	temp_message.<xsl:value-of select="xmml:name"/> = messages-><xsl:value-of select="xmml:name"/>[index];</xsl:for-each>
+	message-&gt;_position = 0;<xsl:for-each select="xmml:variables/gpu:variable">
+    message-&gt;<xsl:value-of select="xmml:name"/> = messages-><xsl:value-of select="xmml:name"/>[0];</xsl:for-each>
 
-	//AoS to shared memory
-	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
-	xmachine_message_<xsl:value-of select="xmml:name"/>* sm_message = ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
-	sm_message[0] = temp_message;
-
-	__syncthreads();
-
-  //HACK FOR 64 bit addressing issue in sm
-	return ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[d_SM_START]);
+    return message;
 }
 
-__device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>* message, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages){
+  __device__ xmachine_message_<xsl:value-of select="xmml:name"/>* get_next_<xsl:value-of select="xmml:name"/>_message(xmachine_message_<xsl:value-of select="xmml:name"/>* message, xmachine_message_<xsl:value-of select="xmml:name"/>_list* messages){
+    message-&gt;_position++;
 
-	extern __shared__ int sm_data [];
-	char* message_share = (char*)&amp;sm_data[0];
-	
-	//wrap size is the number of tiles required to load all messages
-	int wrap_size = ceil((float)d_message_<xsl:value-of select="xmml:name"/>_count/ blockDim.x)*blockDim.x;
+    //If end of messages (last message not multiple of gridsize) go to 0 index
+    if (message-&gt;_position >= d_message_<xsl:value-of select="xmml:name"/>_count)
+        return nullptr;
 
-	int i = WRAP((message->_position + 1),wrap_size);
-
-	//If end of messages (last message not multiple of gridsize) go to 0 index
-	if (i >= d_message_<xsl:value-of select="xmml:name"/>_count)
-		i = 0;
-
-	//Check if back to start position of first message
-	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
-		return nullptr;
-
-	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
-	i = i % blockDim.x;						 //mod i for shared memory index
-
-	//if count == Block Size load next tile int shared memory values
-	if (i == 0){
-		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
-		
-		//SoA to AoS - xmachine_message_<xsl:value-of select="xmml:name"/> Coalesced memory read
-		int index = (tile* blockDim.x) + threadIdx.x;
-		xmachine_message_<xsl:value-of select="xmml:name"/> temp_message;
-		temp_message._position = messages->_position[index];<xsl:for-each select="xmml:variables/gpu:variable">
-		temp_message.<xsl:value-of select="xmml:name"/> = messages-><xsl:value-of select="xmml:name"/>[index];</xsl:for-each>
-
-		//AoS to shared memory
-		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
-		xmachine_message_<xsl:value-of select="xmml:name"/>* sm_message = ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
-		sm_message[0] = temp_message;
-
-		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
-	}
-
-	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_<xsl:value-of select="xmml:name"/>));
-	return ((xmachine_message_<xsl:value-of select="xmml:name"/>*)&amp;message_share[message_index]);
+    //SoA to AoS - xmachine_message_<xsl:value-of select="xmml:name"/> Coalesced memory read
+    <xsl:for-each select="xmml:variables/gpu:variable">message-&gt;<xsl:value-of select="xmml:name"/> = messages-><xsl:value-of select="xmml:name"/>[message-&gt;_position];
+    </xsl:for-each>
+    return message;
 }
 </xsl:if>
 	
