@@ -307,7 +307,7 @@ size_t temp_scan_bytes_xmachine_message_<xsl:value-of select="xmml:name" />;
 </xsl:for-each>
   
 /* CUDA Streams for function layers */<xsl:for-each select="gpu:xmodel/xmml:layers/xmml:layer">
-<xsl:sort select="count(gpu:layerFunction)" order="descending"/>
+<xsl:sort select="count(gpu:layerFunction)" data-type="number" order="descending"/>
 <xsl:if test="position() =1"> <!-- Get the layer with most functions -->
 <xsl:for-each select="gpu:layerFunction">
 cudaStream_t stream<xsl:value-of select="position()"/>;</xsl:for-each>
@@ -731,7 +731,7 @@ void initialise(char * inputfile){
   
   /* Init CUDA Streams for function layers */
   <xsl:for-each select="gpu:xmodel/xmml:layers/xmml:layer">
-  <xsl:sort select="count(gpu:layerFunction)" order="descending"/>
+  <xsl:sort select="count(gpu:layerFunction)" data-type="number" order="descending"/>
   <xsl:if test="position() =1"> <!-- Get the layer with most functions -->
   <xsl:for-each select="gpu:layerFunction">
   gpuErrchk(cudaStreamCreate(&amp;stream<xsl:value-of select="position()"/>));</xsl:for-each>
@@ -857,7 +857,7 @@ void cleanup(){
   
   /* CUDA Streams for function layers */
   <xsl:for-each select="gpu:xmodel/xmml:layers/xmml:layer">
-  <xsl:sort select="count(gpu:layerFunction)" order="descending"/>
+  <xsl:sort select="count(gpu:layerFunction)" data-type="number" order="descending"/>
   <xsl:if test="position() =1"> <!-- Get the layer with most functions -->
   <xsl:for-each select="gpu:layerFunction">
   gpuErrchk(cudaStreamDestroy(stream<xsl:value-of select="position()"/>));</xsl:for-each>
