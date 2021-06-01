@@ -20,6 +20,7 @@
 
 #include <header.h>
 
+#define AGENT_ARRAY_ELEMENTS 1024
 
 
 __FLAME_GPU_FUNC__ int make_proposals(xmachine_memory_Man* agent, xmachine_message_proposal_list* proposal_messages){
@@ -28,14 +29,16 @@ __FLAME_GPU_FUNC__ int make_proposals(xmachine_memory_Man* agent, xmachine_messa
 	int round;
 
 	round = agent->round;
+	if (round < AGENT_ARRAY_ELEMENTS) {
 
-	//get next preferable woman
-	woman = get_Man_agent_array_value<int>(agent->preferred_woman, round);
+		//get next preferable woman
+		woman = get_Man_agent_array_value<int>(agent->preferred_woman, round);
 
-	//make a proposal
-    add_proposal_message(proposal_messages, agent->id, woman);
+		//make a proposal
+		add_proposal_message(proposal_messages, agent->id, woman);
 
-	agent->round++;
+		agent->round++;
+	}
 
 	return 0;
 }
@@ -49,11 +52,13 @@ __FLAME_GPU_FUNC__ int check_proposals(xmachine_memory_Woman* agent, xmachine_me
     {
 		//if proposal is for the woman
 		if (current_message->woman == agent->id){
-			//if proposal desirabiloty is higher than current
-			int rank = get_Woman_agent_array_value<int>(agent->preferred_man, current_message->id);
-			if ((agent->current_suitor_rank == -1)||(rank < agent->current_suitor_rank)){
-				agent->current_suitor = current_message->id;
-				agent->current_suitor_rank = rank;
+			if(current_message->id < AGENT_ARRAY_ELEMENTS) {
+				//if proposal desirabiloty is higher than current
+				int rank = get_Woman_agent_array_value<int>(agent->preferred_man, current_message->id);
+				if ((agent->current_suitor_rank == -1)||(rank < agent->current_suitor_rank)){
+					agent->current_suitor = current_message->id;
+					agent->current_suitor_rank = rank;
+				}
 			}
 		}
         

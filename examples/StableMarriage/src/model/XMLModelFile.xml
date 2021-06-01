@@ -37,7 +37,7 @@
           <outputs>
             <gpu:output>
               <messageName>proposal</messageName>
-              <gpu:type>single_message</gpu:type>
+              <gpu:type>optional_message</gpu:type>
             </gpu:output>
           </outputs>
           <condition>
