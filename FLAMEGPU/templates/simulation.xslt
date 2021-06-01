@@ -1283,7 +1283,7 @@ void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$s
 		int minGridSize;
 		int gridSize;
 
-		if (h_xmachine_memory_<xsl:value-of select="$agent_name"/>_count + count &gt; xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX){
+		if (h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count + count &gt; xmachine_memory_<xsl:value-of select="$agent_name"/>_MAX){
 			printf("Error: Buffer size of <xsl:value-of select="$agent_name"/> agents in state <xsl:value-of select="$state"/> will be exceeded by h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$state" />\n");
 			exit(EXIT_FAILURE);
 		}
