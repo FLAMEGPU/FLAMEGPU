@@ -749,6 +749,10 @@ void initialise(char * inputfile){
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent"><xsl:if test="gpu:type='continuous'"> <xsl:for-each select="xmml:states/gpu:state">
 void sort_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/>(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list* agents))
 {
+
+  if (h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>_count &lt;= 1) { 
+      return;
+  }
 	int blockSize;
 	int minGridSize;
 	int gridSize;
